@@ -11,6 +11,7 @@ export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 #####
 
 leCertEmit () {
+  cert_url=$1
   if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
     echo "## Downloading recommended TLS parameters ..."
     mkdir -p "$data_path/conf"
@@ -57,9 +58,9 @@ leCertEmit () {
             printMessage ok
         fi
 
-        echo "## Requesting Let's Encrypt certificate for $CATALYST_URL ..."
+        echo "## Requesting Let's Encrypt certificate for $nginx_url ..."
         domain_args=""
-        domain_args="$domain_args -d ${nginx_url}"
+        domain_args="$domain_args -d ${cert_url}"
         staging_arg="--staging"
 
         # Select appropriate EMAIL arg
@@ -226,13 +227,13 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     if [ -d "$data_path" ]; then
     echo -n "## Existing data found for $CATALYST_URL. "
     if test ${REGENERATE} -eq 1; then
-        leCertEmit
+        leCertEmit nginx_url
     else
         echo -n "## Keeping the current certs"
     fi
     else
         echo "## No certificates found. Performing certificate creation"
-        leCertEmit
+        leCertEmit nginx_url
     fi
 
     if test $? -ne 0; then
