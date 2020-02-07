@@ -5,13 +5,14 @@ export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
 export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
-
+echo $nginx_url
 ####
 # Functions
 #####
 
 leCertEmit () {
   cert_url=$1
+  echo "cert_url: $cert_url"
   if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
     echo "## Downloading recommended TLS parameters ..."
     mkdir -p "$data_path/conf"
