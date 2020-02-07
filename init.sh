@@ -190,6 +190,8 @@ else
     printMessage failed
     exit 1
 fi
+export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
+
 echo "NGINX URL: $nginx_url"
 
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
