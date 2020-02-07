@@ -58,7 +58,7 @@ leCertEmit () {
             printMessage ok
         fi
 
-        echo "## Requesting Let's Encrypt certificate for $nginx_url ..."
+        echo "## Requesting Let's Encrypt certificate for $cert_url ..."
         domain_args=""
         domain_args="$domain_args -d ${cert_url}"
         staging_arg="--staging"
