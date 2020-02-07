@@ -5,7 +5,6 @@ export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
 export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
-echo $nginx_url
 ####
 # Functions
 #####
@@ -191,6 +190,7 @@ else
     printMessage failed
     exit 1
 fi
+echo "NGINX URL: $nginx_url"
 
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39m ]"
