@@ -227,13 +227,13 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     if [ -d "$data_path" ]; then
     echo -n "## Existing data found for $CATALYST_URL. "
     if test ${REGENERATE} -eq 1; then
-        leCertEmit nginx_url
+        leCertEmit $nginx_url
     else
         echo -n "## Keeping the current certs"
     fi
     else
         echo "## No certificates found. Performing certificate creation"
-        leCertEmit nginx_url
+        leCertEmit $nginx_url
     fi
 
     if test $? -ne 0; then
