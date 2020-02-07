@@ -59,7 +59,7 @@ leCertEmit () {
 
         echo "## Requesting Let's Encrypt certificate for $CATALYST_URL ..."
         domain_args=""
-        domain_args="$domain_args -d ${nginx_url}}"
+        domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
 
         # Select appropriate EMAIL arg
