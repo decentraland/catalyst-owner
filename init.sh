@@ -208,7 +208,6 @@ fi
 
 docker pull decentraland/katalyst:${DOCKER_TAG}
 
-
 printMessage ok
 docker-compose stop nginx
 
