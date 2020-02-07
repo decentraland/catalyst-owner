@@ -189,7 +189,6 @@ else
     exit 1
 fi
 
-printMessage ok
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39m ]"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "[ \e[33m ${CONTENT_SERVER_STORAGE} \e[39m ]"
@@ -209,14 +208,8 @@ fi
 
 docker pull decentraland/katalyst:${DOCKER_TAG}
 
-matches=`cat ${nginx_server_file} | grep ${CATALYST_URL} | wc -l`
-if test $matches -eq 0; then
-  printMessage failed
-  echo "Failed to perform changes on nginx server file, no changes found. Look into ${nginx_server_file} for more information"
-  exit 1
-fi
-printMessage ok
 
+printMessage ok
 docker-compose stop nginx
 
 if test $? -ne 0; then
@@ -225,10 +218,12 @@ if test $? -ne 0; then
   exit 1
 fi
 
+nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
+
 if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file... "
-    sed "s/\$katalyst_host/${CATALYST_URL}/g" ${nginx_server_template_https} > ${nginx_server_file}
-
+    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
+    
     if [ -d "$data_path" ]; then
     echo -n "## Existing data found for $CATALYST_URL. "
     if test ${REGENERATE} -eq 1; then
@@ -250,7 +245,15 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     printMessage ok
 else
     echo -n "## Replacing HTTP \$katalyst_host on nginx server file... "
-    sed "s/\$katalyst_host/${CATALYST_URL}/g" ${nginx_server_template_http} > ${nginx_server_file}
+    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
+fi
+
+
+matches=`cat ${nginx_server_file} | grep ${nginx_url}  | wc -l`
+if test $matches -eq 0; then
+  printMessage failed
+  echo "Failed to perform changes on nginx server file, no changes found. Look into ${nginx_server_file} for more information"
+  exit 1
 fi
 
 echo "## Restarting containers..."
