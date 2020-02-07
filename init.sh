@@ -4,6 +4,7 @@ export data_path="./local/certbot"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
+export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 
 ####
 # Functions
@@ -58,7 +59,7 @@ leCertEmit () {
 
         echo "## Requesting Let's Encrypt certificate for $CATALYST_URL ..."
         domain_args=""
-        domain_args="$domain_args -d $CATALYST_URL"
+        domain_args="$domain_args -d ${nginx_url}}"
         staging_arg="--staging"
 
         # Select appropriate EMAIL arg
@@ -217,7 +218,6 @@ if test $? -ne 0; then
   exit 1
 fi
 
-nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 
 if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file... "
