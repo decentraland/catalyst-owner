@@ -1,0 +1,64 @@
+# This file is auto generated. Look for docker-compose.yml_template, on
+# local folder to perform any changes
+
+version: "3"
+
+volumes:
+  content_server_storage: {}
+  nginx_storage: {}
+
+services:
+  comms-server:
+    image: decentraland/katalyst:${DOCKER_TAG}
+    working_dir: /app
+    command: comms
+    ports:
+      - "9000:9000"
+    restart: always
+
+  content-server:
+    image: decentraland/katalyst:${DOCKER_TAG}
+    working_dir: /app
+    command: content
+      - STORAGE_ROOT_FOLDER=/app/storage/content_server/
+      - ALLOW_LEGACY_ENTITIES=${ALLOW_LEGACY_ENTITIES}
+      - SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
+      - DCL_API_URL=${DCL_API_URL}
+      - ETH_NETWORK=${ETH_NETWORK}
+    ports:
+      - "6969:6969"
+    restart: always
+    volumes:
+      - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
+
+  lambdas:
+    image: decentraland/katalyst:${DOCKER_TAG}
+    working_dir: /app
+    command: lambdas
+    environment:
+      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - ENS_OWNER_PROVIDER_URL=${ENS_OWNER_PROVIDER_URL}
+    ports:
+      - "7070:7070"
+
+  nginx:
+    image: nginx:1.15-alpine
+    ports:
+       - "80:80"
+       - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 10s & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+       - ./local/nginx/conf.d:/etc/nginx/conf.d
+       - ./local/certbot/conf:/etc/letsencrypt
+       - ./local/certbot/www:/var/www/certbot
+    depends_on:
+       - lambdas
+       - content-server
+       - comms-server
+
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./local/certbot/conf:/etc/letsencrypt
+      - ./local/certbot/www:/var/www/certbot
