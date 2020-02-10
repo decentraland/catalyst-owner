@@ -227,14 +227,13 @@ fi
 # If the server is localhost, do not enable https
 # Setup the nginx conf file with plain http
 # else, create new certs
+export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
     
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
-    export nginx_url=`echo "${CATALYST_URL##*/}"`
-
     if [ -d "$data_path" ]; then
     echo -n "## Existing data found for $nginx_url. "
     if test ${REGENERATE} -eq 1; then
