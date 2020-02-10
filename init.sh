@@ -151,7 +151,7 @@ if ! [ -f ".env" ]; then
   printMessage failed
   exit 1
 else
-  export $(cat .env | xargs)
+  while IFS= read -r line; do export "$line"; done < .env
 fi
 
 if ! [ -f ".default-env" ]; then
@@ -159,7 +159,7 @@ if ! [ -f ".default-env" ]; then
   printMessage failed
   exit 1
 else
-  export $(cat .default-env | xargs)
+  while IFS= read -r line; do export "$line"; done < .default-env
 fi
 
 echo -n "## Checking if email is configured..."
