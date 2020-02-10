@@ -1,4 +1,4 @@
-ETH_NETWORK=ropsten
+ETH_NETWORK=mainnet
 ENS_OWNER_PROVIDER_URL=https://api.thegraph.com/subgraphs/name/decentraland/marketplace
 DCL_API_URL=https://api.decentraland.org/v1
 DOCKER_TAG=latest
