@@ -5,6 +5,7 @@ export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
 export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
+
 ####
 # Functions
 #####
