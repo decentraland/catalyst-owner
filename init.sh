@@ -147,11 +147,19 @@ clear
 echo -n "## Loading env variables"
 
 if ! [ -f ".default-env" ]; then
-  echo -n "Error: .env does not exist" >&2
+  echo -n "Error: .default-env does not exist" >&2
   printMessage failed
   exit 1
 else
   cat .default-env >> .env
+fi
+
+if ! [ -f ".env" ]; then
+  echo -n "Error: .env does not exist" >&2
+  printMessage failed
+  exit 1
+else
+  while IFS= read -r line; do export "$line"; done < .env
 fi
 
 echo -n "## Checking if email is configured..."
