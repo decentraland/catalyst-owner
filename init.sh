@@ -146,20 +146,12 @@ printMessage () {
 clear
 echo -n "## Loading env variables"
 
-if ! [ -f ".default-env" ]; then
-  echo -n "Error: .default-env does not exist" >&2
-  printMessage failed
-  exit 1
-else
-  cat .default-env >> .env
-fi
-
 if ! [ -f ".env" ]; then
   echo -n "Error: .env does not exist" >&2
   printMessage failed
   exit 1
 else
-  while IFS= read -r line; do export "$line"; done < .env
+  export $(cat .env | xargs)
 fi
 
 echo -n "## Checking if email is configured..."
@@ -231,7 +223,7 @@ export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
-    
+
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
