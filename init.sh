@@ -1,6 +1,6 @@
 #!/bin/bash
 export rsa_key_size=4096
-export data_path="./local/certbot"
+export data_path="local/certbot"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
@@ -234,7 +234,7 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
-    if [ -d "$data_path" ]; then
+    if [ -d "$data_path/conf/live/$nginx_url" ]; then
     echo -n "## Existing data found for $nginx_url. "
     if test ${REGENERATE} -eq 1; then
         leCertEmit $nginx_url
