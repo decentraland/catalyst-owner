@@ -190,9 +190,10 @@ else
     printMessage failed
     exit 1
 fi
-export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 
-echo "NGINX URL: $nginx_url"
+# This is the URL without the 'http/s'
+# Needed to place the server on nginx conf file
+export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39m ]"
@@ -201,10 +202,10 @@ echo -n " - EMAIL:                   " ; echo -e "\e[33m ${EMAIL} \e[39m"
 echo -n " - DCL_API_URL:             " ; echo -e "\e[33m ${DCL_API_URL} \e[39m"
 echo -n " - ETH_NETWORK:             " ; echo -e "\e[33m ${ETH_NETWORK} \e[39m"
 echo -n " - ENS_OWNER_PROVIDER_URL:  " ; echo -e "\e[33m ${ENS_OWNER_PROVIDER_URL} \e[39m"
-
 echo ""
 echo "Starting in 5 seconds... " && sleep 5
 
+# Check if docker compose is installed
 if ! [ -x "$(command -v docker-compose)" ]; then
   echo -n "Error: docker-compose is not installed..." >&2
   printMessage failed
@@ -212,17 +213,24 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 docker pull decentraland/katalyst:${DOCKER_TAG}
-
+if test $? -ne 0; then
+  echo -n "Failed to stop nginx"
+  printMessage failed
+  exit 1
+fi
 printMessage ok
-docker-compose stop nginx
 
+
+docker-compose stop nginx
 if test $? -ne 0; then
   echo -n "Failed to stop nginx"
   printMessage failed
   exit 1
 fi
 
-
+# If the server is localhost, do not enable https
+# Setup the nginx conf file with plain http
+# else, create new certs
 if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
