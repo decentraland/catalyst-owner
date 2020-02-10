@@ -4,15 +4,12 @@ export data_path="./local/certbot"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
-export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
 
 ####
 # Functions
 #####
 
 leCertEmit () {
-  cert_url=$1
-  echo "cert_url: $cert_url"
   if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
     echo "## Downloading recommended TLS parameters ..."
     mkdir -p "$data_path/conf"
@@ -21,9 +18,9 @@ leCertEmit () {
     echo
   fi
 
-  echo " Creating dummy certificate for $CATALYST_URL ..."
-  path="/etc/letsencrypt/live/$CATALYST_URL"
-  mkdir -p "$data_path/conf/live/$CATALYST_URL"
+  echo " Creating dummy certificate for $nginx_url..."
+  path="/etc/letsencrypt/live/$nginx_url"
+  mkdir -p "$data_path/conf/live/$nginx_url"
   docker-compose run --rm --entrypoint "\
     openssl req -x509 -nodes -newkey rsa:1024 -days 1\
       -keyout '$path/privkey.pem' \
@@ -43,11 +40,11 @@ leCertEmit () {
     printMessage ok
   fi
 
-    echo -n "## Deleting dummy certificate for $CATALYST_URL ..."
+    echo -n "## Deleting dummy certificate for $nginx_url ..."
     docker-compose run --rm --entrypoint "\
-            rm -Rf /etc/letsencrypt/live/$CATALYST_URL && \
-            rm -Rf /etc/letsencrypt/archive/$CATALYST_URL && \
-            rm -Rf /etc/letsencrypt/renewal/$CATALYST_URL.conf" certbot
+            rm -Rf /etc/letsencrypt/live/$nginx_url && \
+            rm -Rf /etc/letsencrypt/archive/$nginx_url && \
+            rm -Rf /etc/letsencrypt/renewal/$nginx_url.conf" certbot
         echo
 
         if test $? -ne 0; then
@@ -59,9 +56,9 @@ leCertEmit () {
             printMessage ok
         fi
 
-        echo "## Requesting Let's Encrypt certificate for $cert_url ..."
+        echo "## Requesting Let's Encrypt certificate for $nginx_url ..."
         domain_args=""
-        domain_args="$domain_args -d ${cert_url}"
+        domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
 
         # Select appropriate EMAIL arg
@@ -192,9 +189,7 @@ else
     exit 1
 fi
 
-# This is the URL without the 'http/s'
-# Needed to place the server on nginx conf file
-export nginx_url=`echo ${CATALYST_URL} | awk -F\/ '{ print $3 }'`
+
 
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39m ]"
@@ -236,8 +231,12 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Replacing HTTPS \$katalyst_host on nginx server file... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
     
+    # This is the URL without the 'http/s'
+    # Needed to place the server on nginx conf file
+    export nginx_url=`echo "${CATALYST_URL##*/}"`
+
     if [ -d "$data_path" ]; then
-    echo -n "## Existing data found for $CATALYST_URL. "
+    echo -n "## Existing data found for $nginx_url. "
     if test ${REGENERATE} -eq 1; then
         leCertEmit $nginx_url
     else
