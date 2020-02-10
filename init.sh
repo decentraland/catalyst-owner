@@ -154,14 +154,6 @@ else
   while IFS= read -r line; do export "$line"; done < .env
 fi
 
-if ! [ -f ".default-env" ]; then
-  echo -n "Error: .default-env does not exist" >&2
-  printMessage failed
-  exit 1
-else
-  while IFS= read -r line; do export "$line"; done < .default-env
-fi
-
 echo -n "## Checking if email is configured..."
 if test ${EMAIL}; then
   printMessage ok
