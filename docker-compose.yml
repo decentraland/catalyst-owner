@@ -20,6 +20,7 @@ services:
     image: decentraland/katalyst:${DOCKER_TAG}
     working_dir: /app
     command: content
+    environment:
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
     env_file:
       - .env
