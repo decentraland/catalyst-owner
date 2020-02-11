@@ -14,7 +14,6 @@ upstream lambdas {
 
 server {
     server_name $katalyst_host;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
     client_max_body_size 256M;
 
 
