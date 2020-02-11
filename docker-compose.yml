@@ -21,10 +21,8 @@ services:
     working_dir: /app
     command: content
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
-      - ALLOW_LEGACY_ENTITIES=${ALLOW_LEGACY_ENTITIES}
-      - SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
-      - DCL_API_URL=${DCL_API_URL}
-      - ETH_NETWORK=${ETH_NETWORK}
+    env_file:
+      - .env
     ports:
       - "6969:6969"
     restart: always
@@ -37,7 +35,8 @@ services:
     command: lambdas
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
-      - ENS_OWNER_PROVIDER_URL=${ENS_OWNER_PROVIDER_URL}
+    env_file:
+      - .env
     ports:
       - "7070:7070"
 

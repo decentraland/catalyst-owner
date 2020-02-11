@@ -151,7 +151,7 @@ if ! [ -f ".env" ]; then
   printMessage failed
   exit 1
 else
-  export $(cat .env | xargs)
+  source ".env"
 fi
 
 echo -n "## Checking if email is configured..."
