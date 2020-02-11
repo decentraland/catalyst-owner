@@ -12,6 +12,8 @@ services:
     image: decentraland/katalyst:${DOCKER_TAG}
     working_dir: /app
     command: comms
+    env_file:
+      - .env
     ports:
       - "9000:9000"
     restart: always
