@@ -1,78 +1,48 @@
-# Lighthouse
+# Catalyst Management
 
-## Projects
+Welcome to the Catalyst management tool!
 
-- Lighthouse - Communications coordinator
-- Communications peer library
-- Example client
+Here you will find everything you need to set up you our Catalyst node.
 
 ## Set up
 
-* Install libs
+### Requirements
 
-    `yarn install`
+* You will to have installed [docker-compose](https://docs.docker.com/compose/install/).
+* You will need to have a public domain pointing to your server.
+* Your server will need to have the HTTPS port open (443).
+* The initialization script runs on Bash. It has not been tested on Windows.
 
-* Set up a lighthouse instance on localhost:9000
+### What you will need to configure
+To configure your node, you will have to set three variables in the [.env](.env) file:
 
-    `yarn bazel run comms/lighthouse:server`
+* EMAIL: Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.
+* CONTENT_SERVER_STORAGE: The path to the directory where the content will be stored.
+* CATALYST_URL: The public domain of the node. For example `https://peer.decentraland.org`.
 
-* Set up a client server on localhost:3001
+## Running your Catalyst
 
-    `yarn bazel run comms/peer-react-app:devserver`
+After you have configured everything, all you need to do is run:
 
-* Open the client
+```
+./init.sh
+```
 
-    `open localhost:3001`
+## Updating your Catalyst
 
-## Running it with docker
+To update your Catalyst to a newer version, you can do the same as above:
 
-* Build the image
+```
+./init.sh
+```
 
-    `docker build . -t decentraland/katalyst:latest`
+## Stopping your Catalyst
 
-* Modify the .env file to set your configuration
+To stop your Catalyst, you can run:
+```
+./stop.sh
+```
 
-* Run it locally:
-    ```
-    docker run -ti --rm --name comms   --env-file .env -p 9000:9000 katalyst:latest comms
-    docker run -ti --rm --name content --env-file .env -p 6969:6969 katalyst:latest content
-    docker run -ti --rm --name lambdas --env-file .env -p 7070:7070 katalyst:latest lambdas
-    ```
-
-* Run it with compose:
-
-    `docker-compose up`
-
-* Give it a try:
-    ```
-    curl http://localhost:9000/hello
-    curl http://localhost:6969/status
-    ```
-
-## Lighthouse endpoints
-
-Try the following endpoints for a minimal monitoring of the rooms state.
-
-* List of rooms
-
-    `curl localhost:9000/rooms`
-
-* List of rooms joined curreently by user
-
-    `curl localhost:9000/rooms\?userId=${USER_ID}`
-* Join user to room
-
-    `curl -X PUT localhost:9000/rooms/${ROOM_ID} -d '{ "id": "${USER_ID}" }' -H "Content-Type: application/json"`
-
-* Leave user from room
-
-    `curl -X DELETE localhost:9000/rooms/${ROOM_ID}/users/${USER_ID}`
-
-* List of users in room
-
-    `curl localhost:9000/rooms/${ROOM_ID}`
-
-
-## Monitoring
-
-For monitoring see [the following doc](docs/MONITORING.md)
+## FAQ
+### 1. How are TLS certificates managed?
+We are using [Let's Encrypt](https://letsencrypt.org/) for certificates. We automatically generate the certificates the first time you start your server. We will also handle the renewal of the server for you!
