@@ -43,7 +43,8 @@ if test -f ${IMMUTABLE}; then
     # Move all immutable history into the temp history
     # Old temp and immutable logs will be stored with a '-old' suffix
     cp ${TEMP} ${TEMP_OLD}
-    ((tac 2> /dev/null || tail -r) < ${IMMUTABLE}) >> ${TEMP}
+    echo -en '\n' >> ${TEMP}
+    cat ${IMMUTABLE} >> ${TEMP}
     mv ${IMMUTABLE} ${IMMUTABLE_OLD}
 
     # Start the content server again

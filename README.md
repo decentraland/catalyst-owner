@@ -18,7 +18,7 @@ To configure your node, you will have to set three variables in the [.env](.env)
 
 * EMAIL: Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.
 * CONTENT_SERVER_STORAGE: The path to the directory where the content will be stored.
-* CATALYST_URL: The public domain of the node. For example `https://peer.decentraland.org`.
+* CATALYST_URL: The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL.
 
 ## Running your Catalyst
 
