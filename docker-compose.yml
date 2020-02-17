@@ -17,10 +17,11 @@ services:
     ports:
       - "9000:9000"
     restart: always
-  logging:
-    options:
-      max-size: "100M"
-      max-file: "10"
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "10"
+  
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG}
@@ -38,7 +39,7 @@ services:
     logging:
       options:
         max-size: "100M"
-        max-file: "10"
+        max-file: "10"    
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG}
@@ -83,4 +84,4 @@ services:
     logging:
       options:
         max-size: "100M"
-        max-file: "5"
+        max-file: "10"      
