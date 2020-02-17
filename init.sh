@@ -207,8 +207,6 @@ if test $? -ne 0; then
   printMessage failed
   exit 1
 fi
-printMessage ok
-
 
 docker-compose stop nginx
 if test $? -ne 0; then
@@ -222,7 +220,7 @@ fi
 # else, create new certs
 export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
-    echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
+    echo -n "## Replacing HTTPS $katalyst_host on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
 
     # This is the URL without the 'http/s'
@@ -243,8 +241,6 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
             printMessage failed
             echo -n "Failed to deploy certificates. Take a look above for errors!"
             exit 1
-        else
-            printMessage ok
         fi
     fi
     echo -n "## Finalizing Let's Encrypt setup... "
