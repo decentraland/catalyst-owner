@@ -230,6 +230,7 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
     echo -n "Existing data found for $nginx_url. "
     printMessage ok
+    fi
     if test ${REGENERATE} -eq 1; then
         leCertEmit $nginx_url
     else
