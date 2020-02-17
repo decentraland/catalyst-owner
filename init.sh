@@ -151,6 +151,7 @@ if ! [ -f ".env" ]; then
   printMessage failed
   exit 1
 else
+  printMessage ok
   source ".env"
 fi
 
@@ -227,27 +228,31 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
-    echo -n "## Existing data found for $nginx_url. "
+    echo -n "Existing data found for $nginx_url. "
+    printMessage ok
     if test ${REGENERATE} -eq 1; then
         leCertEmit $nginx_url
     else
-        echo -n "## Keeping the current certs"
+        echo -n "## Current certificates will be used.\n"
     fi
     else
-        echo "## No certificates found. Performing certificate creation"
+        echo "## No certificates found. Performing certificate creation...\n"
         leCertEmit $nginx_url
     fi
 
     if test $? -ne 0; then
-        echo -n "Failed to deploy certificates. Look upstairs for errors: "
+        echo -n "Failed to deploy certificates. Take a look above for errors!"
         printMessage failed
         exit 1
+    else
+        echo -n "## Emitted certificates for $katalyst_host\n"
     fi
-    echo -n "## Certs emited: "
+    echo -n "## Finalizing Let's Encrypt setup..."
     printMessage ok
 else
     echo -n "## Replacing HTTP \$katalyst_host on nginx server file... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
+    printMessage ok
 fi
 
 
@@ -267,5 +272,4 @@ if test $? -ne 0; then
   printMessage failed
   exit 1
 fi
-echo -n "## containers started Ok... "
-printMessage ok
+echo -n "## Catalyst server is up and running at $katalyst_host\n"
