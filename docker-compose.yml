@@ -17,6 +17,10 @@ services:
     ports:
       - "9000:9000"
     restart: always
+  logging:
+    options:
+      max-size: "100M"
+      max-file: "10"
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG}
@@ -31,6 +35,10 @@ services:
     restart: always
     volumes:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "10"
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG}
@@ -42,6 +50,10 @@ services:
       - .env
     ports:
       - "7070:7070"
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "10"
 
   nginx:
     image: nginx:1.15-alpine
@@ -57,6 +69,10 @@ services:
        - lambdas
        - content-server
        - comms-server
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "10"
 
   certbot:
     image: certbot/certbot
@@ -64,3 +80,7 @@ services:
     volumes:
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "5"
