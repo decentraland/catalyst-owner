@@ -151,8 +151,8 @@ if ! [ -f ".env" ]; then
   printMessage failed
   exit 1
 else
-  printMessage ok
   source ".env"
+  printMessage ok
 fi
 
 echo -n "## Checking if email is configured..."
