@@ -220,7 +220,7 @@ fi
 # else, create new certs
 export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
-    echo -n "## Replacing HTTPS $katalyst_host on nginx server file ${nginx_url}... "
+    echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
 
     # This is the URL without the 'http/s'
