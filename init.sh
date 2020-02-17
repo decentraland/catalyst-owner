@@ -228,7 +228,7 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
-        echo -"Existing data found for $nginx_url."
+        echo "Existing data found for \$nginx_url."
 
         if test ${REGENERATE} -eq 1; then
             leCertEmit $nginx_url
