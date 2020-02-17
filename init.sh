@@ -220,7 +220,8 @@ fi
 # else, create new certs
 export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
-    echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
+    echo "## Using HTTPS."
+    echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
 
     # This is the URL without the 'http/s'
@@ -246,7 +247,8 @@ if [ ${CATALYST_URL} != "http://localhost" ]; then
     echo -n "## Finalizing Let's Encrypt setup... "
     printMessage ok
 else
-    echo -n "## Replacing HTTP \$katalyst_host on nginx server file... "
+    echo "## Using HTTP because CATALYST_URL is set to http://localhost"
+    echo -n "## Replacing value \$katalyst_host on nginx server file... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
     printMessage ok
 fi
