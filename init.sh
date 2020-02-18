@@ -48,15 +48,15 @@ leCertEmit () {
         echo
 
         if test $? -ne 0; then
-            echo -n "Failed to remove files..."
+            echo -n "Failed to remove files... "
             printMessage failed
             exit 1
         else
-            echo -n "## files deleted ..."
+            echo -n "## Files deleted ... "
             printMessage ok
         fi
 
-        echo "## Requesting Let's Encrypt certificate for $nginx_url ..."
+        echo "## Requesting Let's Encrypt certificate for $nginx_url... "
         domain_args=""
         domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
@@ -83,7 +83,7 @@ leCertEmit () {
             printMessage failed
             exit 1
         else
-            echo -n "## Certificates requested..."
+            echo -n "## Certificates issued "
             printMessage ok
         fi
 
@@ -114,12 +114,12 @@ leCertEmit () {
             printMessage failed
             exit 1
         else
-            echo -n "Real certs emited OK..."
+            echo -n "Real certificates emited "
             printMessage ok
         fi
 
 
-        echo "## Reloading nginx with real certs ..."
+        echo "## Reloading nginx with real certs..."
         docker-compose restart nginx
         if test $? -ne 0; then
             echo -n "Failed to reload nginx... "
@@ -144,7 +144,7 @@ printMessage () {
 # Main program
 ##
 clear
-echo -n "## Loading env variables"
+echo -n "## Loading env variables... "
 
 if ! [ -f ".env" ]; then
   echo -n "Error: .env does not exist" >&2
@@ -152,9 +152,10 @@ if ! [ -f ".env" ]; then
   exit 1
 else
   source ".env"
+  printMessage ok
 fi
 
-echo -n "## Checking if email is configured..."
+echo -n "## Checking if email is configured... "
 if test ${EMAIL}; then
   printMessage ok
 else
@@ -163,7 +164,7 @@ else
     exit 1
 fi
 
-echo -n "## Checking if storage is configured..."
+echo -n "## Checking if storage is configured... "
 if test -d ${CONTENT_SERVER_STORAGE}; then
     printMessage ok
 else
@@ -172,7 +173,7 @@ else
     exit 1
 fi
 
-echo -n "## Checking if catalyst url is configured..."
+echo -n "## Checking if catalyst url is configured... "
 if test ${CATALYST_URL}; then
     printMessage ok
 else
@@ -202,16 +203,14 @@ fi
 
 docker pull decentraland/katalyst:${DOCKER_TAG}
 if test $? -ne 0; then
-  echo -n "Failed to stop nginx"
+  echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1
 fi
-printMessage ok
-
 
 docker-compose stop nginx
 if test $? -ne 0; then
-  echo -n "Failed to stop nginx"
+  echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1
 fi
@@ -221,33 +220,37 @@ fi
 # else, create new certs
 export nginx_url=`echo "${CATALYST_URL##*/}"`
 if [ ${CATALYST_URL} != "http://localhost" ]; then
-    echo -n "## Replacing HTTPS \$katalyst_host on nginx server file ${nginx_url}... "
+    echo "## Using HTTPS."
+    echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
 
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
-    echo -n "## Existing data found for $nginx_url. "
-    if test ${REGENERATE} -eq 1; then
-        leCertEmit $nginx_url
-    else
-        echo -n "## Keeping the current certs"
-    fi
-    else
-        echo "## No certificates found. Performing certificate creation"
-        leCertEmit $nginx_url
-    fi
+        echo "Existing data found for \$nginx_url."
 
-    if test $? -ne 0; then
-        echo -n "Failed to deploy certificates. Look upstairs for errors: "
-        printMessage failed
-        exit 1
+        if test ${REGENERATE} -eq 1; then
+            leCertEmit $nginx_url
+        else
+            echo "## Current certificates will be used."
+        fi
+    else
+        echo "## No certificates found. Performing certificate creation... "
+        leCertEmit $nginx_url
+
+        if test $? -ne 0; then
+            printMessage failed
+            echo -n "Failed to deploy certificates. Take a look above for errors!"
+            exit 1
+        fi
     fi
-    echo -n "## Certs emited: "
+    echo -n "## Finalizing Let's Encrypt setup... "
     printMessage ok
 else
-    echo -n "## Replacing HTTP \$katalyst_host on nginx server file... "
+    echo "## Using HTTP because CATALYST_URL is set to http://localhost"
+    echo -n "## Replacing value \$katalyst_host on nginx server file... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
+    printMessage ok
 fi
 
 
@@ -258,7 +261,7 @@ if test $matches -eq 0; then
   exit 1
 fi
 
-echo "## Restarting containers..."
+echo "## Restarting containers... "
 docker-compose down
 docker-compose up -d
 
@@ -267,5 +270,4 @@ if test $? -ne 0; then
   printMessage failed
   exit 1
 fi
-echo -n "## containers started Ok... "
-printMessage ok
+echo "## Catalyst server is up and running at $CATALYST_URL"
