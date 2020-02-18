@@ -17,9 +17,24 @@ Here you will find everything you need to set up you our Catalyst node.
 ### What you will need to configure
 To configure your node, you will have to set three variables in the [.env](.env) file:
 
-* EMAIL: Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.
-* CONTENT_SERVER_STORAGE: The path to the directory where the content will be stored.
-* CATALYST_URL: The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL.
+| Name | Description | Default | Required |
+|------|-------------|:-----:|:-----:|
+| EMAIL | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire. | - | yes |
+| CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. | - | yes |
+| CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. | - | yes |
+
+Advanced configurations. Normally, it shouldn't be modified
+
+| Name | Description | Default | Required |
+|------|-------------|:-----:|:-----:|
+| ETH_NETWORK | Which Ethereum network you want to use. Usually is Ropsten for testing or Mainnet for production | mainnet | yes |
+| ENS_OWNER_PROVIDER_URL | Who is resolving the ENS names. | https://api.thegraph.com(..))marketplace | yes |
+| DCL_API_URL | Which API you will use. | https://api.decentraland.org/v1 | yes |
+| DOCKER_TAG | Docker tag of the catalyst image to use. You can find the tags [here](https://hub.docker.com/repository/docker/decentraland/katalyst). | - | yes |
+| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. On the first run always try to ask for certificate issuing, nevermind this value. As a friendly advice, look for FAQ questions (2), (3) and (4)| 0 | yes |
+
+
+
 
 ## Running your Catalyst
 
@@ -37,11 +52,19 @@ To update your Catalyst to a newer version, you can do the same as above:
 ./init.sh
 ```
 
-## Stopping your Catalyst
+## Stopping your Catalyst node
 
-To stop your Catalyst, you can run:
+To stop a specific container on your node:
+
 ```
 ./stop.sh
+```
+
+## Stopping a specific container from a Catalyst node
+To stop a specific container on your node:
+
+```
+./stop.sh [ nginx | lambdas | content-server | comms-server ]
 ```
 
 ## FAQ
