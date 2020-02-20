@@ -71,7 +71,7 @@ services:
        - lambdas
        - content-server
        - comms-server
-    logging:  
+    logging:
       options:
         max-size: "100M"
         max-file: "10"
