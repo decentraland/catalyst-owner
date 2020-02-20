@@ -15,6 +15,7 @@ upstream lambdas {
 server {
     server_name $katalyst_host;
     client_max_body_size 256M;
+    gzip on;
 
 
     location ~ ^/content(.*)$ {
