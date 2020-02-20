@@ -1,7 +1,5 @@
 rewrite_log on;
 
-worker_processes auto;
-
 upstream content-server {
     server content-server:6969;
 }
@@ -17,11 +15,6 @@ upstream lambdas {
 server {
     server_name $katalyst_host;
     client_max_body_size 256M;
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript application/octet-stream;
-    gzip_proxied any;
-    gzip_min_length 15000;
-
 
     location ~ ^/content(.*)$ {
         proxy_pass http://content-server$1$is_args$args;
