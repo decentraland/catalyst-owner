@@ -48,7 +48,7 @@ if test -f ${IMMUTABLE}; then
     mv ${IMMUTABLE} ${IMMUTABLE_OLD}
 
     # Start the content server again
-    docker-compose up --force-recreate -d content-server
+    PERFORM_MULTI_SERVER_ONBOARDING=true docker-compose up --force-recreate -d content-server
 
     echo "DONE!"
 else
