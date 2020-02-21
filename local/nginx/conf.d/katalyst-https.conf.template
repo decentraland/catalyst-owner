@@ -35,6 +35,19 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
     client_max_body_size 256M;
 
+    location ~ ^/content/contents/(.*)$ {
+        root /var/www/content/contents;
+        try_files /$1 /404.html;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Content-Type application/wasm;
+    }
+
+    location ~ ^/lambdas/contentv2/contents/(.*)$ {
+        root /var/www/content/contents;
+        try_files /$1 /404.html;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Content-Type application/wasm;
+    }
 
     location ~ ^/content(.*)$ {
         proxy_pass http://content-server$1$is_args$args;
