@@ -16,7 +16,6 @@ server {
     server_name $katalyst_host;
     client_max_body_size 256M;
 
-
     location ~ ^/content(.*)$ {
         proxy_pass http://content-server$1$is_args$args;
         proxy_pass_request_headers  on;
