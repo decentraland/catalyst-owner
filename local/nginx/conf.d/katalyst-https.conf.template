@@ -12,6 +12,14 @@ upstream lambdas {
     server lambdas:7070;
 }
 
+upstream comms_metrics {
+    server comms:9090;
+}
+
+upstream content_metrics {
+    server content:9090;
+}
+
 server {
     listen 80;
     server_name $katalyst_host;
@@ -56,6 +64,16 @@ server {
         proxy_pass http://lambdas$1$is_args$args;
         proxy_pass_request_headers  on;
     }
+
+    location  ~ ^/comms_metrics$ {
+        proxy_pass http://comms_metrics;
+        proxy_pass_request_headers  on;
+    }
+
+    location  ~ ^/content_metrics$ {
+        proxy_pass http://content_metrics;
+        proxy_pass_request_headers  on;
+    } 
 
     location / {
         root /etc/nginx/html;
