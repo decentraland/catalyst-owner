@@ -12,6 +12,14 @@ upstream lambdas {
     server lambdas:7070;
 }
 
+upstream comms_metrics {
+    server comms-server:9090;
+}
+
+upstream content_metrics {
+    server content-server:9090;
+}
+
 server {
     listen 80;
     server_name $katalyst_host;
@@ -35,8 +43,8 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
     client_max_body_size 256M;
 
-    location ~ ^/content(.*)$ {
-        proxy_pass http://content-server$1$is_args$args;
+    location ~ ^/content/(.*)$ {
+        proxy_pass http://content-server/$1$is_args$args;
         proxy_pass_request_headers  on;
         proxy_connect_timeout       600;
         proxy_send_timeout          600;
@@ -44,8 +52,8 @@ server {
         send_timeout                600;
     }
 
-    location  ~ ^/comms(.*)$ {
-        proxy_pass http://comms-server$1$is_args$args;
+    location  ~ ^/comms/(.*)$ {
+        proxy_pass http://comms-server/$1$is_args$args;
         proxy_pass_request_headers  on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 	    proxy_set_header Upgrade $http_upgrade;
@@ -56,6 +64,16 @@ server {
         proxy_pass http://lambdas$1$is_args$args;
         proxy_pass_request_headers  on;
     }
+
+    location /comms_metrics {
+        proxy_pass http://comms_metrics/metrics;
+        proxy_pass_request_headers  on;
+    }
+
+    location /content_metrics {
+        proxy_pass http://content_metrics/metrics;
+        proxy_pass_request_headers  on;
+    } 
 
     location / {
         root /etc/nginx/html;
