@@ -13,11 +13,11 @@ upstream lambdas {
 }
 
 upstream comms_metrics {
-    server comms:9090;
+    server comms-server:9090;
 }
 
 upstream content_metrics {
-    server content:9090;
+    server content-server:9090;
 }
 
 server {
