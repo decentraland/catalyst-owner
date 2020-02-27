@@ -20,6 +20,10 @@ upstream content_metrics {
     server content-server:9090;
 }
 
+upstream system_metrics {
+    server cadvisor:8080;
+}
+
 server {
     listen 80;
     server_name $katalyst_host;
@@ -74,6 +78,11 @@ server {
         proxy_pass http://content_metrics/metrics;
         proxy_pass_request_headers  on;
     } 
+
+    location /system_metrics {
+        proxy_pass http://system_metrics/metrics;
+        proxy_pass_request_headers  on;
+    }
 
     location / {
         root /etc/nginx/html;
