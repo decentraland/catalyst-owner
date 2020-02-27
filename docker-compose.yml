@@ -57,6 +57,20 @@ services:
         max-size: "100M"
         max-file: "10"
 
+  cadvisor:
+    image: gcr.io/google_containers/cadvisor:v0.35.0
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    depends_on:
+      - comms-server
+      - content-server
+      - lambdas
+
   nginx:
     image: nginx:1.15-alpine
     ports:
@@ -72,6 +86,7 @@ services:
        - lambdas
        - content-server
        - comms-server
+       - cadvisor
     logging:
       options:
         max-size: "100M"
@@ -87,18 +102,3 @@ services:
       options:
         max-size: "100M"
         max-file: "10"
-
-  cadvisor:
-    image: gcr.io/google_containers/cadvisor:v0.35.0
-    container_name: cadvisor
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    depends_on:
-      - comms-server
-      - content-server
-      - lambdas
-      - nginx
