@@ -20,6 +20,10 @@ upstream content_metrics {
     server content-server:9090;
 }
 
+upstream lambdas_metrics {
+    server lambdas:7070;
+}
+
 upstream system_metrics {
     server cadvisor:8080;
 }
@@ -57,6 +61,11 @@ server {
 
     location /content_metrics {
         proxy_pass http://content_metrics/metrics;
+        proxy_pass_request_headers  on;
+    }
+
+    location /lambdas_metrics {
+        proxy_pass http://lambdas_metrics/metrics;
         proxy_pass_request_headers  on;
     }
 
