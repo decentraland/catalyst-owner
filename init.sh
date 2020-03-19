@@ -198,8 +198,6 @@ echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "[ \e[33m ${CONTENT_SERVER_STORAGE} \e[39m ]"
 echo -n " - EMAIL:                   " ; echo -e "\e[33m ${EMAIL} \e[39m"
 echo -n " - ETH_NETWORK:             " ; echo -e "\e[33m ${ETH_NETWORK} \e[39m"
-echo -n " - DCL_PARCEL_ACCESS_URL:   " ; echo -e "\e[33m ${DCL_PARCEL_ACCESS_URL} \e[39m"
-echo -n " - ENS_OWNER_PROVIDER_URL:  " ; echo -e "\e[33m ${ENS_OWNER_PROVIDER_URL} \e[39m"
 echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
 echo ""
 echo "Starting in 5 seconds... " && sleep 5
