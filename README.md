@@ -8,8 +8,8 @@ Here you will find everything you need to set up you our Catalyst node.
 
 ### Requirements
 
-* You will to install [docker](https://docs.docker.com/install/).
-* You will to install [docker-compose](https://docs.docker.com/compose/install/).
+* You will need to have [docker](https://docs.docker.com/install/) installed.
+* You will to have [docker-compose](https://docs.docker.com/compose/install/) installed.
 * You will need to have a public domain pointing to your server.
 * Your server will need to have the HTTPS port open (443).
 * The initialization script runs on Bash. It has not been tested on Windows.
