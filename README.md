@@ -8,8 +8,8 @@ Here you will find everything you need to set up you our Catalyst node.
 
 ### Requirements
 
-* You will to have installed [docker](https://docs.docker.com/install/).
-* You will to have installed [docker-compose](https://docs.docker.com/compose/install/).
+* You will need to have [docker](https://docs.docker.com/install/) installed.
+* You will to have [docker-compose](https://docs.docker.com/compose/install/) installed.
 * You will need to have a public domain pointing to your server.
 * Your server will need to have the HTTPS port open (443).
 * The initialization script runs on Bash. It has not been tested on Windows.
@@ -23,15 +23,12 @@ To configure your node, you will have to set three variables in the [.env](.env)
 | CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. | - | yes |
 | CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. | - | yes |
 
-Advanced configurations. Normally, it shouldn't be modified
+There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
 | Name | Description | Default | Required |
 |------|-------------|:-----:|:-----:|
-| ETH_NETWORK | Which Ethereum network you want to use. Usually is Ropsten for testing or Mainnet for production | mainnet | yes |
-| ENS_OWNER_PROVIDER_URL | Who is resolving the ENS names. | https://api.thegraph.com(..))marketplace | yes |
-| DCL_API_URL | Which API you will use. | https://api.decentraland.org/v1 | yes |
-| DOCKER_TAG | Docker tag of the catalyst image to use. You can find the tags [here](https://hub.docker.com/repository/docker/decentraland/katalyst). | - | yes |
-| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. On the first run always try to ask for certificate issuing, nevermind this value. As a friendly advice, look for FAQ questions (2), (3) and (4)| 0 | yes |
+| ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production | mainnet | yes |
+| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4)| 0 | yes |
 
 
 
@@ -76,7 +73,7 @@ One of the steps in issuing a certificate is the creation of auto signed certs. 
 
 To force a certificate regeneration you will need to change the `REGENERATE` entry on the `.env` file to `1` and then execute the script again.
 
-**IT'S IMPORTANT** to roll back this value to `0`. If you don't, a new certificate will be issued on each run and you will hit the Let's Encript ratio limit. It this happens, your domain will be banned.
+**IT'S IMPORTANT** to roll back this value to `0`. If you don't, a new certificate will be issued on each run and you will hit the Let's Encrypt ratio limit. It this happens, your domain will be banned.
 
 ### 3. How many certs I can issue?
 This is tied to Let's Encrypt ratio limit. To know about Let's Encrypt ratio limit look [here](https://letsencrypt.org/docs/staging-environment/)
