@@ -9,11 +9,12 @@ volumes:
 
 services:
   comms-server:
-    image: decentraland/katalyst:${DOCKER_TAG}
+    image: decentraland/katalyst:${DOCKER_TAG:-latest}
     working_dir: /app
     command: comms
     env_file:
       - .env
+      - .env-advanced
     ports:
       - "9000:9000"
     restart: always
@@ -21,17 +22,18 @@ services:
       options:
         max-size: "100M"
         max-file: "10"
-  
+
 
   content-server:
-    image: decentraland/katalyst:${DOCKER_TAG}
+    image: decentraland/katalyst:${DOCKER_TAG:-latest}
     working_dir: /app
     command: content
     environment:
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
-      - PERFORM_MULTI_SERVER_ONBOARDING=${PERFORM_MULTI_SERVER_ONBOARDING}
+      - PERFORM_MULTI_SERVER_ONBOARDING=${PERFORM_MULTI_SERVER_ONBOARDING:-false}
     env_file:
       - .env
+      - .env-advanced
     ports:
       - "6969:6969"
     restart: always
@@ -40,16 +42,17 @@ services:
     logging:
       options:
         max-size: "100M"
-        max-file: "10"    
+        max-file: "10"
 
   lambdas:
-    image: decentraland/katalyst:${DOCKER_TAG}
+    image: decentraland/katalyst:${DOCKER_TAG:-latest}
     working_dir: /app
     command: lambdas
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
     env_file:
       - .env
+      - .env-advanced
     ports:
       - "7070:7070"
     logging:
@@ -86,4 +89,4 @@ services:
     logging:
       options:
         max-size: "100M"
-        max-file: "10"      
+        max-file: "10"

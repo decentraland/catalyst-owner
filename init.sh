@@ -155,6 +155,15 @@ else
   printMessage ok
 fi
 
+if ! [ -f ".env-advanced" ]; then
+  echo -n "Error: .env-advanced does not exist" >&2
+  printMessage failed
+  exit 1
+else
+  source ".env-advanced"
+  printMessage ok
+fi
+
 echo -n "## Checking if email is configured... "
 if test ${EMAIL}; then
   printMessage ok
@@ -182,15 +191,14 @@ else
     exit 1
 fi
 
+# Define default value of docker tag as latest
+DOCKER_TAG=${DOCKER_TAG:-latest}
 
-
-echo -n " - REGENERATE:              " ; echo -e "\e[33m ${REGENERATE} \e[39m"
-echo -n " - CATALYST_URL:            " ; echo -e "[ \e[33m ${CATALYST_URL} \e[39m ]"
-echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "[ \e[33m ${CONTENT_SERVER_STORAGE} \e[39m ]"
-echo -n " - EMAIL:                   " ; echo -e "\e[33m ${EMAIL} \e[39m"
-echo -n " - DCL_API_URL:             " ; echo -e "\e[33m ${DCL_API_URL} \e[39m"
-echo -n " - ETH_NETWORK:             " ; echo -e "\e[33m ${ETH_NETWORK} \e[39m"
-echo -n " - ENS_OWNER_PROVIDER_URL:  " ; echo -e "\e[33m ${ENS_OWNER_PROVIDER_URL} \e[39m"
+echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
+echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
+echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
+echo -n " - ETH_NETWORK:             " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
+echo -n " - REGENERATE:              " ; echo -e "\033[33m ${REGENERATE} \033[39m"
 echo ""
 echo "Starting in 5 seconds... " && sleep 5
 
