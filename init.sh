@@ -209,6 +209,28 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
+if ! [ -f ".env-database-admin" ]; then
+    ROOT_USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
+    ROOT_PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
+    echo "POSTGRES_USER=${ROOT_USER}" > .env-database-admin
+    echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
+    echo "POSTGRES_DB=postgres" >> .env-database-admin
+    echo "POSTGRES_HOST=postgres" >> .env-database-admin
+    echo "POSTGRES_PORT=5432" >> .env-database-admin
+fi
+
+source ".env-database-admin"
+
+if ! [ -f ".env-database-content" ]; then
+    USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
+    PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
+    echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
+    echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
+    echo "POSTGRES_CONTENT_DB=content" >> .env-database-content
+fi
+
+source ".env-database-content"
+
 docker pull decentraland/katalyst:${DOCKER_TAG}
 if test $? -ne 0; then
   echo -n "Failed to stop nginx! "
