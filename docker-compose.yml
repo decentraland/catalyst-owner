@@ -23,6 +23,20 @@ services:
         max-size: "100M"
         max-file: "10"
 
+  postgress:
+    image: postgres
+    container_name: ${POSTGRES_HOST:-postgres}
+    env_file:
+      - .env-database-admin
+    expose:
+      - ${POSTGRES_PORT:-5432}
+    restart: always
+    volumes:
+      - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "10"
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -34,6 +48,8 @@ services:
     env_file:
       - .env
       - .env-advanced
+      - .env-database-admin
+      - .env-database-content
     ports:
       - "6969:6969"
     restart: always
