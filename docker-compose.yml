@@ -6,7 +6,7 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
-  lighthouse-storage-volume: {}
+  lighthouse_storage_volume: {}
 
 services:
   comms-server:
@@ -21,7 +21,7 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - "lighthouse-storage-volume:/app/storage/lighthouse"
+      - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
     logging:
       options:
