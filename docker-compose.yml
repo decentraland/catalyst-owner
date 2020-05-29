@@ -6,6 +6,7 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
+  lighthouse-storage-volume: {}
 
 services:
   comms-server:
@@ -15,8 +16,12 @@ services:
     env_file:
       - .env
       - .env-advanced
+    environment: 
+      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
     ports:
       - "9000:9000"
+    volumes:
+      - "lighthouse-storage-volume:/app/storage/lighthouse"
     restart: always
     logging:
       options:
