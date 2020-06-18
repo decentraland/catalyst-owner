@@ -7,6 +7,7 @@ volumes:
   content_server_storage: {}
   nginx_storage: {}
   lighthouse_storage_volume: {}
+  lambdas_server_storage: {}
 
 services:
   comms-server:
@@ -71,6 +72,7 @@ services:
     command: lambdas
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
     env_file:
       - .env
       - .env-advanced
@@ -80,6 +82,8 @@ services:
       options:
         max-size: "100M"
         max-file: "10"
+    volumes:
+      - "lambdas_server_storage:/app/storage/lambdas"
 
   nginx:
     image: nginx:1.15-alpine
