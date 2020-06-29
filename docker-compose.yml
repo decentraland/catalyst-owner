@@ -6,6 +6,8 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
+  lighthouse_storage_volume: {}
+  lambdas_server_storage: {}
 
 services:
   comms-server:
@@ -15,8 +17,12 @@ services:
     env_file:
       - .env
       - .env-advanced
+    environment: 
+      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
     ports:
       - "9000:9000"
+    volumes:
+      - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
     logging:
       options:
@@ -44,7 +50,7 @@ services:
     command: content
     environment:
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
-      - PERFORM_MULTI_SERVER_ONBOARDING=${PERFORM_MULTI_SERVER_ONBOARDING:-false}
+      - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
     env_file:
       - .env
       - .env-advanced
@@ -66,6 +72,7 @@ services:
     command: lambdas
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
     env_file:
       - .env
       - .env-advanced
@@ -75,6 +82,8 @@ services:
       options:
         max-size: "100M"
         max-file: "10"
+    volumes:
+      - "lambdas_server_storage:/app/storage/lambdas"
 
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
