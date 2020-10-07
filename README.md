@@ -10,9 +10,11 @@ Here you will find everything you need to set up you our Catalyst node.
 
 * You will need to have [docker](https://docs.docker.com/install/) installed.
 * You will to have [docker-compose](https://docs.docker.com/compose/install/) installed.
-* You will need to have a public domain pointing to your server.
-* Your server will need to have the HTTPS port open (443).
 * The initialization script runs on Bash. It has not been tested on Windows.
+
+In order to run a public server, you will also need to:
+* Have a public domain pointing to your server.
+* Your server will need to have the HTTPS port open (443).
 
 ### What you will need to configure
 To configure your node, you will have to set three variables in the [.env](.env) file:
@@ -21,7 +23,7 @@ To configure your node, you will have to set three variables in the [.env](.env)
 |------|-------------|:-----:|:-----:|
 | EMAIL | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire. | - | yes |
 | CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. | - | yes |
-| CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. | - | yes |
+| CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost` | - | yes |
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
