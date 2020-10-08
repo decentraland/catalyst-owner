@@ -43,6 +43,15 @@ After you have configured everything, all you need to do is run:
 ./init.sh
 ```
 
+#### How to make sure that your Catalyst is running
+
+Once you started your Catalyst server, after a few seconds you should be able to test the different services by accessing:
+
+* Content: `CATALYST_URL/content/status`
+* Comms: `CATALYST_URL/comms/status`
+* Lambdas: `CATALYST_URL/lambdas/status`
+
+
 ## Updating your Catalyst
 
 To update your Catalyst to a newer version, you can do the same as above:
