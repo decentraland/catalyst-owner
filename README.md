@@ -22,7 +22,7 @@ To configure your node, you will have to set three variables in the [.env](.env)
 | Name | Description | Default | Required |
 |------|-------------|:-----:|:-----:|
 | EMAIL | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire. | - | yes |
-| CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. | - | yes |
+| CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. Path must be absolute. | - | yes |
 | CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost` | - | yes |
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
