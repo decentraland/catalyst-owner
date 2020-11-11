@@ -191,8 +191,9 @@ else
     exit 1
 fi
 
-# Define default value of docker tag as latest
+# Define defaults
 DOCKER_TAG=${DOCKER_TAG:-latest}
+REGENERATE=${REGENERATE:-0}
 
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
