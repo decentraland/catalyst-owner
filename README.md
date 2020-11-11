@@ -30,7 +30,7 @@ There is also some advanced configuration in the [.env-advanced](.env-advanced) 
 | Name | Description | Default | Required |
 |------|-------------|:-----:|:-----:|
 | ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production | mainnet | yes |
-| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4)| 0 | yes |
+| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4)| 0 | no |
 
 
 
