@@ -101,6 +101,8 @@
             fetch('/comms/layers').then(_ => {
               return _.json()
             }).then(_ => {
+              currentUsersDiv.innerText = _.reduce((sum, elem) => sum + elem.usersCount, 0)
+            }).catch(_ => {
               currentUsersDiv.innerText = '(unknown)'
             })
           })()
