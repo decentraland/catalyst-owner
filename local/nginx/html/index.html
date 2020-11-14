@@ -1,25 +1,112 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Welcome to nginx!</title>
-<style>
+  <meta charset="utf-8">
+  <meta name="description" content="Catalyst Server">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌎</text></svg>">
+  <title>Catalyst server status</title>
+  <style type="text/css">
     body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
+      margin: 40px auto;
+      max-width: 650px;
+      line-height: 1.6;
+      font-size: 18px;
+      color: #2e2e2e;
+      padding: 0 10px
     }
-</style>
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+      font-family: Georgia, serif;
+    }
+
+    p {
+      font-family: Roboto, sans-serif;
+      font-size: 16px;
+    }
+
+    h1 {
+      color: #212121;
+    }
+
+    h2 {
+      color: #424242;
+    }
+
+    h3 {
+      color: #636363;
+    }
+
+    a {
+      color: #636363;
+    }
+
+    a:visited {
+      color: #636363;
+    }
+
+    a:hover {
+      color: #0b6dd4;
+    }
+  </style>
 </head>
+
 <body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
-
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
+  <header>
+    <h1>Server status</h1>
+  </header>
+  <section>
+    <h2><span id="catalyst-name"></span></h2>
+    <p>Content server status: <span id="content-status">loading...</span></p>
+    <p>Content history height: <span id="content-count">loading...</span></p>
+    <p>Communications status: <span id="comms-status">loading...</span></p>
+    <p>Current users: <span id="user-count">loading...</span></p>
+  </section>
+  <script type='text/javascript' async>
+    ; (function (window, document) {
+      window.addEventListener('load', function () {
+        const document = window.document
+        document.getElementById('catalyst-name').innerText = window.location.host
+        const contentStatusDiv = document.getElementById('content-status')
+        const historyHeightDiv = document.getElementById('content-count')
+        const commsStatusDiv = document.getElementById('comms-status')
+        const currentUsersDiv = document.getElementById('user-count')
+          ; (async function fill() {
+            fetch('/content/status').then(_ => {
+              return _.json()
+            }).then(_ => {
+              const status = _.synchronizationStatus.synchronizationState
+              const time = _.synchronizationStatus.lastSyncWithOtherServers
+              contentStatusDiv.innerText = status === 'Bootstrapping' ?
+                status : status + ' ('
+                + ((new Date().getTime() - new Date(time).getTime()) / 1000).toFixed(0)
+                + ' seconds ago)'
+              historyHeightDiv.innerText = _.historySize
+            }).catch(_ => {
+              contentStatusDiv.innerText = 'Down'
+              historyHeightDiv.innerText = '(unknown)'
+            })
+            fetch('/comms/status').then(_ => {
+              return _.json()
+            }).then(_ => {
+              commsStatusDiv.innerText = _.ready ? 'Active' : 'Inactive'
+            }).catch(_ => {
+              commsStatusDiv.innerText = 'Unavailable'
+            })
+            fetch('/comms/layers').then(_ => {
+              return _.json()
+            }).then(_ => {
+              currentUsersDiv.innerText = '(unknown)'
+            })
+          })()
+      })
+    })(window, window.document)
+  </script>
 </body>
+
 </html>
