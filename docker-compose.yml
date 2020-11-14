@@ -70,6 +70,7 @@ services:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
     working_dir: /app
     command: lambdas
+    restart: always
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
@@ -96,6 +97,7 @@ services:
        - ./local/nginx/conf.d:/etc/nginx/conf.d
        - ./local/certbot/conf:/etc/letsencrypt
        - ./local/certbot/www:/var/www/certbot
+    restart: always
     depends_on:
        - lambdas
        - content-server
@@ -107,6 +109,7 @@ services:
 
   certbot:
     image: certbot/certbot
+    restart: always
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     volumes:
       - ./local/certbot/conf:/etc/letsencrypt
