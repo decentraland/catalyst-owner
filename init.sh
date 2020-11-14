@@ -211,9 +211,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 if ! [ -f ".env-database-admin" ]; then
-    ROOT_USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
     ROOT_PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    echo "POSTGRES_USER=${ROOT_USER}" > .env-database-admin
+    echo "POSTGRES_USER=postgres" > .env-database-admin
     echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
     echo "POSTGRES_DB=postgres" >> .env-database-admin
     echo "POSTGRES_HOST=postgres" >> .env-database-admin
