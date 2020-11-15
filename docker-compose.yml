@@ -95,6 +95,7 @@ services:
     volumes:
        - ./local/nginx/nginx.conf:/etc/nginx/nginx.conf
        - ./local/nginx/conf.d:/etc/nginx/conf.d
+       - ./local/nginx/html:/etc/nginx/html
        - ./local/certbot/conf:/etc/letsencrypt
        - ./local/certbot/www:/var/www/certbot
     restart: always
