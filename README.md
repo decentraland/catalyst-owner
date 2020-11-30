@@ -10,9 +10,11 @@ Here you will find everything you need to set up you our Catalyst node.
 
 * You will need to have [docker](https://docs.docker.com/install/) installed.
 * You will to have [docker-compose](https://docs.docker.com/compose/install/) installed.
-* You will need to have a public domain pointing to your server.
-* Your server will need to have the HTTPS port open (443).
 * The initialization script runs on Bash. It has not been tested on Windows.
+
+In order to run a public server, you will also need to:
+* Have a public domain pointing to your server.
+* Your server will need to have the HTTPS port open (443).
 
 ### What you will need to configure
 To configure your node, you will have to set three variables in the [.env](.env) file:
@@ -20,15 +22,15 @@ To configure your node, you will have to set three variables in the [.env](.env)
 | Name | Description | Default | Required |
 |------|-------------|:-----:|:-----:|
 | EMAIL | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire. | - | yes |
-| CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. | - | yes |
-| CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. | - | yes |
+| CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. Path must be absolute. | - | yes |
+| CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost` | - | yes |
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
 | Name | Description | Default | Required |
 |------|-------------|:-----:|:-----:|
 | ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production | mainnet | yes |
-| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4)| 0 | yes |
+| REGENERATE | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4)| 0 | no |
 
 
 
@@ -40,6 +42,15 @@ After you have configured everything, all you need to do is run:
 ```
 ./init.sh
 ```
+
+#### How to make sure that your Catalyst is running
+
+Once you started your Catalyst server, after a few seconds you should be able to test the different services by accessing:
+
+* Content: `CATALYST_URL/content/status`
+* Comms: `CATALYST_URL/comms/status`
+* Lambdas: `CATALYST_URL/lambdas/status`
+
 
 ## Updating your Catalyst
 

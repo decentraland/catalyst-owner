@@ -191,8 +191,9 @@ else
     exit 1
 fi
 
-# Define default value of docker tag as latest
+# Define defaults
 DOCKER_TAG=${DOCKER_TAG:-latest}
+REGENERATE=${REGENERATE:-0}
 
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
@@ -210,9 +211,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 if ! [ -f ".env-database-admin" ]; then
-    ROOT_USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
     ROOT_PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    echo "POSTGRES_USER=${ROOT_USER}" > .env-database-admin
+    echo "POSTGRES_USER=postgres" > .env-database-admin
     echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
     echo "POSTGRES_DB=postgres" >> .env-database-admin
     echo "POSTGRES_HOST=postgres" >> .env-database-admin

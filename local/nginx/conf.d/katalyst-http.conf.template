@@ -67,5 +67,7 @@ server {
 
     location / {
         root /etc/nginx/html;
+        error_page 404 /404;
+        error_page 500 502 503 504 /50x;
     }
 }
