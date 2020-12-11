@@ -30,7 +30,7 @@ services:
         max-file: "10"
 
   postgress:
-    image: postgres
+    image: postgres:12
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
