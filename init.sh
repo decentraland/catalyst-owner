@@ -195,6 +195,7 @@ fi
 DOCKER_TAG=${DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 
+echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
 echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
