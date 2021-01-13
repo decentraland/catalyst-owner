@@ -25,6 +25,7 @@ services:
       - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
@@ -40,6 +41,7 @@ services:
     volumes:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
@@ -62,6 +64,7 @@ services:
     volumes:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
@@ -80,6 +83,7 @@ services:
     ports:
       - "7070:7070"
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
@@ -104,6 +108,7 @@ services:
        - content-server
        - comms-server
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
@@ -116,6 +121,7 @@ services:
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
     logging:
+      driver: syslog
       options:
         max-size: "100M"
         max-file: "10"
