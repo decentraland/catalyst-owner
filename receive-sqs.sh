@@ -18,5 +18,9 @@ if [ -n "${SQS_URL}" ]; then
     else
       echo "Error consuming message $MSG"
     fi
+  else
+    echo 'No message was received'
   fi
+else
+  echo 'No SQS_URL is set'
 fi
