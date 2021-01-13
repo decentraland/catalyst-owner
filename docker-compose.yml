@@ -17,7 +17,7 @@ services:
     env_file:
       - .env
       - .env-advanced
-    environment: 
+    environment:
       - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
     ports:
       - "9000:9000"
@@ -26,9 +26,7 @@ services:
     restart: always
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
 
   postgress:
     image: postgres:12
@@ -42,9 +40,7 @@ services:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -65,9 +61,7 @@ services:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -84,34 +78,30 @@ services:
       - "7070:7070"
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
   nginx:
     image: nginx:1.15-alpine
     ports:
-       - "80:80"
-       - "443:443"
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+      - "80:80"
+      - "443:443"
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     volumes:
-       - ./local/nginx/nginx.conf:/etc/nginx/nginx.conf
-       - ./local/nginx/conf.d:/etc/nginx/conf.d
-       - ./local/nginx/html:/etc/nginx/html
-       - ./local/certbot/conf:/etc/letsencrypt
-       - ./local/certbot/www:/var/www/certbot
+      - ./local/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./local/nginx/conf.d:/etc/nginx/conf.d
+      - ./local/nginx/html:/etc/nginx/html
+      - ./local/certbot/conf:/etc/letsencrypt
+      - ./local/certbot/www:/var/www/certbot
     restart: always
     depends_on:
-       - lambdas
-       - content-server
-       - comms-server
+      - lambdas
+      - content-server
+      - comms-server
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
 
   certbot:
     image: certbot/certbot
@@ -122,6 +112,4 @@ services:
       - ./local/certbot/www:/var/www/certbot
     logging:
       driver: syslog
-      options:
-        max-size: "100M"
-        max-file: "10"
+      options: {}
