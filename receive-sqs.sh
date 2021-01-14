@@ -11,6 +11,8 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
 
     if [ -n "$MSG" ]; then
       export DOCKER_TAG
+      export EXIT_CODE
+
       DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
 
       if [ -n "$DOCKER_TAG" ]; then
