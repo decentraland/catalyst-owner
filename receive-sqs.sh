@@ -10,23 +10,27 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
     MSG=$(aws sqs receive-message --queue-url "$SQS_URL");
 
     if [ -n "$MSG" ]; then
-      DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
       export DOCKER_TAG
+      DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
 
-      if ! [ -f ".env" ]; then
-        echo -n "Error: .env does not exist" >&2
+      if [ -n "$DOCKER_TAG" ]; then
+        if ! [ -f ".env" ]; then
+          echo -n "Error: .env does not exist" >&2
+        else
+          escapedDockerTag=$(echo "$DOCKER_TAG" | jq -R)
+          {
+            echo "";
+            echo "# $(date)";
+            echo "DOCKER_TAG=${escapedDockerTag}";
+          } >> .env
+        fi
+
+        bash ./init.sh
+
+        EXIT_CODE=$?
       else
-        escapedDockerTag=$(echo "$DOCKER_TAG" | jq -R)
-        {
-          echo "";
-          echo "# $(date)";
-          echo "DOCKER_TAG=${escapedDockerTag}";
-        } >> .env
+        EXIT_CODE=1
       fi
-
-      bash ./init.sh
-
-      EXIT_CODE=$?
 
       # Only remove the message from the queue if the update was successful
       if [ $EXIT_CODE -eq 0 ]; then
