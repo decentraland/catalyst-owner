@@ -26,7 +26,9 @@ services:
     restart: always
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: comms
+      }
 
   postgress:
     image: postgres:12
@@ -40,7 +42,9 @@ services:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: postgres
+      }
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -61,7 +65,9 @@ services:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: content-server
+      }
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -78,7 +84,9 @@ services:
       - "7070:7070"
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: lambdas
+      }
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
@@ -101,7 +109,9 @@ services:
       - comms-server
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: nginx
+      }
 
   certbot:
     image: certbot/certbot
@@ -112,4 +122,6 @@ services:
       - ./local/certbot/www:/var/www/certbot
     logging:
       driver: syslog
-      options: {}
+      options: {
+        tag: certbot
+      }
