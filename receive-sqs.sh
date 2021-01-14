@@ -16,11 +16,12 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
       if ! [ -f ".env" ]; then
         echo -n "Error: .env does not exist" >&2
       else
-         {
+        escapedDockerTag=$(echo "$DOCKER_TAG" | jq -R)
+        {
           echo "";
           echo "# $(date)";
-          echo "DOCKER_TAG=\"$DOCKER_TAG\"";
-         } >> .env
+          echo "DOCKER_TAG=${escapedDockerTag}";
+        } >> .env
       fi
 
       bash ./init.sh
