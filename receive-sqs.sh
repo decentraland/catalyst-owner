@@ -13,6 +13,16 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
       DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
       export DOCKER_TAG
 
+      if ! [ -f ".env" ]; then
+        echo -n "Error: .env does not exist" >&2
+      else
+         {
+          echo "";
+          echo "# $(date)";
+          echo "DOCKER_TAG=\"$DOCKER_TAG\"";
+         } >> .env
+      fi
+
       bash ./init.sh
 
       EXIT_CODE=$?
