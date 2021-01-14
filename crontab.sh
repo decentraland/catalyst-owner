@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Update the catalyst-owner version using the current branch
-git pull origin "$(git rev-parse --abbrev-ref HEAD)"
+git pull origin "$(git rev-parse --abbrev-ref HEAD)" --quiet
 
 # Update the version if we have messages in the SQS
 bash ./receive-sqs.sh

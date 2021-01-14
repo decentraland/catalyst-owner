@@ -34,8 +34,6 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
         echo "[ERROR] consuming message $MSG"
         exit 1
       fi
-    else
-      echo 'No message was received'
     fi
   else
     echo 'No SQS_URL is set'
