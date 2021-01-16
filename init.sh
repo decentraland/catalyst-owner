@@ -64,7 +64,7 @@ leCertEmit () {
         domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
 
-        if [ "$CATALYST_OWNER_CHANNEL" == "stable" ]; then
+        if [ "$CATALYST_OWNER_CHANNEL" = "stable" ]; then
           staging_arg=""
         fi
 
