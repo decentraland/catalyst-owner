@@ -4,3 +4,4 @@ local/nginx/conf.d/00-katalyst.conf
 .env-database-*
 .env
 .env-advanced
+.cron
