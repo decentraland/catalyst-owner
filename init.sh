@@ -64,6 +64,10 @@ leCertEmit () {
         domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
 
+        if [ "$CATALYST_OWNER_CHANNEL" == "stable" ]; then
+          staging_arg=""
+        fi
+
         # Select appropriate EMAIL arg
         case "$EMAIL" in
             "") email_arg="--register-unsafely-without-email" ;;
@@ -76,14 +80,14 @@ leCertEmit () {
           echo "Checking server liveness: ${CATALYST_URL}"
           statusCode=$(curl -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk {'print $2'} | bc)
           echo ">> statusCode: ${statusCode} returnCode: $?"
-          if [ $statusCode -lt 500 ]; then
+          if [ "$statusCode" -lt 500 ]; then
             serverAlive=0
             echo ">> Success"
           else
             ((serverAlive=serverAlive+1))
-            echo ">> waiting..."
+            echo ">> Waiting..."
+            sleep 6
           fi
-          sleep 6
         done
 
         docker-compose run --rm --entrypoint "\

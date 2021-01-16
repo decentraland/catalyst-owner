@@ -24,6 +24,9 @@ To configure your node, you will have to set three variables in the [.env](.env)
 | EMAIL | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire. | - | yes |
 | CONTENT_SERVER_STORAGE |The path to the directory where the content will be stored. Path must be absolute. | - | yes |
 | CATALYST_URL |The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost` | - | yes |
+| CATALYST_OWNER_CHANNEL | Which update channel in the cloud bootstrap configurations to use `stable` or `latest`. | `latest` | no |
+| SQS_QUEUE_NAME | Which Amazon SQS to consume in `crontab.sh` | - | no |
+| MOUNT_DISK | Useful to mount a disk to the folder `$CONTENT_SERVER_STORAGE` when working with persistent storage in cloud instances. | - | no |
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
@@ -105,3 +108,22 @@ To turn off compression, simply edit the configuration in [local/nginx/nginx.con
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript application/octet-stream;
     gzip_min_length 30000;
 ```
+
+## Logs
+
+All the logs of catalyst-owner are configured to be redirected to the syslog. Please make sure you have a way to redirect the syslog to a place where you can read it (there are useful services like cloudwatch, splunk, sumologic that can help you organize your logs).
+
+## `userdata.sh`
+
+Base file to run in the `user data` section of a cloud-init enabled instance like AWS EC2.
+
+It configures the minimum necessary environment to run the catalyst.
+
+## `bootstrap.sh`
+
+This file is automatically configured by `userdata.sh` to run when the instance starts. It mounts the volumes if necessary (MOUNT_DISK env var) and starts the services.
+
+
+## `mount.sh`
+
+This file must be executed as root. Its only responsibiliy is to mount the MOUNT_DISK volume to the CONTENT_SERVER_STORAGE folder if necessary.
