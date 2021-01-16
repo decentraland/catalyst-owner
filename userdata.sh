@@ -44,16 +44,18 @@ until docker-compose version; do
   sleep 10
 done
 
+WD=$(pwd)
+
 {
   # configure crontab to run on startup
-  echo "@reboot cd $(pwd) && ./bootstrap.sh 2>&1 | logger -t catalyst-owner-bootstrap"
+  echo "@reboot (cd ${WD} && ${WD}/bootstrap.sh 2>&1) | logger -t catalyst-owner-bootstrap"
 
   # and to update every 5 minutes
-  echo "*/5 * * * * cd $(pwd) && ./.cron 2>&1 | logger -t catalyst-owner-cron"
+  echo "*/5 * * * * (cd ${WD} && ${WD}/.cron 2>&1) | logger -t catalyst-owner-cron"
 } > .cron
 
-chown ubuntu:ubuntu "$(pwd)/.cron"
-crontab -u ubuntu "$(pwd)/.cron"
+chown ubuntu:ubuntu "${WD}/.cron"
+crontab -u ubuntu "${WD}/.cron"
 
 # reboot to verify everyting is OK
 sudo reboot
