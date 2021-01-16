@@ -22,4 +22,4 @@ until mount | grep /opt/ebs; do
 done
 
 echo "Setting up automatic mounting of EBS volume..."
-blkid | grep xvdf | awk '{print $2}' | sed s/\"//g | awk '{print $1" "'$CONTENT_SERVER_STORAGE'"  xfs  defaults,nofail  0  2"}' | cat >> /etc/fstab
+blkid | grep xvdf | awk '{print $2}' | sed s/\"//g | awk '{print $1" '$CONTENT_SERVER_STORAGE'  xfs  defaults,nofail  0  2"}' | cat >> /etc/fstab
