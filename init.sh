@@ -197,6 +197,7 @@ fi
 # Define defaults
 DOCKER_TAG=${DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
+SLEEP_TIME=${SLEEP_TIME:-5}
 
 echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
@@ -205,7 +206,7 @@ echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
 echo -n " - ETH_NETWORK:             " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
 echo -n " - REGENERATE:              " ; echo -e "\033[33m ${REGENERATE} \033[39m"
 echo ""
-echo "Starting in 5 seconds... " && sleep 5
+echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
 # Check if docker compose is installed
 if ! [ -x "$(command -v docker-compose)" ]; then

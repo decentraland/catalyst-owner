@@ -27,6 +27,7 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
           } >> .env
         fi
 
+        export SLEEP_TIME=0
         bash ./init.sh
 
         EXIT_CODE=$?
