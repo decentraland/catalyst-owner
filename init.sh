@@ -70,6 +70,21 @@ leCertEmit () {
             *) email_arg="--email $EMAIL" ;;
         esac
 
+        # wait until the server responds
+        serverAlive=10
+        until [ $serverAlive -gt 1 ]; do
+          echo "Checking server liveness: ${CATALYST_URL}"
+          statusCode=$(curl -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk "{'print $2'}" | bc)
+          echo ">> statusCode: ${statusCode} returnCode: $?"
+          if [ $statusCode -lt 500 ]; then
+            serverAlive=0
+            echo ">> Success"
+          else
+            ((serverAlive=serverAlive+1))
+            echo ">> waiting..."
+          fi
+          sleep 6
+        done
 
         docker-compose run --rm --entrypoint "\
             certbot certonly --webroot -w /var/www/certbot \
