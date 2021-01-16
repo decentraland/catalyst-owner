@@ -15,8 +15,9 @@ else
   resize2fs /dev/xvdf
 fi
 
-until mount /dev/xvdf "${CONTENT_SERVER_STORAGE}"; do
-  echo "Failed mounting volume; retrying in 10 seconds..."
+until mount | grep /opt/ebs; do
+  echo "Tryint to mount ${CONTENT_SERVER_STORAGE}.."
+  mount /dev/xvdf "${CONTENT_SERVER_STORAGE}";
   sleep 10
 done
 
