@@ -20,7 +20,6 @@ if [ "$MOUNT_DISK" ]; then
     mkfs.xfs "$MOUNT_DISK"
   else
     xfs_growfs "$MOUNT_DISK"
-    resize2fs "$MOUNT_DISK"
   fi
 
   echo "Tryint to mount $MOUNT_DISK to ${CONTENT_SERVER_STORAGE}.."
