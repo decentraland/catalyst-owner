@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 
-if [ -f .env-cron ]; then
-  source .env-cron
+if ! [ -f ".env-cron" ]; then
+  echo 'Warning: .env-cron does not exist'
+else
+  source ".env-cron"
 fi
 
 git config pull.rebase true
