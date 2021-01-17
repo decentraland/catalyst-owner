@@ -13,7 +13,10 @@ MOUNT_DISK=${MOUNT_DISK:-}
 
 # mount the disk $MOUNT_DISK to $CONTENT_SERVER_STORAGE
 if [ "$MOUNT_DISK" ]; then
-  if ! fsck.xfs -n "$MOUNT_DISK"; then
+
+  # format if no XFS filesystem
+  file -s "$MOUNT_DISK" | grep -o XFS
+  if [ $? -ne 0 ]; then
     mkfs.xfs "$MOUNT_DISK"
   else
     resize2fs "$MOUNT_DISK"
