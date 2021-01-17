@@ -19,6 +19,7 @@ if [ "$MOUNT_DISK" ]; then
   if [ $? -ne 0 ]; then
     mkfs.xfs "$MOUNT_DISK"
   else
+    xfs_growfs "$MOUNT_DISK"
     resize2fs "$MOUNT_DISK"
   fi
 
