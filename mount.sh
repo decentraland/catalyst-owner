@@ -28,7 +28,7 @@ if [ "$MOUNT_DISK" ]; then
   backupFile="/etc/fstab.$(date +%s)"
 
   # find the mounted disk in fstab
-  presentInFstab=$(cat /etc/fstab | grep -o "$MOUNT_DISK")
+  presentInFstab=$(cat /etc/fstab | grep -o "$CONTENT_SERVER_STORAGE")
 
   if [ ! "$presentInFstab" ]; then
     echo "Configuring fstab"
