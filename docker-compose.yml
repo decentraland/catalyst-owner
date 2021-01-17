@@ -58,6 +58,8 @@ services:
       - .env-advanced
       - .env-database-admin
       - .env-database-content
+    depends_on:
+      - postgress
     ports:
       - "6969:6969"
     restart: always
