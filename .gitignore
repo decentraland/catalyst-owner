@@ -3,5 +3,7 @@ local/certbot/conf/**
 local/nginx/conf.d/00-katalyst.conf
 .env-database-*
 .env
+.env-cron
 .env-advanced
 .cron
+.crontab

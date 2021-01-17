@@ -51,10 +51,10 @@ WD=$(pwd)
 
   # and to update every 5 minutes
   echo "*/5 * * * * (cd ${WD} && ${WD}/crontab.sh 2>&1) | logger -t catalyst-owner-cron"
-} > .cron
+} > .crontab
 
-chown ubuntu:ubuntu "${WD}/.cron"
-crontab -u ubuntu "${WD}/.cron"
+chown ubuntu:ubuntu "${WD}/.crontab"
+crontab -u ubuntu "${WD}/.crontab"
 
 # reboot to verify everyting is OK
 sudo reboot
