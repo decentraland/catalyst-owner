@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This file is automatically configured by `userdata.sh` to run when
+# the instance starts.
+
+# It mounts the volumes if necessary (MOUNT_DISK env var) and starts the services.
+
 source .env
 
 set -u # break on unbound variables

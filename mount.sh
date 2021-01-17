@@ -45,16 +45,16 @@ if [ "$MOUNT_DISK" ]; then
     | cat >> /etc/fstab
 
     diff $backupFile /etc/fstab
-  fi
 
-  # unmount
-  umount "$MOUNT_DISK"
-  mount -a
+    # unmount
+    umount "$MOUNT_DISK"
+    mount -a
 
-  # this should work
-  mount | grep "${CONTENT_SERVER_STORAGE}"
+    # this should work
+    mount | grep "${CONTENT_SERVER_STORAGE}"
 
-  if [ $? -ne 0 ]; then
-    echo 'ERROR it was not possible to configure automatic mounting of the disk'
+    if [ $? -ne 0 ]; then
+      echo 'ERROR it was not possible to configure automatic mounting of the disk'
+    fi
   fi
 fi
