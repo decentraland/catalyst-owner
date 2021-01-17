@@ -9,8 +9,7 @@ apt-get -qq install apt-transport-https ca-certificates curl software-properties
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 
-# try to update couple of times
-apt-get -qq update || sleep 5 && apt-get update || sleep 5 && apt-get update || sleep 5 && apt-get update || sleep 5 && apt-get update
+apt-get -qq update
 apt-get -qq upgrade -y
 
 # install docker and utils
