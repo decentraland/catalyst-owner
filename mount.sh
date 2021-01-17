@@ -13,8 +13,8 @@ MOUNT_DISK=${MOUNT_DISK:-}
 
 # mount the disk $MOUNT_DISK to $CONTENT_SERVER_STORAGE
 if [ "$MOUNT_DISK" ]; then
-  if ! fsck.ext4 -n "$MOUNT_DISK"; then
-    mkfs.ext4 "$MOUNT_DISK"
+  if ! fsck.xfs -n "$MOUNT_DISK"; then
+    mkfs.xfs "$MOUNT_DISK"
   else
     resize2fs "$MOUNT_DISK"
   fi
@@ -28,9 +28,9 @@ if [ "$MOUNT_DISK" ]; then
   backupFile="/etc/fstab.$(date +%s)"
 
   # find the mounted disk in fstab
-  cat /etc/fstab | grep -o "$MOUNT_DISK"
+  presentInFstab=$(cat /etc/fstab | grep -o "$MOUNT_DISK")
 
-  if [ $? -ne 0 ]; then
+  if [ ! "$presentInFstab" ]; then
     echo "Configuring fstab"
 
     echo "Backing up to $backupFile"
@@ -45,16 +45,16 @@ if [ "$MOUNT_DISK" ]; then
     | cat >> /etc/fstab
 
     diff $backupFile /etc/fstab
+  fi
 
-    # unmount
-    umount "$MOUNT_DISK"
-    mount -a
+  # unmount
+  umount "$MOUNT_DISK"
+  mount -a
 
-    # this should work
-    mount | grep "${CONTENT_SERVER_STORAGE}"
+  # this should work
+  mount | grep "${CONTENT_SERVER_STORAGE}"
 
-    if [ $? -ne 0 ]; then
-      echo 'ERROR it was not possible to configure automatic mounting of the disk'
-    fi
+  if [ $? -ne 0 ]; then
+    echo 'ERROR it was not possible to configure automatic mounting of the disk'
   fi
 fi
