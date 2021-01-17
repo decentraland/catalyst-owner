@@ -12,7 +12,7 @@ mkdir -p "${CONTENT_SERVER_STORAGE}"
 MOUNT_DISK=${MOUNT_DISK:-}
 
 # mount the disk $MOUNT_DISK to $CONTENT_SERVER_STORAGE
-if [ "$MOUNT_DISK" -ne "" ]; then
+if [ "$MOUNT_DISK" ]; then
   if ! fsck.ext4 -n "$MOUNT_DISK"; then
     mkfs.ext4 "$MOUNT_DISK"
   else
