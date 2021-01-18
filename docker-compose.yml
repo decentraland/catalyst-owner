@@ -63,6 +63,7 @@ services:
     ports:
       - "6969:6969"
     restart: always
+    shm_size: '1gb'
     volumes:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
