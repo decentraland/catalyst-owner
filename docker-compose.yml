@@ -38,6 +38,7 @@ services:
     expose:
       - ${POSTGRES_PORT:-5432}
     restart: always
+    shm_size: 512mb
     volumes:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
