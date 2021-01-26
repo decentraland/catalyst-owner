@@ -11,9 +11,15 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
 
     if [ -n "$MSG" ]; then
       export DOCKER_TAG
+      export TARGETED_REGION
       export EXIT_CODE
 
       DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
+      TARGETED_REGION=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .region);
+
+      if [ -n "$TARGETED_REGION" ] && [ "$DEPLOYMENT_REGION" != "$TARGETED_REGION" ]; then
+       exit 0
+      fi
 
       if [ -n "$DOCKER_TAG" ]; then
         if ! [ -f ".env" ]; then
