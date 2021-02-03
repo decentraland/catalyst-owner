@@ -5,6 +5,9 @@ export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
 
+# ensure we have wide path options to run in different environments
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+
 ####
 # Functions
 #####
@@ -61,12 +64,31 @@ leCertEmit () {
         domain_args="$domain_args -d ${nginx_url}"
         staging_arg="--staging"
 
+        if [ "$CATALYST_OWNER_CHANNEL" = "stable" ]; then
+          staging_arg=""
+        fi
+
         # Select appropriate EMAIL arg
         case "$EMAIL" in
             "") email_arg="--register-unsafely-without-email" ;;
             *) email_arg="--email $EMAIL" ;;
         esac
 
+        # wait until the server responds
+        serverAlive=10
+        until [ $serverAlive -lt 1 ]; do
+          echo "Checking server liveness: ${CATALYST_URL}"
+          statusCode=$(curl -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk {'print $2'} | bc)
+          echo ">> statusCode: ${statusCode} returnCode: $?"
+          if [ "$statusCode" -lt 500 ]; then
+            serverAlive=0
+            echo ">> Success"
+          else
+            ((serverAlive=serverAlive+1))
+            echo ">> Waiting..."
+            sleep 6
+          fi
+        done
 
         docker-compose run --rm --entrypoint "\
             certbot certonly --webroot -w /var/www/certbot \
@@ -194,14 +216,16 @@ fi
 # Define defaults
 DOCKER_TAG=${DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
+SLEEP_TIME=${SLEEP_TIME:-5}
 
+echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
 echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
 echo -n " - ETH_NETWORK:             " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
 echo -n " - REGENERATE:              " ; echo -e "\033[33m ${REGENERATE} \033[39m"
 echo ""
-echo "Starting in 5 seconds... " && sleep 5
+echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
 # Check if docker compose is installed
 if ! [ -x "$(command -v docker-compose)" ]; then
@@ -248,8 +272,8 @@ fi
 # If the server is localhost, do not enable https
 # Setup the nginx conf file with plain http
 # else, create new certs
-export nginx_url=`echo "${CATALYST_URL##*/}"`
-if [ ${CATALYST_URL} != "http://localhost" ]; then
+export nginx_url="$(echo "${CATALYST_URL##*/}")"
+if [ "${CATALYST_URL}" != "http://localhost" ]; then
     echo "## Using HTTPS."
     echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
     sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
@@ -284,7 +308,7 @@ else
 fi
 
 
-matches=`cat ${nginx_server_file} | grep ${nginx_url}  | wc -l`
+matches=$(cat ${nginx_server_file} | grep ${nginx_url}  | wc -l)
 if test $matches -eq 0; then
   printMessage failed
   echo "Failed to perform changes on nginx server file, no changes found. Look into ${nginx_server_file} for more information"
