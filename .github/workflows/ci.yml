@@ -4,15 +4,20 @@ on: push
 jobs:
   test-localhost:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        catalyst_url:
+          - http://localhost
+          - https://localhost
     steps:
       - uses: actions/checkout@v2
-      - name: create env files
+      - name: create env files ${{ matrix.catalyst_url }}
         run: |
           mkdir -p /opt/catalyst-storage
           cat <<EOF > .env
             EMAIL=developers@decentraland.org
             CONTENT_SERVER_STORAGE=/opt/catalyst-storage
-            CATALYST_URL=http://localhost
+            CATALYST_URL=${{ matrix.catalyst_url }}
           EOF
           cat <<EOF > .env-advanced
             ETH_NETWORK=ropsten
@@ -39,20 +44,13 @@ jobs:
             cat $d
           done
 
-      # - name: print host
-      #   run: |
-      #     hostip=$(ip route show | awk '/default/ {print $3}')
-      #     export BASE_URL="http://${hostip}:80"
-      #     echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
-      #     echo $BASE_URL
-
       - name: sleep until server answers, timeout 1m
         timeout-minutes: 1
         run: |
           docker container ls
           docker-compose logs
 
-          until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
             docker container ls
             sleep 10
@@ -60,11 +58,11 @@ jobs:
 
       - name: test system_metrics auth, must be 401
         if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 401
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 401
 
       - name: test comms_metrics auth, must be 401
         if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
 
       - name: add a user to enable system metrics
         if: ${{ always() }}
@@ -72,11 +70,11 @@ jobs:
 
       - name: test system_metrics auth, must be 200
         if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user:test-password
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 200 -u test-user:test-password
 
       - name: test comms_metrics auth, must be 401 (still)
         if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
 
       - name: add a user to enable comms metrics
         if: ${{ always() }}
@@ -84,14 +82,14 @@ jobs:
 
       - name: test comms_metrics auth, must be 200
         if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user2:test-password2
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
 
       - name: smoke test endpoints
         if: ${{ always() }}
         run: |
-          ./.github/workflows/check-http-status-code.sh http://localhost/lambdas/status 200
-          ./.github/workflows/check-http-status-code.sh http://localhost/comms/status 200
-          ./.github/workflows/check-http-status-code.sh http://localhost/content/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
       - name: run stop.sh
         if: ${{ always() }}
