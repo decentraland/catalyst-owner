@@ -8,7 +8,7 @@ jobs:
       matrix:
         catalyst_url:
           - http://localhost
-          - https://localhost
+          - https://localhost.example.com
     steps:
       - uses: actions/checkout@v2
       - name: create env files ${{ matrix.catalyst_url }}
