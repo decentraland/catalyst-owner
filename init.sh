@@ -235,7 +235,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 if ! [ -f ".env-database-admin" ]; then
-    ROOT_PASSWORD="p$(openssl rand -hex 18)"
+    ROOT_PASSWORD="$(openssl rand -hex 8)"
     echo "POSTGRES_USER=postgres" > .env-database-admin
     echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
     echo "POSTGRES_DB=postgres" >> .env-database-admin
@@ -246,8 +246,8 @@ fi
 source ".env-database-admin"
 
 if ! [ -f ".env-database-content" ]; then
-    USER="u$(openssl rand -hex 18)"
-    PASSWORD="p$(openssl rand -hex 18)"
+    USER="contentserver"
+    PASSWORD="$(openssl rand -hex 8)"
     echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
     echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
     echo "POSTGRES_CONTENT_DB=content" >> .env-database-content
