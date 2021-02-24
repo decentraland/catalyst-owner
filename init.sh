@@ -78,7 +78,7 @@ leCertEmit () {
         serverAlive=10
         until [ $serverAlive -lt 1 ]; do
           echo "Checking server liveness: ${CATALYST_URL}"
-          statusCode=$(curl -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk {'print $2'} | bc)
+          statusCode=$(curl --insecure -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk {'print $2'} | bc)
           echo ">> statusCode: ${statusCode} returnCode: $?"
           if [ "$statusCode" -lt 500 ]; then
             serverAlive=0
