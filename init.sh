@@ -246,7 +246,7 @@ fi
 source ".env-database-admin"
 
 if ! [ -f ".env-database-content" ]; then
-    USER="contentserver"
+    USER="contentserver-$(openssl rand -hex 4)"
     PASSWORD="$(openssl rand -hex 8)"
     echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
     echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
