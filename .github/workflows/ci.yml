@@ -18,8 +18,8 @@ jobs:
             REGENERATE=0
           EOF
       - name: run init.sh
-        run: init.sh
+        run: ./init.sh
       - name: wait 10s
         run: sleep 10
       - name: run stop.sh
-        run: stop.sh
+        run: ./stop.sh
