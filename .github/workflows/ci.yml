@@ -88,7 +88,7 @@ jobs:
         if: ${{ always() }}
         run: |
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
-          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
       - name: run stop.sh
