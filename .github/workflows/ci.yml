@@ -17,15 +17,23 @@ jobs:
           cat <<EOF > .env-advanced
             ETH_NETWORK=ropsten
             REGENERATE=0
+            LOG_LEVEL=debug
             METRICS=true
           EOF
       - name: run init.sh
         run: ./init.sh
 
+      - name: print host
+        run: |
+          hostip=$(ip route show | awk '/default/ {print $3}')
+          export BASE_URL="http://${hostip}:80"
+          echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
+          echo $BASE_URL
+
       - name: sleep until server answers, timeout 1m
         timeout-minutes: 1
         run: |
-          until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
+          until ./.github/workflows/check-http-status-code.sh {{env.BASE_URL}} 200; do
             echo "Retrying in 2 seconds..."
             sleep 2
           done
