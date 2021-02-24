@@ -234,7 +234,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-if ! [ -f "openssl rand -base64 32.env-database-admin" ]; then
+if ! [ -f ".env-database-admin" ]; then
     ROOT_PASSWORD=$(openssl rand -hex 18)
     echo "POSTGRES_USER=postgres" > .env-database-admin
     echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin

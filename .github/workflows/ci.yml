@@ -23,6 +23,13 @@ jobs:
       - name: run init.sh
         run: ./init.sh
 
+      - name: cat .env*
+        run: |
+          for d in .env* ; do
+            echo "> printing $d"
+            cat $d
+          done
+
       # - name: print host
       #   run: |
       #     hostip=$(ip route show | awk '/default/ {print $3}')
