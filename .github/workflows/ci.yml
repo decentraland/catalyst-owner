@@ -53,9 +53,9 @@ jobs:
           docker-compose logs
 
           until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
-            echo "Retrying in 2 seconds..."
+            echo "Retrying in 10 seconds..."
             docker container ls
-            sleep 2
+            sleep 10
           done
 
       - name: test system_metrics auth, must be 401
@@ -99,4 +99,7 @@ jobs:
 
       - name: print syslog
         if: ${{ always() }}
-        run: tail -n 5000 /var/log/syslog
+        run: |
+          docker container ls
+          docker-compose logs
+          tail -n 5000 /var/log/syslog
