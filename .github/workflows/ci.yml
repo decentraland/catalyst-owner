@@ -8,7 +8,7 @@ jobs:
       matrix:
         catalyst_url:
           - http://localhost
-          - https://localhost.decentraland.services
+          # - https://localhost.decentraland.services
     steps:
       - uses: actions/checkout@v2
       - name: create env files ${{ matrix.catalyst_url }}
@@ -44,15 +44,42 @@ jobs:
             cat $d
           done
 
-      - name: sleep until server answers, timeout 1m
-        timeout-minutes: 1
+      - name: wait for nginx
+        timeout-minutes: 2
         run: |
           docker container ls
           docker-compose logs
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
-            docker container ls
+            docker-compose logs nginx
+            sleep 10
+          done
+
+      - name: wait for comms
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs comms-server
+            sleep 10
+          done
+
+      - name: wait for content
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs content-server
+            sleep 10
+          done
+
+      - name: wait for lambdas
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs lambdas
             sleep 10
           done
 
@@ -76,6 +103,7 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
 
+
       - name: add a user to enable comms metrics
         if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
@@ -83,15 +111,6 @@ jobs:
       - name: test comms_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
-
-      - name: wait for content
-        timeout-minutes: 2
-        run: |
-          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
-            echo "Retrying in 10 seconds..."
-            docker-compose logs content-server
-            sleep 10
-          done
 
       - name: smoke test endpoints
         if: ${{ always() }}
