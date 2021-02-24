@@ -4,7 +4,7 @@ URL=$1; shift
 EXPECTED_STATUS=$1; shift
 
 # STATUSCODE=$(docker run --network container:nginx curlimages/curl --silent -v $* --output /dev/stderr --write-out "%{http_code}" "$URL")
-STATUSCODE=$(curl --silent -v $* --output /dev/stderr --write-out "%{http_code}" "$URL")
+STATUSCODE=$(curl --insecure --silent -v $* --output /dev/stderr --write-out "%{http_code}" "$URL")
 
 if [ $? -ne 0 ]; then
   echo "❌ Curl failed"
