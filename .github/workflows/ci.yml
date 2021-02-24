@@ -20,6 +20,10 @@ jobs:
             LOG_LEVEL=debug
             METRICS=true
           EOF
+
+      - name: replacing syslog for local driver
+        run: sed "s/\syslog/local/g" docker-compose.yml > docker-compose.yml
+
       - name: run init.sh
         run: ./init.sh
 
@@ -41,7 +45,8 @@ jobs:
         timeout-minutes: 1
         run: |
           docker container ls
-          ./.github/workflows/check-http-status-code.sh http://localhost 200
+          docker-compose logs
+
           until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
             echo "Retrying in 2 seconds..."
             docker container ls
