@@ -28,7 +28,7 @@ services:
       driver: syslog
       options: { tag: comms }
 
-  postgress:
+  postgres:
     image: postgres:12
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
@@ -56,7 +56,7 @@ services:
       - .env-database-admin
       - .env-database-content
     depends_on:
-      - postgress
+      - postgres
     ports:
       - "6969:6969"
     restart: always

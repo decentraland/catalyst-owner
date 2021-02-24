@@ -84,6 +84,15 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
 
+      - name: wait for content
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs content-server
+            sleep 10
+          done
+
       - name: smoke test endpoints
         if: ${{ always() }}
         run: |
