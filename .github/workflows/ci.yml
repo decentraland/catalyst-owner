@@ -25,6 +25,8 @@ jobs:
         run: |
           cp docker-compose.yml docker-compose.yml.bak
           sed "s/syslog/local/g" docker-compose.yml.bak > docker-compose.yml
+          cp docker-compose.yml docker-compose.yml.bak
+          sed "s/options: {.*}//g" docker-compose.yml.bak > docker-compose.yml
           git diff docker-compose.yml
 
       - name: run init.sh
