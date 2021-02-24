@@ -17,10 +17,39 @@ jobs:
           cat <<EOF > .env-advanced
             ETH_NETWORK=ropsten
             REGENERATE=0
+            METRICS=true
           EOF
       - name: run init.sh
         run: ./init.sh
-      - name: wait 10s
-        run: sleep 10
+
+      - name: test system_metrics auth, must be 401
+        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 401
+
+      - name: test comms_metrics auth, must be 401
+        run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
+
+      - name: add a user to enable system metrics
+        run: htpasswd -bc local/nginx/auth/.htpasswd-cadvisor test-user test-password
+
+      - name: test system_metrics auth, must be 200
+        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user:test-password
+
+      - name: test comms_metrics auth, must be 401 (still)
+        run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
+
+      - name: add a user to enable comms metrics
+        run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
+
+      - name: test comms_metrics auth, must be 200
+        run: |
+          ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user2:test-password2
+
+      - name: smoke test endpoints
+        run: |
+          ./.github/workflows/check-http-status-code.sh http://localhost/lambdas/status 200
+          ./.github/workflows/check-http-status-code.sh http://localhost/comms/status 200
+          ./.github/workflows/check-http-status-code.sh http://localhost/content/status 200
+
       - name: run stop.sh
+        if: ${{ always() }}
         run: ./stop.sh
