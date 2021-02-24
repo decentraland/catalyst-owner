@@ -8,9 +8,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: create env files
         run: |
+          mkdir -p /opt/catalyst-storage
           cat <<EOF > .env
             EMAIL=developers@decentraland.org
-            CONTENT_SERVER_STORAGE=/opt/catalyst
+            CONTENT_SERVER_STORAGE=/opt/catalyst-storage
             CATALYST_URL=http://localhost
           EOF
           cat <<EOF > .env-advanced
