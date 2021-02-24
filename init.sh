@@ -234,10 +234,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-if ! [ -f ".env-database-admin" ]; then
-    set -e
-    ROOT_PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    set +e
+if ! [ -f "openssl rand -base64 32.env-database-admin" ]; then
+    ROOT_PASSWORD=$(openssl rand -hex 18)
     echo "POSTGRES_USER=postgres" > .env-database-admin
     echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
     echo "POSTGRES_DB=postgres" >> .env-database-admin
@@ -248,10 +246,8 @@ fi
 source ".env-database-admin"
 
 if ! [ -f ".env-database-content" ]; then
-    set -e
-    USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
-    PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    set +e
+    USER=$(openssl rand -hex 18)
+    PASSWORD=$(openssl rand -hex 18)
     echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
     echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
     echo "POSTGRES_CONTENT_DB=content" >> .env-database-content
