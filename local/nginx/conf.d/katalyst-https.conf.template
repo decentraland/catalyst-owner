@@ -12,6 +12,18 @@ upstream lambdas {
     server lambdas:7070;
 }
 
+upstream comms_metrics {
+    server comms-server:9090;
+}
+
+upstream content_metrics {
+    server content-server:9090;
+}
+
+upstream system_metrics {
+    server cadvisor:8080;
+}
+
 server {
     listen 80;
     server_name $katalyst_host;
@@ -40,8 +52,8 @@ server {
         allow all;
     }
 
-    location ~ ^/content(.*)$ {
-        proxy_pass http://content-server$1$is_args$args;
+    location ~ ^/content/(.*)$ {
+        proxy_pass http://content-server/$1$is_args$args;
         proxy_pass_request_headers  on;
         proxy_connect_timeout       600;
         proxy_send_timeout          600;
@@ -49,16 +61,31 @@ server {
         send_timeout                600;
     }
 
-    location  ~ ^/comms(.*)$ {
-        proxy_pass http://comms-server$1$is_args$args;
+    location  ~ ^/comms/(.*)$ {
+        proxy_pass http://comms-server/$1$is_args$args;
         proxy_pass_request_headers  on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-	    proxy_set_header Upgrade $http_upgrade;
-    	proxy_set_header Connection "Upgrade";
+	      proxy_set_header Upgrade $http_upgrade;
+    	  proxy_set_header Connection "Upgrade";
     }
 
-    location  ~ ^/lambdas(.*)$ {
-        proxy_pass http://lambdas$1$is_args$args;
+    location  ~ ^/lambdas/(.*)$ {
+        proxy_pass http://lambdas/$1$is_args$args;
+        proxy_pass_request_headers  on;
+    }
+
+    location /comms_metrics {
+        proxy_pass http://comms_metrics/metrics;
+        proxy_pass_request_headers  on;
+    }
+
+    location /content_metrics {
+        proxy_pass http://content_metrics/metrics;
+        proxy_pass_request_headers  on;
+    } 
+
+    location /system_metrics {
+        proxy_pass http://system_metrics/metrics;
         proxy_pass_request_headers  on;
     }
 

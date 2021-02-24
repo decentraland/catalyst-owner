@@ -26,9 +26,7 @@ services:
     restart: always
     logging:
       driver: syslog
-      options: {
-        tag: comms
-      }
+      options: { tag: comms }
 
   postgress:
     image: postgres:12
@@ -43,9 +41,7 @@ services:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
       driver: syslog
-      options: {
-        tag: postgres
-      }
+      options: { tag: postgres }
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -68,9 +64,7 @@ services:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
       driver: syslog
-      options: {
-        tag: content-server
-      }
+      options: { tag: content-server }
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -87,11 +81,23 @@ services:
       - "7070:7070"
     logging:
       driver: syslog
-      options: {
-        tag: lambdas
-      }
+      options: { tag: lambdas }
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
+
+  cadvisor:
+    image: gcr.io/google_containers/cadvisor:v0.35.0
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    depends_on:
+      - comms-server
+      - content-server
+      - lambdas
 
   nginx:
     image: nginx:1.15-alpine
@@ -108,13 +114,12 @@ services:
     restart: always
     depends_on:
       - lambdas
+      - cadvisor
       - content-server
       - comms-server
     logging:
       driver: syslog
-      options: {
-        tag: nginx
-      }
+      options: { tag: nginx }
 
   certbot:
     image: certbot/certbot
@@ -125,6 +130,4 @@ services:
       - ./local/certbot/www:/var/www/certbot
     logging:
       driver: syslog
-      options: {
-        tag: certbot
-      }
+      options: { tag: certbot }
