@@ -23,7 +23,7 @@ jobs:
 
       - name: replacing syslog for default driver and print diff
         run: |
-          sed "s/\driver: syslog//g" docker-compose.yml > docker-compose.yml
+          sed -i.bak "s/\driver: syslog//g" docker-compose.yml > docker-compose.yml
           git diff docker-compose.yml
 
       - name: run init.sh
