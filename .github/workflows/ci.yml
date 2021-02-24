@@ -22,29 +22,44 @@ jobs:
       - name: run init.sh
         run: ./init.sh
 
+      - name: sleep until server answers, timeout 1m
+        timeout-minutes: 1
+        run: |
+          until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
+            echo "Retrying in 2 seconds..."
+            sleep 2
+          done
+
       - name: test system_metrics auth, must be 401
+        if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 401
 
       - name: test comms_metrics auth, must be 401
+        if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
 
       - name: add a user to enable system metrics
+        if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-cadvisor test-user test-password
 
       - name: test system_metrics auth, must be 200
+        if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user:test-password
 
       - name: test comms_metrics auth, must be 401 (still)
+        if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh http://localhost/comms_metrics 401
 
       - name: add a user to enable comms metrics
+        if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
 
       - name: test comms_metrics auth, must be 200
-        run: |
-          ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user2:test-password2
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh http://localhost/system_metrics 200 -u test-user2:test-password2
 
       - name: smoke test endpoints
+        if: ${{ always() }}
         run: |
           ./.github/workflows/check-http-status-code.sh http://localhost/lambdas/status 200
           ./.github/workflows/check-http-status-code.sh http://localhost/comms/status 200
