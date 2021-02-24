@@ -42,6 +42,8 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh http://localhost 200; do
             echo "Retrying in 2 seconds..."
+            docker compose ls
+            docker container ls
             sleep 2
           done
 
