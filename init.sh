@@ -255,6 +255,24 @@ fi
 
 source ".env-database-content"
 
+if [ -z "$POSTGRES_CONTENT_PASSWORD" ]; then
+  echo "Empty POSTGRES_CONTENT_PASSWORD"
+  printMessage failed
+  exit 1
+fi
+
+if [ -z "$POSTGRES_CONTENT_USER" ]; then
+  echo "Empty POSTGRES_CONTENT_USER"
+  printMessage failed
+  exit 1
+fi
+
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  echo "Empty POSTGRES_PASSWORD"
+  printMessage failed
+  exit 1
+fi
+
 docker pull decentraland/katalyst:${DOCKER_TAG}
 if test $? -ne 0; then
   echo -n "Failed to stop nginx! "

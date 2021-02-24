@@ -68,3 +68,6 @@ jobs:
       - name: run stop.sh
         if: ${{ always() }}
         run: ./stop.sh
+
+      - name: print syslog
+        run: tail -n 5000 /var/log/syslog
