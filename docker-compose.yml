@@ -24,9 +24,9 @@ services:
     volumes:
       - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
-    # logging:
-      # driver: syslog
-      # options: { tag: comms }
+    logging:
+      driver: syslog
+      options: { tag: comms }
 
   postgres:
     image: postgres:12
@@ -39,9 +39,9 @@ services:
     shm_size: 512mb
     volumes:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
-    # logging:
-      # driver: syslog
-      # options: { tag: postgres }
+    logging:
+      driver: syslog
+      options: { tag: postgres }
 
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter
@@ -54,9 +54,9 @@ services:
     depends_on:
       - postgres
     shm_size: 512mb
-    # logging:
-      # driver: syslog
-      # options: { tag: postgres }
+    logging:
+      driver: syslog
+      options: { tag: postgres }
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -77,9 +77,9 @@ services:
     restart: always
     volumes:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
-    # logging:
-      # driver: syslog
-      # options: { tag: content-server }
+    logging:
+      driver: syslog
+      options: { tag: content-server }
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -94,9 +94,9 @@ services:
       - .env-advanced
     ports:
       - "7070:7070"
-    # logging:
-      # driver: syslog
-      # options: { tag: lambdas }
+    logging:
+      driver: syslog
+      options: { tag: lambdas }
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
@@ -135,9 +135,9 @@ services:
       - cadvisor
       - content-server
       - comms-server
-    # logging:
-      # driver: syslog
-      # options: { tag: nginx }
+    logging:
+      driver: syslog
+      options: { tag: nginx }
 
   certbot:
     image: certbot/certbot
@@ -146,6 +146,6 @@ services:
     volumes:
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
-    # logging:
-      # driver: syslog
-      # options: { tag: certbot }
+    logging:
+      driver: syslog
+      options: { tag: certbot }
