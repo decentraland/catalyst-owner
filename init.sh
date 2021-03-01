@@ -262,9 +262,11 @@ source ".env-database-metrics"
 if ! [ -f ".env-database-content" ]; then
     USER="cs$(openssl rand -hex 4)"
     PASSWORD="$(openssl rand -hex 8)"
-    echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
-    echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
-    echo "POSTGRES_CONTENT_DB=content" >> .env-database-content
+    {
+      echo "POSTGRES_CONTENT_USER=${USER}"
+      echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}"
+      echo "POSTGRES_CONTENT_DB=content"
+    } > .env-database-content
 fi
 
 source ".env-database-content"
