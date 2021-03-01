@@ -249,7 +249,7 @@ source ".env-database-admin"
 
 if ! [ -f ".env-database-metrics" ]; then
     {
-      echo "DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${ROOT_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      echo "DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
       echo "DATA_SOURCE_URI=${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
       echo "DATA_SOURCE_USER=${POSTGRES_USER}"
       echo "DATA_SOURCE_PASS=${POSTGRES_PASSWORD}"
