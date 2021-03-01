@@ -43,6 +43,21 @@ services:
       driver: syslog
       options: { tag: postgres }
 
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    env_file:
+      - .env-database-metrics
+    expose:
+      - 9187
+    restart: always
+    depends_on:
+      - postgres
+    shm_size: 512mb
+    logging:
+      driver: syslog
+      options: { tag: postgres }
+
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
     working_dir: /app

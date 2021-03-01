@@ -236,14 +236,28 @@ fi
 
 if ! [ -f ".env-database-admin" ]; then
     ROOT_PASSWORD="$(openssl rand -hex 8)"
-    echo "POSTGRES_USER=postgres" > .env-database-admin
-    echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
-    echo "POSTGRES_DB=postgres" >> .env-database-admin
-    echo "POSTGRES_HOST=postgres" >> .env-database-admin
-    echo "POSTGRES_PORT=5432" >> .env-database-admin
+    {
+      echo "POSTGRES_USER=postgres"
+      echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}"
+      echo "POSTGRES_DB=postgres"
+      echo "POSTGRES_HOST=postgres"
+      echo "POSTGRES_PORT=5432"
+    } > .env-database-admin
 fi
 
 source ".env-database-admin"
+
+if ! [ -f ".env-database-metrics" ]; then
+    {
+      echo "DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${ROOT_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      echo "DATA_SOURCE_URI=${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      echo "DATA_SOURCE_USER=${POSTGRES_USER}"
+      echo "DATA_SOURCE_PASS=${POSTGRES_PASSWORD}"
+      echo "PG_EXPORTER_AUTO_DISCOVER_DATABASES=${POSTGRES_PASSWORD}"
+    } > .env-database-metrics
+fi
+
+source ".env-database-metrics"
 
 if ! [ -f ".env-database-content" ]; then
     USER="cs$(openssl rand -hex 4)"
