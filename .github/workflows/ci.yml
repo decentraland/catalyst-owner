@@ -93,7 +93,7 @@ jobs:
 
       - name: add a user to enable system metrics
         if: ${{ always() }}
-        run: htpasswd -bc local/nginx/auth/.htpasswd-cadvisor test-user test-password
+        run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
 
       - name: test system_metrics auth, must be 200
         if: ${{ always() }}

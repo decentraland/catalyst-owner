@@ -135,6 +135,7 @@ services:
       - cadvisor
       - content-server
       - comms-server
+      - postgres-exporter
     logging:
       driver: syslog
       options: { tag: nginx }
