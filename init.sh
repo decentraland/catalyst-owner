@@ -253,7 +253,7 @@ if ! [ -f ".env-database-metrics" ]; then
       echo "DATA_SOURCE_URI=${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
       echo "DATA_SOURCE_USER=${POSTGRES_USER}"
       echo "DATA_SOURCE_PASS=${POSTGRES_PASSWORD}"
-      echo "PG_EXPORTER_AUTO_DISCOVER_DATABASES=${POSTGRES_PASSWORD}"
+      echo "PG_EXPORTER_AUTO_DISCOVER_DATABASES=true"
     } > .env-database-metrics
 fi
 
@@ -287,15 +287,15 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
-docker pull decentraland/katalyst:${DOCKER_TAG}
-if test $? -ne 0; then
+docker pull "decentraland/katalyst:${DOCKER_TAG:latest}"
+if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1
 fi
 
 docker-compose stop nginx
-if test $? -ne 0; then
+if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1
