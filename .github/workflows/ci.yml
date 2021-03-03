@@ -103,6 +103,10 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/postgres_metrics 200 -u test-user:test-password
 
+      - name: test node_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
+
       - name: test comms_metrics auth, must be 401 (still)
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
