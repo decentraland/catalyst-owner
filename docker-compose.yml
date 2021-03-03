@@ -48,8 +48,6 @@ services:
     container_name: postgres-exporter
     env_file:
       - .env-database-metrics
-    expose:
-      - 9187
     restart: always
     depends_on:
       - postgres
@@ -61,15 +59,16 @@ services:
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node-exporter
-    command:
-      - '--path.rootfs=/host'
-      - '--web.config=/etc/node_exporter/web-config.yml'
-    network_mode: host
-    pid: host
     restart: unless-stopped
     volumes:
-      - '/:/host:ro'
-      - ./local/node_exporter/web-config.yml:/etc/node_exporter/web-config.yml
+      - '/:/rootfs:ro'
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)"
     logging:
       driver: syslog
       options: { tag: node-exporter }
