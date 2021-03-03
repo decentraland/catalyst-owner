@@ -1,0 +1,9 @@
+# There are several tools out there to generate bcrypt passwords, e.g. htpasswd:
+
+# htpasswd -nBC 10 "" | tr -d ':\n'
+
+# That command will prompt you for a password and output the hashed password,
+# which will look something like: $2y$10$X0h1gDsPszWURQaxFh.zoubFi6DXncSjhoQNJgRrnGs7EsimhC7zG
+
+basic_auth_users:
+  decentraland-crawler: $apr1$f/Lgy/ah$oM33GobBk7lxXbvVhyKm/1
