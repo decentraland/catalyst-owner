@@ -63,13 +63,13 @@ services:
     container_name: node-exporter
     command:
       - '--path.rootfs=/host'
-      # - '--web.config=/etc/node_exporter/web-config.yml'
+      - '--web.config=/etc/node_exporter/web-config.yml'
     network_mode: host
     pid: host
     restart: unless-stopped
     volumes:
       - '/:/host:ro'
-      # - ./local/node_exporter/web-config.yml:/etc/node_exporter/web-config.yml
+      - ./local/node_exporter/web-config.yml:/etc/node_exporter/web-config.yml
     logging:
       driver: syslog
       options: { tag: node-exporter }
