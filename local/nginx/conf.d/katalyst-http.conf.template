@@ -6,6 +6,8 @@ server {
     server_name $katalyst_host;
     client_max_body_size 256M;
 
+    root /etc/nginx/html;
+
     include include/routes.conf;
     include include/metrics.conf;
 }
