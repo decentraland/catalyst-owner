@@ -78,7 +78,7 @@ leCertEmit () {
         serverAlive=10
         until [ $serverAlive -lt 1 ]; do
           echo "Checking server liveness: ${CATALYST_URL}"
-          statusCode=$(curl -I -s --http1.1 "${CATALYST_URL}" | grep HTTP/1.1 | awk {'print $2'} | bc)
+          statusCode=$(curl --insecure -I -vv -s --http1.1 --output /dev/stderr --write-out "%{http_code}" "${CATALYST_URL}")
           echo ">> statusCode: ${statusCode} returnCode: $?"
           if [ "$statusCode" -lt 500 ]; then
             serverAlive=0
@@ -235,35 +235,69 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 if ! [ -f ".env-database-admin" ]; then
-    ROOT_PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    echo "POSTGRES_USER=postgres" > .env-database-admin
-    echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}" >> .env-database-admin
-    echo "POSTGRES_DB=postgres" >> .env-database-admin
-    echo "POSTGRES_HOST=postgres" >> .env-database-admin
-    echo "POSTGRES_PORT=5432" >> .env-database-admin
+    ROOT_PASSWORD="$(openssl rand -hex 8)"
+    {
+      echo "POSTGRES_USER=postgres"
+      echo "POSTGRES_PASSWORD=${ROOT_PASSWORD}"
+      echo "POSTGRES_DB=postgres"
+      echo "POSTGRES_HOST=postgres"
+      echo "POSTGRES_PORT=5432"
+    } > .env-database-admin
 fi
 
 source ".env-database-admin"
 
+if ! [ -f ".env-database-metrics" ]; then
+    {
+      echo "DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      echo "DATA_SOURCE_URI=${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      echo "DATA_SOURCE_USER=${POSTGRES_USER}"
+      echo "DATA_SOURCE_PASS=${POSTGRES_PASSWORD}"
+      echo "PG_EXPORTER_AUTO_DISCOVER_DATABASES=true"
+    } > .env-database-metrics
+fi
+
+source ".env-database-metrics"
+
 if ! [ -f ".env-database-content" ]; then
-    USER=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-z | head -c 16)
-    PASSWORD=$(cat /dev/urandom | env LC_CTYPE=C tr -dc a-zA-Z0-9 | head -c 16)
-    echo "POSTGRES_CONTENT_USER=${USER}" > .env-database-content
-    echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}" >> .env-database-content
-    echo "POSTGRES_CONTENT_DB=content" >> .env-database-content
+    USER="cs$(openssl rand -hex 4)"
+    PASSWORD="$(openssl rand -hex 8)"
+    {
+      echo "POSTGRES_CONTENT_USER=${USER}"
+      echo "POSTGRES_CONTENT_PASSWORD=${PASSWORD}"
+      echo "POSTGRES_CONTENT_DB=content"
+    } > .env-database-content
 fi
 
 source ".env-database-content"
 
-docker pull decentraland/katalyst:${DOCKER_TAG}
-if test $? -ne 0; then
+if [ -z "$POSTGRES_CONTENT_PASSWORD" ]; then
+  echo "Empty POSTGRES_CONTENT_PASSWORD"
+  printMessage failed
+  exit 1
+fi
+
+if [ -z "$POSTGRES_CONTENT_USER" ]; then
+  echo "Empty POSTGRES_CONTENT_USER"
+  printMessage failed
+  exit 1
+fi
+
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  echo "Empty POSTGRES_PASSWORD"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "decentraland/katalyst:${DOCKER_TAG:latest}"
+if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1
 fi
 
 docker-compose stop nginx
-if test $? -ne 0; then
+if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
   exit 1

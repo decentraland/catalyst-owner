@@ -26,11 +26,9 @@ services:
     restart: always
     logging:
       driver: syslog
-      options: {
-        tag: comms
-      }
+      options: { tag: comms }
 
-  postgress:
+  postgres:
     image: postgres:12
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
@@ -43,9 +41,37 @@ services:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
     logging:
       driver: syslog
-      options: {
-        tag: postgres
-      }
+      options: { tag: postgres }
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    env_file:
+      - .env-database-metrics
+    restart: always
+    depends_on:
+      - postgres
+    shm_size: 512mb
+    logging:
+      driver: syslog
+      options: { tag: postgres-exporter }
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - '/:/rootfs:ro'
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)"
+    logging:
+      driver: syslog
+      options: { tag: node-exporter }
 
   content-server:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -60,7 +86,7 @@ services:
       - .env-database-admin
       - .env-database-content
     depends_on:
-      - postgress
+      - postgres
     ports:
       - "6969:6969"
     restart: always
@@ -68,9 +94,7 @@ services:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
     logging:
       driver: syslog
-      options: {
-        tag: content-server
-      }
+      options: { tag: content-server }
 
   lambdas:
     image: decentraland/katalyst:${DOCKER_TAG:-latest}
@@ -87,13 +111,26 @@ services:
       - "7070:7070"
     logging:
       driver: syslog
-      options: {
-        tag: lambdas
-      }
+      options: { tag: lambdas }
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
+  cadvisor:
+    image: gcr.io/google_containers/cadvisor:v0.35.0
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    depends_on:
+      - comms-server
+      - content-server
+      - lambdas
+
   nginx:
+    container_name: nginx
     image: nginx:1.15-alpine
     ports:
       - "80:80"
@@ -102,19 +139,21 @@ services:
     volumes:
       - ./local/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./local/nginx/conf.d:/etc/nginx/conf.d
+      - ./local/nginx/include:/etc/nginx/include
+      - ./local/nginx/auth:/etc/nginx/auth
       - ./local/nginx/html:/etc/nginx/html
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
     restart: always
     depends_on:
       - lambdas
+      - cadvisor
       - content-server
       - comms-server
+      - postgres-exporter
     logging:
       driver: syslog
-      options: {
-        tag: nginx
-      }
+      options: { tag: nginx }
 
   certbot:
     image: certbot/certbot
@@ -125,6 +164,4 @@ services:
       - ./local/certbot/www:/var/www/certbot
     logging:
       driver: syslog
-      options: {
-        tag: certbot
-      }
+      options: { tag: certbot }
