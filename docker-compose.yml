@@ -53,10 +53,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
+          cpus: '3'
           memory: 10GB
         reservations:
-          cpus: 1
+          cpus: '1'
           memory: 10M
 
   postgres-exporter:
