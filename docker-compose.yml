@@ -37,9 +37,6 @@ services:
       - ${POSTGRES_PORT:-5432}
     restart: always
     shm_size: 512mb
-    mem_limit: 10240M
-    mem_reservation: 4096M
-    cpus: 4
     command: >
       -c work_mem=8GB
       -c shared_buffers=3GB
@@ -53,6 +50,14 @@ services:
     logging:
       driver: syslog
       options: { tag: postgres }
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 10GB
+        reservations:
+          cpus: '1'
+          memory: 10M
 
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter
@@ -135,9 +140,14 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-    mem_limit: 128M
-    mem_reservation: 64MB
-    cpus: 0.1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.10"
+          memory: 64M
 
   nginx:
     container_name: nginx
