@@ -33,9 +33,9 @@ else
           echo "`printMessage ok`. Container ${i} was stopped"
         else
           echo "`printMessage failed`. Unable to stop ${i}"
-        fi 
+        fi
     else
       echo "`printMessage failed`. The service ${i} does not exists"
-    fi 
+    fi
   done
 fi
