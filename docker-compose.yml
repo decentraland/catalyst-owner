@@ -76,7 +76,7 @@ services:
     container_name: node-exporter
     restart: unless-stopped
     volumes:
-      - "/:/rootfs:ro"
+      - '/:/rootfs:ro'
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     command:
@@ -147,6 +147,10 @@ services:
         reservations:
           cpus: "0.10"
           memory: 64M
+    depends_on:
+      - comms-server
+      - content-server
+      - lambdas
 
   nginx:
     container_name: nginx
