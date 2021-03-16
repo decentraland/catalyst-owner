@@ -1,0 +1,16 @@
+# defaults for mac, syslog is not present there
+
+version: "3"
+
+services:
+  comms-server: &COMMON
+    logging:
+      driver: local
+  nginx: *COMMON
+  certbot: *COMMON
+  postgres: *COMMON
+  postgres-exporter: *COMMON
+  node-exporter: *COMMON
+  content-server: *COMMON
+  lambdas: *COMMON
+  cadvisor: *COMMON
