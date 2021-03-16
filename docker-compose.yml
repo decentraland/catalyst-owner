@@ -138,15 +138,7 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 128M
-        reservations:
-          cpus: "0.10"
-          memory: 64M
+      - /dev/disk/:/dev/disk:ro  
     depends_on:
       - comms-server
       - content-server
