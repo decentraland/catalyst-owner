@@ -93,6 +93,7 @@ services:
     working_dir: /app
     command: content
     environment:
+      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
     env_file:
@@ -139,7 +140,7 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro  
+      - /dev/disk/:/dev/disk:ro
     depends_on:
       - comms-server
       - content-server
