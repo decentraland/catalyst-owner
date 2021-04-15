@@ -34,11 +34,9 @@ services:
       - ${POSTGRES_PORT:-5432}
     restart: always
     shm_size: 2560MB
-    command: >
-      -c config_file=/etc/postgresql/postgresql.conf
     volumes:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
-      - "./local/postgres/postgresql.conf:/etc/postgresql/postgresql.conf"
+      - "./local/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf"
     logging:
       driver: syslog
       options: { tag: postgres }
