@@ -60,8 +60,12 @@ services:
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
+    environment:
+      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres-exporter/queries.yaml
     env_file:
       - .env-database-metrics
+    volumes:
+      - ./local/postgres-exporter:/etc/postgres-exporter
     restart: always
     depends_on:
       - postgres
