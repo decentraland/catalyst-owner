@@ -291,7 +291,7 @@ fi
 
 docker pull "decentraland/katalyst:${DOCKER_TAG:latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to stop nginx! "
+  echo -n "Failed to pull the docker image with tag ${DOCKER_TAG:latest}"
   printMessage failed
   exit 1
 fi
