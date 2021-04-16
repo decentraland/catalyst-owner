@@ -30,6 +30,7 @@ services:
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
+      - .env-database-content
     expose:
       - ${POSTGRES_PORT:-5432}
     restart: always
