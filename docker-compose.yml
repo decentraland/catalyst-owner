@@ -91,7 +91,6 @@ services:
     env_file:
       - .env
       - .env-advanced
-      - .env-database-admin
       - .env-database-content
     depends_on:
       - postgres
