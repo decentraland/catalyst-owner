@@ -88,6 +88,8 @@ services:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-postgres}
     env_file:
       - .env
       - .env-advanced
