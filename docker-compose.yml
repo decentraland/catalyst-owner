@@ -30,6 +30,7 @@ services:
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
+      - .env-database-content
     expose:
       - ${POSTGRES_PORT:-5432}
     restart: always
@@ -39,6 +40,7 @@ services:
       - "./local/postgres/custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro"
       - "./local/postgres/postgresql.conf:/etc/postgresql/postgresql.conf"
       - "./local/postgres/scripts/always:/always-initdb.d:ro"
+      - "./local/postgres/scripts/initial:/docker-entrypoint-initdb.d:ro"
     command: custom-entrypoint.sh -c config_file=/etc/postgresql/postgresql.conf
     logging:
       driver: syslog
@@ -86,10 +88,11 @@ services:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
     env_file:
       - .env
       - .env-advanced
-      - .env-database-admin
       - .env-database-content
     depends_on:
       - postgres

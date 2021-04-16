@@ -26,6 +26,7 @@ if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 	docker_temp_server_start "$@" -c max_locks_per_transaction=256
 	docker_setup_db
 	docker_process_init_files /docker-entrypoint-initdb.d/*
+	docker_process_init_files /always-initdb.d/*
 	docker_temp_server_stop
 else
 	docker_temp_server_start "$@"
