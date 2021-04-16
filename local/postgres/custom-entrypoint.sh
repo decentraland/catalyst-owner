@@ -2,6 +2,7 @@
 set -Eeo pipefail
 
 # Example using the functions of the postgres entrypoint to customize startup to always run files in /always-initdb.d/
+# Based on https://github.com/docker-library/postgres/pull/496
 
 source "$(which docker-entrypoint.sh)"
 
@@ -10,9 +11,9 @@ docker_create_db_directories
 # assumption: we are already running as the owner of PGDATA
 
 # This is needed if the container is started as `root`
-#if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
-#	exec gosu postgres "$BASH_SOURCE" "$@"
-#fi
+if [ "$(id -u)" = '0' ]; then
+	exec gosu postgres "$BASH_SOURCE" "$@"
+fi
 
 if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 	docker_verify_minimum_env

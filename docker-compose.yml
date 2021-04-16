@@ -36,9 +36,9 @@ services:
     shm_size: 2560MB
     volumes:
       - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
-      - "./local/postgres/custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh"
+      - "./local/postgres/custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro"
       - "./local/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf"
-      - "./local/postgres/scripts/always:/always-initdb.d"
+      - "./local/postgres/scripts/always:/always-initdb.d:ro"
     command: custom-entrypoint.sh
     logging:
       driver: syslog
