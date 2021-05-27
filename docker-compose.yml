@@ -112,6 +112,7 @@ services:
     restart: always
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
     env_file:
       - .env
