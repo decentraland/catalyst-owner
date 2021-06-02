@@ -15,7 +15,7 @@ services:
       - shared_keys:/secrets
 
   auth-server:
-    image: decentraland/pow-authorization-server
+    image: decentraland/pow-authorization-server:next
     ports:
       - "5000:5000"
     restart: always
