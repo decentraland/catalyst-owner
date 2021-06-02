@@ -1,0 +1,28 @@
+version: "3"
+
+
+services:
+
+  nginx:
+    container_name: nginx
+    image: decentraland/openresty
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - auth-server
+    volumes:
+      - shared_keys:/secrets
+
+  auth-server:
+    image: decentraland/pow-authorization-server
+    ports:
+      - "5000:5000"
+    restart: always
+    volumes:
+      - shared_keys:/secrets
+    environment:
+      - SECRETS_DIRECTORY=/secrets
+
+volumes:
+    shared_keys:

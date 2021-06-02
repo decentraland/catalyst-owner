@@ -1,0 +1,21 @@
+name: test openresty
+
+on: push
+jobs:
+  test-localhost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run build.sh
+        run: ./buildOpenresty.sh
+      - name: run init
+        run: docker-compose --file openresty-docker-compose.yml up -d nginx
+
+
+      # - name: add a user to enable system metrics
+      #   if: ${{ always() }}
+      #   run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
+
+
+      - name: run stop
+        run: docker-compose --file openresty-docker-compose.yml down 
