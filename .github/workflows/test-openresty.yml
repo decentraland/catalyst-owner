@@ -11,11 +11,13 @@ jobs:
       - name: run init
         run: docker-compose --file openresty-docker-compose.yml up -d nginx
 
+      - name: no token (10 per minute)
+        run: ab -t 100 localhost:8080/verify
 
-      # - name: add a user to enable system metrics
-      #   if: ${{ always() }}
-      #   run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
-
+      - name: get JWT
+        run: ./get_jwt.sh > ./jwt.txt
+      - name: with token (1 per minute)
+        run: ab -t 100 -H "Cookie: JWT=$(cat ./jwt.txt)" localhost:8080/verify
 
       - name: run stop
-        run: docker-compose --file openresty-docker-compose.yml down 
+        run: docker-compose --file openresty-docker-compose.yml down
