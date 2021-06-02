@@ -2,7 +2,7 @@ name: test openresty
 
 on: push
 jobs:
-  test-localhost:
+  test-openresty:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
