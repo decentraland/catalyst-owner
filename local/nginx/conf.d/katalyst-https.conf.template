@@ -34,6 +34,6 @@ server {
         allow all;
     }
 
-    include include/routes.conf;
-    include include/metrics.conf;
+    include /etc/nginx/include/routes.conf;
+    include /etc/nginx/include/metrics.conf;
 }
