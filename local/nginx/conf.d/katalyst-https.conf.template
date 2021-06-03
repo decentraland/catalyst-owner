@@ -1,6 +1,6 @@
 rewrite_log on;
 
-include include/upstream.conf;
+include /etc/nginx/include/upstream.conf;
 
 server {
     listen 80;
