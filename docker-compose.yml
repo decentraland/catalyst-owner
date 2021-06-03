@@ -5,6 +5,7 @@ volumes:
   nginx_storage: {}
   lighthouse_storage_volume: {}
   lambdas_server_storage: {}
+  shared_keys:
 
 services:
   comms-server:
@@ -156,6 +157,7 @@ services:
       - ./local/nginx/html:/etc/nginx/html
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
+      - shared_keys:/secrets
     restart: always
     depends_on:
       - lambdas
@@ -177,3 +179,14 @@ services:
     logging:
       driver: syslog
       options: { tag: certbot }
+
+
+  auth-server:
+    image: decentraland/pow-authorization-server:next
+    ports:
+      - "5000:5000"
+    restart: always
+    volumes:
+      - shared_keys:/secrets
+    environment:
+      - SECRETS_DIRECTORY=/secrets
