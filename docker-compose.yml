@@ -144,7 +144,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:1.15-alpine
+    image: openresty/openresty:alpine
     ports:
       - "80:80"
       - "443:443"
@@ -165,6 +165,7 @@ services:
       - content-server
       - comms-server
       - postgres-exporter
+      - auth-server
     logging:
       driver: syslog
       options: { tag: nginx }
