@@ -166,7 +166,6 @@ services:
       - comms-server
       - postgres-exporter
       - auth-server
-    shm_size: 512mb
     logging:
       driver: syslog
       options: { tag: nginx }
