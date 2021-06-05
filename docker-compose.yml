@@ -144,7 +144,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: openresty/openresty:alpine
+    image: decentraland/openresty
     ports:
       - "80:80"
       - "443:443"
