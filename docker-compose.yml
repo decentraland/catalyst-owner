@@ -191,3 +191,6 @@ services:
       - shared_keys:/secrets
     environment:
       - SECRETS_DIRECTORY=/secrets
+    logging:
+      driver: syslog
+      options: { tag: auth }
