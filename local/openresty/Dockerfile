@@ -23,4 +23,4 @@ RUN tar -xvzf /etc/nginx/libs/lua-resty-openssl-0.7.2.tar.gz -C /etc/nginx/libs/
 RUN rm /etc/nginx/libs/lua-resty-openssl-0.7.2.tar.gz
 
 
-CMD ["nginx", "-p", "/nginx" , "-g", "daemon off;"]
+# CMD ["nginx", "-p", "/nginx" , "-g", "daemon off;"]
