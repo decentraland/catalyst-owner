@@ -18,6 +18,8 @@ server {
     }
 }
 
+limit_req_zone key=$no_key zone=no_token:100m rate=10r/m;
+
 server {
     listen 443 ssl http2;
     server_name $katalyst_host;
