@@ -1,7 +1,7 @@
 rewrite_log on;
 
 include /etc/nginx/include/upstream.conf;
-limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+include /etc/nginx/include/rates.conf;
 
 server {
     server_name $katalyst_host;
