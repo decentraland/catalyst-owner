@@ -34,6 +34,9 @@ jobs:
           sed "s/options: {.*}//g" docker-compose.yml.bak > docker-compose.yml
           git diff docker-compose.yml
 
+      - name: build openresty
+        run: ./buildOpenresty.sh
+
       - name: run init.sh
         run: ./init.sh
 
