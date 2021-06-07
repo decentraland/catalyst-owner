@@ -18,15 +18,21 @@ server {
     }
 }
 
-limit_req_zone $binary_remote_addr zone=mylimit:100m rate=10r/s;
-
 server {
     listen 443 ssl http2;
     server_name $katalyst_host;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    ssl_certificate /etc/letsencrypt/live/$katalyst_host/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
     client_max_body_size 256M;
 
     root /etc/nginx/html;
 
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        allow all;
+    }
 
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;

@@ -159,13 +159,12 @@ services:
       - ./local/certbot/www:/var/www/certbot
       - shared_keys:/secrets
     restart: always
-    shm_size: 2560MB
     depends_on:
-      # - lambdas
-      # - cadvisor
-      # - content-server
-      # - comms-server
-      # - postgres-exporter
+      - lambdas
+      - cadvisor
+      - content-server
+      - comms-server
+      - postgres-exporter
       - auth-server
     logging:
       driver: syslog
@@ -192,6 +191,3 @@ services:
       - shared_keys:/secrets
     environment:
       - SECRETS_DIRECTORY=/secrets
-    logging:
-      driver: syslog
-      options: { tag: auth }
