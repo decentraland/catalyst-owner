@@ -159,6 +159,7 @@ services:
       - ./local/certbot/www:/var/www/certbot
       - shared_keys:/secrets
     restart: always
+    shm_size: 2560MB
     depends_on:
       - lambdas
       - cadvisor
