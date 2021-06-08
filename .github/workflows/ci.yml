@@ -59,6 +59,8 @@ jobs:
             sleep 10
           done
 
+      - name: get challenge
+        run: curl ${{ matrix.catalyst_url }}/auth/challenge  --verbose
 
       - name: no token (10 per minute)
         run: ab -t 100 ${{ matrix.catalyst_url }}/content/deployments
