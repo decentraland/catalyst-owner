@@ -4,6 +4,8 @@ include /etc/nginx/include/upstream.conf;
 include /etc/nginx/include/rates.conf;
 
 server {
+    limit_req_dry_run  on;
+    
     listen 80;
     server_name $katalyst_host;
 
