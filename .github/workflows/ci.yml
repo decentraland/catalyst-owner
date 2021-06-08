@@ -59,6 +59,17 @@ jobs:
             sleep 10
           done
 
+
+      - name: no token (10 per minute)
+        run: ab -t 100 ${{ matrix.catalyst_url }}/content/deployments
+
+      - name: get JWT
+        run: ./get_jwt.sh > ./jwt.txt
+      - name: with token (1 per minute)
+        run: 'ab -t 100 -H "Cookie: JWT=$(cat ./jwt.txt)" ${{ matrix.catalyst_url }}/content/deployments'
+
+
+
       - name: wait for comms
         timeout-minutes: 2
         run: |
