@@ -69,6 +69,8 @@ jobs:
         run: 'ab -t 100 -H "Cookie: JWT=$(cat ./jwt.txt)" ${{ matrix.catalyst_url }}/content/deployments'
 
 
+      - name: nginx logs
+        run: docker logs nginx
 
       - name: wait for comms
         timeout-minutes: 2
