@@ -59,20 +59,14 @@ jobs:
             sleep 10
           done
 
-      - name: get challenge
-        run: curl ${{ matrix.catalyst_url }}/auth/challenge  --verbose
-
-      - name: no token (10 per minute)
-        run: ab -t 100 ${{ matrix.catalyst_url }}/content/deployments
-
-      - name: get JWT
-        run: ./get_jwt.sh > ./jwt.txt
-      - name: with token (1 per minute)
-        run: 'ab -t 100 -H "Cookie: JWT=$(cat ./jwt.txt)" ${{ matrix.catalyst_url }}/content/deployments'
-
-
-      - name: nginx logs
-        run: docker logs nginx
+      - name: wait for auth
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/auth/challenge 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs auth
+            sleep 10
+          done
 
       - name: wait for comms
         timeout-minutes: 2
