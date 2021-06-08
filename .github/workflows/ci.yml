@@ -139,6 +139,9 @@ jobs:
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
+      - name: nginx logs
+        run: docker logs nginx
+
       - name: run stop.sh
         if: ${{ always() }}
         run: ./stop.sh
