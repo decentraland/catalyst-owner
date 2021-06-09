@@ -1,12 +1,10 @@
 FROM openresty/openresty:alpine
 
-EXPOSE 8080
-EXPOSE 443
-
 RUN apk add --no-cache curl perl
 
+WORKDIR /etc/nginx
 
-RUN mkdir -p /etc/nginx/libs
+RUN mkdir -p /etc/nginx/libs /etc/nginx/logs /etc/nginx/conf
 # Download lua-resty-jwt
 # LuaRocks is not officially supported on OpenResty
 # The lua-resty-jwt has been removed from OPM 
@@ -21,6 +19,3 @@ RUN rm /etc/nginx/libs/lua-resty-hmac-0.05.tar.gz
 RUN curl https://codeload.github.com/fffonion/lua-resty-openssl/tar.gz/refs/tags/0.7.2 --output /etc/nginx/libs/lua-resty-openssl-0.7.2.tar.gz
 RUN tar -xvzf /etc/nginx/libs/lua-resty-openssl-0.7.2.tar.gz -C /etc/nginx/libs/lua-resty-jwt-0.2.3/third-party/
 RUN rm /etc/nginx/libs/lua-resty-openssl-0.7.2.tar.gz
-
-
-# CMD ["nginx", "-p", "/nginx" , "-g", "daemon off;"]
