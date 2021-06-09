@@ -150,11 +150,11 @@ services:
       - "443:443"
     command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -p /etc/nginx -g "daemon off;"'''
     volumes:
-      - ./local/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./local/nginx/conf.d:/etc/nginx/conf.d
-      - ./local/nginx/include:/etc/nginx/include
-      - ./local/nginx/auth:/etc/nginx/auth
-      - ./local/nginx/html:/etc/nginx/html
+      - ./local/nginx/nginx.conf:/etc/nginx/conf/nginx.conf
+      - ./local/nginx/conf.d:/etc/nginx/conf/conf.d
+      - ./local/nginx/include:/etc/nginx/conf/include
+      - ./local/nginx/auth:/etc/nginx/conf/auth
+      - ./local/nginx/html:/etc/nginx/conf/html
       - ./local/certbot/conf:/etc/letsencrypt
       - ./local/certbot/www:/var/www/certbot
       - shared_keys:/secrets
