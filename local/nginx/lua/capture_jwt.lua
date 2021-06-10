@@ -15,7 +15,7 @@ local jwt_token = ngx.var.cookie_JWT
 local jwt_obj = jwt:verify(secret, jwt_token)
 
 if (jwt_obj.valid and jwt_obj.verified) then
-    return basePath + path + jwt_obj.payload.nonce
+    return basePath .. path .. jwt_obj.payload.nonce
 else
     return ""
 end
