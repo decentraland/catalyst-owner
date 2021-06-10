@@ -5,8 +5,16 @@ EXPOSE 443
 
 RUN apk add --no-cache curl perl
 
+RUN mkdir -p /etc/nginx/libs /var/log/nginx/ /var/cache/
 
-RUN mkdir -p /etc/nginx/libs /var/log/nginx/
+## Missing commands from original nginx Dockerfile
+# Create nginx user
+RUN addgroup -S nginx \
+  && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx 
+# Forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \  
+  && ln -sf /dev/stderr /var/log/nginx/error.log
+
 # Download lua-resty-jwt
 # LuaRocks is not officially supported on OpenResty
 # The lua-resty-jwt has been removed from OPM 
