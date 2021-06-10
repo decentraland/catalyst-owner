@@ -6,7 +6,7 @@ EXPOSE 443
 RUN apk add --no-cache curl perl
 
 
-RUN mkdir -p /etc/nginx/libs
+RUN mkdir -p /etc/nginx/libs /var/log/nginx/
 # Download lua-resty-jwt
 # LuaRocks is not officially supported on OpenResty
 # The lua-resty-jwt has been removed from OPM 
