@@ -139,7 +139,8 @@ jobs:
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
-# TODO: CHECK POW
+      - name: fetch content server with JWT
+        run: ./fetch_with_jwt.sh ${{ matrix.catalyst_url }}/content/
 
       - name: run stop.sh
         if: ${{ always() }}
