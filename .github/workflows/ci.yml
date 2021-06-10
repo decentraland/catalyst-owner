@@ -59,6 +59,33 @@ jobs:
             sleep 10
           done
 
+      - name: wait for comms
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs comms-server
+            sleep 10
+          done
+
+      - name: wait for content
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs content-server
+            sleep 10
+          done
+
+      - name: wait for lambdas
+        timeout-minutes: 2
+        run: |
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
+            echo "Retrying in 10 seconds..."
+            docker-compose logs lambdas
+            sleep 10
+          done
+
       - name: wait for auth
         timeout-minutes: 2
         run: |
@@ -68,76 +95,49 @@ jobs:
             sleep 10
           done
 
-      # - name: wait for comms
-      #   timeout-minutes: 2
-      #   run: |
-      #     until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
-      #       echo "Retrying in 10 seconds..."
-      #       docker-compose logs comms-server
-      #       sleep 10
-      #     done
+      - name: test system_metrics auth, must be 401
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 401
 
-      # - name: wait for content
-      #   timeout-minutes: 2
-      #   run: |
-      #     until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
-      #       echo "Retrying in 10 seconds..."
-      #       docker-compose logs content-server
-      #       sleep 10
-      #     done
+      - name: test comms_metrics auth, must be 401
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
 
-      # - name: wait for lambdas
-      #   timeout-minutes: 2
-      #   run: |
-      #     until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
-      #       echo "Retrying in 10 seconds..."
-      #       docker-compose logs lambdas
-      #       sleep 10
-      #     done
+      - name: add a user to enable system metrics
+        if: ${{ always() }}
+        run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
 
-      # - name: test system_metrics auth, must be 401
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 401
+      - name: test system_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 200 -u test-user:test-password
 
-      # - name: test comms_metrics auth, must be 401
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
+      - name: test postgres_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/postgres_metrics 200 -u test-user:test-password
 
-      # - name: add a user to enable system metrics
-      #   if: ${{ always() }}
-      #   run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
+      - name: test node_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
 
-      # - name: test system_metrics auth, must be 200
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 200 -u test-user:test-password
-
-      # - name: test postgres_metrics auth, must be 200
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/postgres_metrics 200 -u test-user:test-password
-
-      # - name: test node_metrics auth, must be 200
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
-
-      # - name: test comms_metrics auth, must be 401 (still)
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
+      - name: test comms_metrics auth, must be 401 (still)
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
 
 
-      # - name: add a user to enable comms metrics
-      #   if: ${{ always() }}
-      #   run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
+      - name: add a user to enable comms metrics
+        if: ${{ always() }}
+        run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
 
-      # - name: test comms_metrics auth, must be 200
-      #   if: ${{ always() }}
-      #   run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
+      - name: test comms_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
 
-      # - name: smoke test endpoints
-      #   if: ${{ always() }}
-      #   run: |
-      #     ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
-      #     ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
-      #     ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
+      - name: smoke test endpoints
+        if: ${{ always() }}
+        run: |
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
 
 
