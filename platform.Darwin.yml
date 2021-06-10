@@ -14,4 +14,4 @@ services:
   content-server: *COMMON
   lambdas: *COMMON
   cadvisor: *COMMON
-  auth-server: *COMMON
+  pow-auth-server: *COMMON

@@ -165,7 +165,7 @@ services:
       - content-server
       - comms-server
       - postgres-exporter
-      - auth-server
+      - pow-auth-server
     logging:
       driver: syslog
       options: { tag: nginx }
@@ -182,7 +182,7 @@ services:
       options: { tag: certbot }
 
 
-  auth-server:
+  pow-auth-server:
     image: decentraland/pow-authorization-server:next
     expose:
       - "5000"
@@ -193,4 +193,4 @@ services:
       - SECRETS_DIRECTORY=/secrets
     logging:
       driver: syslog
-      options: { tag: auth }
+      options: { tag: pow-auth }
