@@ -1,6 +1,7 @@
 
-local h = ngx.var.jwt_req_zone
-if (h == nil or h == "") then
+local cookieHeader = ngx.var.cookie_JWT
+
+if (cookieHeader == nil or cookieHeader == "") then
     return "true"
 else
     return ""
