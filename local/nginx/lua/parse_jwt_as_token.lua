@@ -1,7 +1,7 @@
 local jwt = require "resty.jwt"
 
-local basePath = ngx.arg[1]
-local path = ngx.arg[2]
+local basePath = ngx.var.jwt_base_path
+local path = ngx.arg[1]
 
 local jwt_token = ngx.var.cookie_JWT
 local jwt_obj = jwt:verify(ngx.var.secret, jwt_token)
