@@ -16,13 +16,14 @@ CHALLENGE_NONCE=$(node ./.github/workflows/solveChallenge.js $CHALLENGE $CHALLEN
 
 
 # Get JWT
-JWT_RESPONSE=$(curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json" --verbose  --data '{
+curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json" --verbose  --data '{
     "complexity": "${CHALLENGE_COMPLEXITY}",
     "challenge": "${CHALLENGE}",
     "nonce":
       "${CHALLENGE_NONCE}"
-  }' )
-JWT=$(echo $JWT_RESPONSE | jq .jwt)
+  }' > jwt_response.json
+echo "Aca llego: $(cat jwt_response.json)"
+JWT=$(cat jwt_response.json | jq .jwt)
 
 
 STATUS_CODE=$(curl --insecure --silent -v $* --output /dev/stderr --write-out "%{http_code}"  -H "Cookie: JWT=${JWT}" "$URL")
