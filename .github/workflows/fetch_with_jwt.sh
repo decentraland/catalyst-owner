@@ -8,8 +8,8 @@ EXPECTED_STATUS=$1; shift
 # Get challenge
 
 CHALLENGE_RESPONSE=$(curl $CHALLENGE_URL 2>/dev/null)
-CHALLENGE_COMPLEXITY=$(echo $CHALLENGE_RESPONSE | python -c 'import  json,sys; result=json.load(sys.stdin); print(result["'complexity'"])')
-CHALLENGE=$(echo $CHALLENGE_RESPONSE | python -c 'import  json,sys; result=json.load(sys.stdin); print(result["'challenge'"])')
+CHALLENGE_COMPLEXITY=$(echo $CHALLENGE_RESPONSE | jq .complexity)
+CHALLENGE=$(echo $CHALLENGE_RESPONSE | jq .challenge)
 
 # Solve Challenge
 CHALLENGE_NONCE=$(node ./.github/workflows/solveChallenge.js $CHALLENGE $CHALLENGE_COMPLEXITY)
@@ -22,7 +22,7 @@ JWT_RESPONSE=$(curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: a
     "nonce":
       "${CHALLENGE_NONCE}"
   }' )
-JWT=$(echo $JWT_RESPONSE | python -c 'import  json,sys; result=json.load(sys.stdin); print(result["'jwt'"])')
+JWT=$(echo $JWT_RESPONSE | jq .jwt)
 
 
 STATUS_CODE=$(curl --insecure --silent -v $* --output /dev/stderr --write-out "%{http_code}"  -H "Cookie: JWT=${JWT}" "$URL")
