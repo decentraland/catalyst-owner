@@ -8,6 +8,7 @@ EXPECTED_STATUS=$1; shift
 # Get challenge
 
 CHALLENGE_RESPONSE=$(curl $CHALLENGE_URL 2>/dev/null)
+echo "Challenge: $CHALLENGE_RESPONSE"
 CHALLENGE_COMPLEXITY=$(echo $CHALLENGE_RESPONSE | jq .complexity)
 CHALLENGE=$(echo $CHALLENGE_RESPONSE | jq .challenge)
 
