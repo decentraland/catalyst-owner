@@ -11,6 +11,9 @@ jobs:
           # - https://localhost.decentraland.services
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
       - name: create env files ${{ matrix.catalyst_url }}
         run: |
           mkdir -p /opt/catalyst-storage
