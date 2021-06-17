@@ -7,6 +7,7 @@ function generateNonceForChallenge(challenge, complexity) {
       .createHash('sha256')
       .update(challenge + nonce, 'hex')
       .digest('hex')
+
     const isValid = hash.startsWith('0'.repeat(complexity))
 
     if (isValid) {
@@ -15,4 +16,4 @@ function generateNonceForChallenge(challenge, complexity) {
   }
 }
 
-console.log(generateNonceForChallenge(process.argv[0], process.argv[1]))
+console.log(generateNonceForChallenge(process.argv[2], process.argv[3]))
