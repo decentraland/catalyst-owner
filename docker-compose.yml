@@ -144,7 +144,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: decentraland/openresty-lua
+    image: decentraland/openresty-lua:718f1be7988602c3bcef7dde84c121ef80694583
     ports:
       - "80:80"
       - "443:443"

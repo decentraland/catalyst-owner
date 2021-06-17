@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 URL=$1; shift
 EXPECTED_STATUS=$1; shift

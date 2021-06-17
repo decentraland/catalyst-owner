@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 CHALLENGE_URL=$1; shift
 URL=$1; shift
