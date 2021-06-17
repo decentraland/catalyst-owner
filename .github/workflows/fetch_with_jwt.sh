@@ -22,7 +22,12 @@ curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json
     "nonce":
       "${CHALLENGE_NONCE}"
   }' > jwt_response.json
-echo "Aca llego: $(cat jwt_response.json)"
+echo 'Aca llego: {
+    "complexity": "${CHALLENGE_COMPLEXITY}",
+    "challenge": "${CHALLENGE}",
+    "nonce":
+      "${CHALLENGE_NONCE}"
+  }'
 JWT=$(cat jwt_response.json | jq .jwt)
 
 
