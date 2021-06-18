@@ -7,7 +7,6 @@ EXPECTED_STATUS=$1; shift
 
 # Get challenge
 GIVEN_CHALLENGE=$(curl $CHALLENGE_URL 2>/dev/null)
-echo "Obtained challenge: ${GIVEN_CHALLENGE}"
 CHALLENGE_COMPLEXITY=$(echo ${GIVEN_CHALLENGE}| jq .complexity)
 CHALLENGE=$(echo ${GIVEN_CHALLENGE} | jq .challenge | sed 's/[",]//g')
 
@@ -16,9 +15,7 @@ CHALLENGE_NONCE=$(node ./.github/workflows/solveChallenge.js $CHALLENGE $CHALLEN
 
 # Get JWT
 CHALLENGE_BODY=$(echo "{\"complexity\": ${CHALLENGE_COMPLEXITY}, \"challenge\": \"${CHALLENGE}\", \"nonce\": \"${CHALLENGE_NONCE}\"}")
-echo "Sending challenge: ${CHALLENGE_BODY}"
 RESPONSE=$(curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json" --verbose  -d "$CHALLENGE_BODY" )
-echo "Response from pow auth server: ${RESPONSE}"
 JWT=$( echo ${RESPONSE}| jq .jwt)
 
 # Make the request
