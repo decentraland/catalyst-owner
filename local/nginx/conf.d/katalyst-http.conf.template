@@ -11,6 +11,8 @@ server {
 
     root /etc/nginx/html;
 
+    more_set_headers    'Access-Control-Allow-Origin: *';
+
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;
 }
