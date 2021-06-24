@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# set -e
 
 CHALLENGE_URL=$1; shift
 URL=$1; shift
@@ -17,6 +17,7 @@ CHALLENGE_NONCE=$(node ./.github/workflows/solveChallenge.js $CHALLENGE $CHALLEN
 CHALLENGE_BODY=$(echo "{\"complexity\": ${CHALLENGE_COMPLEXITY}, \"challenge\": \"${CHALLENGE}\", \"nonce\": \"${CHALLENGE_NONCE}\"}")
 RESPONSE=$(curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json" --verbose  -d "$CHALLENGE_BODY" )
 JWT=$( echo ${RESPONSE}| jq .jwt)
+echo $JWT
 
 # Make the request
 STATUS_CODE=$(curl --insecure --silent -v $* --output /dev/stderr --write-out "%{http_code}"  -H "Cookie: JWT=${JWT}" "$URL")
