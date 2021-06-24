@@ -16,8 +16,8 @@ services:
       - .env-advanced
     environment:
       - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
-    ports:
-      - "9000:9000"
+    expose:
+      - "9000"
     volumes:
       - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
@@ -96,8 +96,8 @@ services:
       - .env-database-content
     depends_on:
       - postgres
-    ports:
-      - "6969:6969"
+    expose:
+      - "6969"
     restart: always
     volumes:
       - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
@@ -112,12 +112,13 @@ services:
     restart: always
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
     env_file:
       - .env
       - .env-advanced
-    ports:
-      - "7070:7070"
+    expose:
+      - "7070"
     logging:
       driver: syslog
       options: { tag: lambdas }
