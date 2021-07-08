@@ -1,6 +1,7 @@
 local jwt = require "resty.jwt"
 
 local jwt_token = ngx.var.cookie_JWT
+-- If it is not present, then it isn't valid either
 if (jwt_token == nil or jwt_token == "") then
     return ""
 end
