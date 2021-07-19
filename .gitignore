@@ -9,3 +9,6 @@ local/nginx/conf.d/00-katalyst.conf
 .crontab
 docker-compose.yml.bak
 storage
+
+database
+contents
