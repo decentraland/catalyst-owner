@@ -184,7 +184,7 @@ services:
 
 
   pow-auth-server:
-    image: decentraland/pow-authorization-server
+    image: decentraland/pow-authorization-server:9e57cdbee88374c13bbee6bf4442dba7de1ebd5c
     expose:
       - "5000"
     restart: always
