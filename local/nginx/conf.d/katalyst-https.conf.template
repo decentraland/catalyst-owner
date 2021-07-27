@@ -22,12 +22,6 @@ server {
 }
 
 
-map $http_referer $allow_origin {
-    default "*";
-    "~*^(.+)/$" $1;
-    "~*^(.+)[^/]$" $1;
-}
-
 server {
     limit_req_dry_run  on;
     
@@ -45,12 +39,7 @@ server {
         root /var/www/certbot;
         allow all;
     }
-
-    more_set_headers "Access-Control-Allow-Origin: $allow_origin";
-    more_set_headers "Access-Control-Allow-Credentials: true";
-    more_set_headers "Access-Control-Allow-Methods: GET, HEAD, POST, PUT, DELETE,CONNECT, OPTIONS, TRACE, PATCH";
-    more_set_headers "Access-Control-Allow-Headers: DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Origin,Accept,X-Peer-Token";
-
+    
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;
 }
