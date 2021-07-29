@@ -144,7 +144,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: decentraland/openresty-lua
+    image: decentraland/openresty-lua:v1.1.0
     ports:
       - "80:80"
       - "443:443"
@@ -184,7 +184,7 @@ services:
 
 
   pow-auth-server:
-    image: decentraland/pow-authorization-server:9e57cdbee88374c13bbee6bf4442dba7de1ebd5c
+    image: decentraland/pow-authorization-server:b95a718abb23bb51287b373f5f1d7ebe8173e637
     expose:
       - "5000"
     restart: always
