@@ -16,7 +16,7 @@ CHALLENGE_NONCE=$(node ./.github/workflows/solveChallenge.js $CHALLENGE $CHALLEN
 # Get JWT
 CHALLENGE_BODY=$(echo "{\"complexity\": ${CHALLENGE_COMPLEXITY}, \"challenge\": \"${CHALLENGE}\", \"nonce\": \"${CHALLENGE_NONCE}\"}")
 RESPONSE=$(curl -X POST $CHALLENGE_URL 2>/dev/null --header "Content-Type: application/json" --verbose  -d "$CHALLENGE_BODY" )
-JWT=$( echo ${RESPONSE}| jq .jwt)
+JWT=$( echo ${RESPONSE}| jq .jwt | sed 's:^.\(.*\).$:\1:')
 echo $JWT
 
 # Make the request

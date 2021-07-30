@@ -22,7 +22,6 @@ server {
 }
 
 
-
 server {
     limit_req_dry_run  on;
     
@@ -40,9 +39,7 @@ server {
         root /var/www/certbot;
         allow all;
     }
-
-    more_set_headers    'Access-Control-Allow-Origin: *';
-
+    
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;
 }

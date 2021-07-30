@@ -5,7 +5,9 @@ if not cookie then
     ngx.log(ngx.ERR, err)
 end
 
-local ok, err = cookie:set({key = "JWT", value = ""});
+-- Set empty with an expires in the past
+local ok, err = cookie:set({key = "JWT", value = "; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"});
+
 
 if not ok then
     ngx.log(ngx.ERR, err)
