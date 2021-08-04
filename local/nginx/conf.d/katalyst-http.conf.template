@@ -3,6 +3,7 @@ rewrite_log on;
 include /etc/nginx/include/upstream.conf;
 include /etc/nginx/include/rates.conf;
 
+
 server {
     limit_req_dry_run  on;
     
@@ -10,8 +11,6 @@ server {
     client_max_body_size 256M;
 
     root /etc/nginx/html;
-
-    more_set_headers    'Access-Control-Allow-Origin: *';
 
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;

@@ -17,10 +17,10 @@ if  test "$STATUS_CODE" -ne $EXPECTED_STATUS; then
 else
   COOKIE=$(cat cookie.txt | grep -o 'JWT.*' | xargs)
   if test "$COOKIE" = "JWT"; then
-    echo "✅ Status code $STATUS_CODE == $EXPECTED_STATUS"
-    exit 0
-  else 
     echo "❌ Set Cookie JWT: $COOKIE != ''"
     exit 1
+  else 
+    echo "✅ Status code $STATUS_CODE == $EXPECTED_STATUS"
+    exit 0
   fi
 fi
