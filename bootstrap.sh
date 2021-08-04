@@ -7,6 +7,7 @@
 
 source .env
 
+
 set -u # break on unbound variables
 set -x # verbose
 
