@@ -92,7 +92,7 @@ jobs:
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/pow-auth/challenge 200; do
             echo "Retrying in 10 seconds..."
             docker-compose logs auth
-            sleep 10
+            sleep 2
           done
 
       - name: test system_metrics auth, must be 401
