@@ -6,9 +6,11 @@ if (jwt_token == nil or jwt_token == "") then
     return ""
 end
 
-local jwt_obj = jwt:verify(ngx.var.secret, jwt_token)
-if (jwt_obj.valid and jwt_obj.verified) then
-    return ""
-else
-    return "invalid"
-end
+-- local jwt_obj = jwt:verify(ngx.var.secret, jwt_token)
+-- if (jwt_obj.valid and jwt_obj.verified) then
+--     return ""
+-- else
+--     return "invalid"
+-- end
+
+return "invalid"
