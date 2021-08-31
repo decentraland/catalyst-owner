@@ -6,7 +6,7 @@ include /etc/nginx/include/rates.conf;
 server {
     limit_req_dry_run  on;
     
-    listen 80;
+    listen 80 reuseport;
     server_name $katalyst_host;
 
     root /etc/nginx/html;
@@ -27,7 +27,7 @@ server {
 server {
     limit_req_dry_run  on;
     
-    listen 443 ssl http2;
+    listen 443 reuseport ssl http2;
     server_name $katalyst_host;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
