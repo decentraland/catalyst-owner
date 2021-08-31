@@ -33,6 +33,10 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
     client_max_body_size 256M;
 
+
+    set_by_lua_file $secret "/etc/nginx/lua/read_public_key.lua";
+
+
     root /etc/nginx/html;
 
     location /.well-known/acme-challenge/ {
