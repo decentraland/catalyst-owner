@@ -62,7 +62,7 @@ jobs:
       - name: wait for comms
         timeout-minutes: 2
         run: |
-          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200; do
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200; do
             echo "Retrying in 10 seconds..."
             docker-compose logs comms-server
             sleep 10
@@ -155,7 +155,7 @@ jobs:
         if: ${{ always() }}
         run: |
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
-          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/layers 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
       - name: fetch content server with JWT
@@ -169,9 +169,9 @@ jobs:
         run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/lambdas/status 200
 
       - name: fetch comms with JWT
-        run: ./.github/workflows/fetch_with_jwt.sh ${{ matrix.catalyst_url }}/pow-auth/challenge ${{ matrix.catalyst_url }}/comms/layers 200
+        run: ./.github/workflows/fetch_with_jwt.sh ${{ matrix.catalyst_url }}/pow-auth/challenge ${{ matrix.catalyst_url }}/comms/status 200
       - name: fetch comms with invalid JWT
-        run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/comms/layers 200
+        run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/comms/status 200
 
       - name: run stop.sh
         if: ${{ always() }}

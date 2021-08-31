@@ -11,6 +11,8 @@ server {
 
     root /etc/nginx/html;
 
+    set_by_lua_file $secret "/etc/nginx/lua/read_public_key.lua";
+
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
         allow all;
@@ -34,6 +36,8 @@ server {
     client_max_body_size 256M;
 
     root /etc/nginx/html;
+
+    set_by_lua_file $secret "/etc/nginx/lua/read_public_key.lua";
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
