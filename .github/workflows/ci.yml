@@ -86,15 +86,6 @@ jobs:
             sleep 10
           done
 
-      - name: wait for auth
-        timeout-minutes: 2
-        run: |
-          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/pow-auth/challenge 200; do
-            echo "Retrying in 10 seconds..."
-            docker-compose logs auth
-            sleep 10
-          done
-
       - name: test system_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 401
@@ -122,9 +113,6 @@ jobs:
       - name: test comms_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 401
-      - name: test pow_auth_metrics auth, must be 401
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/pow_auth_metrics 401
       - name: test lambdas_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 401
