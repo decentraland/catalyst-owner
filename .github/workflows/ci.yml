@@ -158,21 +158,6 @@ jobs:
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
 
-      - name: fetch content server with JWT
-        run: ./.github/workflows/fetch_with_jwt.sh ${{ matrix.catalyst_url }}/pow-auth/challenge ${{ matrix.catalyst_url }}/content/status 200
-      - name: fetch content server with invalid JWT
-        run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/content/status 200
-
-      - name: fetch lambdas server with JWT
-        run: ./.github/workflows/fetch_with_jwt.sh ${{ matrix.catalyst_url }}/pow-auth/challenge ${{ matrix.catalyst_url }}/lambdas/status 200
-      - name: fetch lambdas server with invalid JWT
-        run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/lambdas/status 200
-
-      - name: fetch comms with JWT
-        run: ./.github/workflows/fetch_with_jwt.sh ${{ matrix.catalyst_url }}/pow-auth/challenge ${{ matrix.catalyst_url }}/comms/status 200
-      - name: fetch comms with invalid JWT
-        run: ./.github/workflows/fetch_with_invalid_jwt.sh ${{ matrix.catalyst_url }}/comms/status 200
-
       - name: run stop.sh
         if: ${{ always() }}
         run: ./stop.sh
