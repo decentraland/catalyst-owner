@@ -1,7 +1,7 @@
 #!/bin/bash
 VARIABLE_SUM=$#
 CONTAINER_NAMES=$@
-CONTAINER_VALID_LIST="nginx lambdas content-server comms-server"
+CONTAINER_VALID_LIST="nginx lambdas content-server comms-server pow-auth-server"
 
 printMessage () {
     Type=$1
