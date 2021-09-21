@@ -166,6 +166,8 @@ services:
       - content-server
       - comms-server
       - postgres-exporter
+      - node-exporter
+      - certbot
     logging:
       driver: syslog
       options: { tag: nginx }
