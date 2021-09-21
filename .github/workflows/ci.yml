@@ -140,9 +140,6 @@ jobs:
       - name: test comms_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms_metrics 200 -u test-user2:test-password2
-      - name: test pow_auth_metrics auth, must be 200
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/pow_auth_metrics 200 -u test-user2:test-password2
       - name: test lambdas_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 200 -u test-user2:test-password2
