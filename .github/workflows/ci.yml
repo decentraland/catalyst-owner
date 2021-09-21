@@ -48,7 +48,7 @@ jobs:
           done
 
       - name: wait for nginx
-        timeout-minutes: 2
+        timeout-minutes: 10
         run: |
           docker container ls
           docker-compose logs
