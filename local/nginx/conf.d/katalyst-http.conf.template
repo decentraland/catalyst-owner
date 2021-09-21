@@ -1,7 +1,6 @@
 rewrite_log on;
 
 include /etc/nginx/include/upstream.conf;
-include /etc/nginx/include/rates.conf;
 
 
 server {
@@ -13,9 +12,7 @@ server {
     client_max_body_size 256M;
 
     root /etc/nginx/html;
-
-    set_by_lua_file $secret "/etc/nginx/lua/read_public_key.lua";
-
+    
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;
 }
