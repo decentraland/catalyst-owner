@@ -355,7 +355,7 @@ fi
 
 echo "## Restarting containers... "
 docker-compose down
-docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" run -d nginx
+docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" run -d --name nginx nginx
 
 if test $? -ne 0; then
   echo -n "Failed to start catalyst node"
