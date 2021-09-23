@@ -1,7 +1,6 @@
 rewrite_log on;
 
 include /etc/nginx/include/upstream.conf;
-include /etc/nginx/include/rates.conf;
 
 server {
     limit_req_dry_run  on;
@@ -36,8 +35,6 @@ server {
     client_max_body_size 256M;
 
     root /etc/nginx/html;
-
-    set_by_lua_file $secret "/etc/nginx/lua/read_public_key.lua";
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;

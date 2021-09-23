@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "contents": true,
+    "database": true
+  }
+}
