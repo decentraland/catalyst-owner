@@ -30,9 +30,8 @@ leCertEmit () {
       -out '$path/fullchain.pem' \
       -subj '/CN=localhost'" certbot
 
-
   echo -n "## Starting nginx ..."
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" --force-recreate up -d nginx
+  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --force-recreate -d nginx
 
   if test $? -ne 0; then
     echo -n "Failed to start nginx...  "
@@ -79,8 +78,9 @@ leCertEmit () {
         until [ $serverAlive -lt 1 ]; do
           echo "Checking server liveness: ${CATALYST_URL}"
           statusCode=$(curl --insecure -I -vv -s --http1.1 --output /dev/stderr --write-out "%{http_code}" "${CATALYST_URL}")
-          echo ">> statusCode: ${statusCode} returnCode: $?"
-          if [ "$statusCode" -lt 500 ]; then
+	  returnCode=$?
+          echo ">> statusCode: ${statusCode} returnCode: ${returnCode}"
+          if [ "$statusCode" -lt 500 ] && [ "$returnCode" -eq 0 ]; then
             serverAlive=0
             echo ">> Success"
           else
