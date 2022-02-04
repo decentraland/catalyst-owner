@@ -3,10 +3,10 @@ rewrite_log on;
 include /etc/nginx/include/upstream.conf;
 include /etc/nginx/include/rates.conf;
 
-# Maps ip address to $user_identifier variable if request is not of type OPTIONS
+# Maps ip address to $user_identifier variable if request is of type GET
 map $request_method $user_identifier {
-    'OPTIONS'   '';
-    default     $http_x_forwarded_for;
+    'GET'       $http_x_forwarded_for;
+    default     '';
 }
 
 server {
