@@ -6,7 +6,7 @@ include /etc/nginx/include/rates.conf;
 # Maps ip address to $user_identifier variable if request is not of type OPTIONS
 map $request_method $user_identifier {
     'OPTIONS'   '';
-    default     $http_x_forwarded_for;
+    default     ${RATE_LIMIT_NGINX_VAR};
 }
 
 server {

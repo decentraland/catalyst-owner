@@ -1,0 +1,72 @@
+# Tier A
+location ~ ^/lambdas/(contracts|crypto|explore|status|health)(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_a burst=20 nodelay;
+
+    proxy_pass http://lambdas/$1$2$is_args$args;
+}
+
+# Tier B
+location ~ ^/lambdas/collections$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_b burst=8 nodelay;
+
+    proxy_pass http://lambdas/collections$is_args$args;
+}
+location ~ ^/lambdas/collections/(?!contents+)(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_b burst=8 nodelay;
+
+    proxy_pass http://lambdas/collections/$1$2$is_args$args;
+}
+location ~ ^/lambdas/contentv2/(parcel_info|scenes)(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_b burst=8 nodelay;
+
+    proxy_pass http://lambdas/contentv2/$1$2$is_args$args;
+}
+
+# Tier C
+location ~ ^/lambdas/contentv2/contents/(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_c burst=50 nodelay;
+
+    proxy_pass http://lambdas/contentv2/contents/$1$is_args$args;
+}
+location ~ ^/lambdas/collections/contents(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_c burst=50 nodelay;
+
+    proxy_pass http://lambdas/collections/contents$1$is_args$args;
+}
+location ~ ^/lambdas/images(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_c burst=50 nodelay;
+
+    proxy_pass http://lambdas/images$1$is_args$args;
+}
+# TODO: This should be tier_b
+location ~ ^/lambdas/(profile|profiles)(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=tier_c burst=50 nodelay;
+
+    proxy_pass http://lambdas/$1$2$is_args$args;
+}
+
+# Default Tier
+location ~ ^/lambdas/(.*)$ {
+    include /etc/nginx/include/lambdas_proxy.conf;
+
+    limit_req zone=default_tier burst=5 nodelay;
+    
+    proxy_pass http://lambdas/$1$is_args$args;
+
+}
