@@ -1,6 +1,11 @@
 **/.DS_Store
 local/certbot/conf/**
 local/nginx/conf.d/00-katalyst.conf
+local/nginx/include/rates.conf
+local/nginx/include/routes.conf
+local/nginx/include/comms.conf
+local/nginx/include/content.conf
+local/nginx/include/lambdas.conf
 .env-database-*
 .env
 .env-cron

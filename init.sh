@@ -4,6 +4,11 @@ export data_path="local/certbot"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
+export nginx_rates_file="local/nginx/include/rates.conf"
+export nginx_routes_file="local/nginx/include/routes.conf"
+export nginx_content_file="local/nginx/include/content.conf"
+export nginx_comms_file="local/nginx/include/comms.conf"
+export nginx_lambdas_file="local/nginx/include/lambdas.conf"
 
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
@@ -162,6 +167,40 @@ printMessage () {
     esac
 }
 
+generate_nginx_config_files() {
+  if ! [[ "$1" =~ ^(${nginx_server_template_https}|${nginx_server_template_http})$ ]]; then
+    echo -n "Failed generating nginx config files... "
+    printMessage failed
+    exit 1
+  fi
+  echo -n "## Generating nginx config files..."
+  template_ext=".template"
+  # Replacing $RATE_LIMIT_NGINX_VAR and $katalyst_host in $nginx_server_file
+  sed "s/\${RATE_LIMIT_NGINX_VAR}/\$${RATE_LIMIT_NGINX_VAR}/g;s/\$katalyst_host/${nginx_url}/g" $1 > ${nginx_server_file}
+  # Replacing $RATE_LIMIT_NGINX_VAR for rates.conf
+  sed "s/\${RATE_LIMIT_NGINX_VAR}/\$${RATE_LIMIT_NGINX_VAR}/g" "${nginx_rates_file}${template_ext}" > ${nginx_rates_file}
+  # Creating content.conf, lambdas.conf and comms.conf and routes.conf with or without rate limiting enabled
+  if [ $RATE_LIMIT_ENABLED != 'true' ]; then
+    sed "/limit_req/,+1d" "${nginx_routes_file}${template_ext}" > ${nginx_routes_file}
+    sed "/limit_req/,+1d" "${nginx_content_file}${template_ext}" > ${nginx_content_file}
+    sed "/limit_req/,+1d" "${nginx_comms_file}${template_ext}" > ${nginx_comms_file}
+    sed "/limit_req/,+1d" "${nginx_lambdas_file}${template_ext}" > ${nginx_lambdas_file}
+  else
+    cp "${nginx_routes_file}${template_ext}" ${nginx_routes_file}
+    cp "${nginx_content_file}${template_ext}" ${nginx_content_file}
+    cp "${nginx_comms_file}${template_ext}" ${nginx_comms_file}
+    cp "${nginx_lambdas_file}${template_ext}" ${nginx_lambdas_file}
+  fi
+  printMessage ok
+  echo "## Generated nginx config files:"
+  echo -n " - $nginx_server_file, from template: " ; echo -e "\033[33m ${1} \033[39m"
+  echo -n " - $nginx_rates_file, from template: " ; echo -e "\033[33m ${nginx_rates_file}${template_ext} \033[39m"
+  echo -n " - $nginx_routes_file, from template: " ; echo -e "\033[33m ${nginx_routes_file}${template_ext} \033[39m"
+  echo -n " - $nginx_content_file, from template: " ; echo -e "\033[33m ${nginx_content_file}${template_ext} \033[39m"
+  echo -n " - $nginx_comms_file, from template: " ; echo -e "\033[33m ${nginx_comms_file}${template_ext} \033[39m"
+  echo -n " - $nginx_lambdas_file, from template: " ; echo -e "\033[33m ${nginx_lambdas_file}${template_ext} \033[39m"
+}
+
 ##
 # Main program
 ##
@@ -217,6 +256,8 @@ fi
 DOCKER_TAG=${DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
+RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-false}
+RATE_LIMIT_NGINX_VAR=${RATE_LIMIT_NGINX_VAR:-binary_remote_addr}
 
 if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst. \033[39m"
@@ -228,6 +269,8 @@ echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STOR
 echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
 echo -n " - ETH_NETWORK:             " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
 echo -n " - REGENERATE:              " ; echo -e "\033[33m ${REGENERATE} \033[39m"
+echo -n " - RATE_LIMIT_ENABLED:      " ; echo -e "\033[33m ${RATE_LIMIT_ENABLED} \033[39m"
+echo -n " - RATE_LIMIT_NGINX_VAR:    " ; echo -e "\033[33m ${RATE_LIMIT_NGINX_VAR} \033[39m"
 echo ""
 echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
@@ -313,8 +356,7 @@ fi
 export nginx_url="$(echo "${CATALYST_URL##*/}")"
 if [ "${CATALYST_URL}" != "http://localhost" ]; then
     echo "## Using HTTPS."
-    echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
-    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
+    generate_nginx_config_files $nginx_server_template_https
 
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
@@ -340,11 +382,8 @@ if [ "${CATALYST_URL}" != "http://localhost" ]; then
     printMessage ok
 else
     echo "## Using HTTP because CATALYST_URL is set to http://localhost"
-    echo -n "## Replacing value \$katalyst_host on nginx server file... "
-    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
-    printMessage ok
+    generate_nginx_config_files $nginx_server_template_http
 fi
-
 
 matches=$(cat ${nginx_server_file} | grep ${nginx_url}  | wc -l)
 if test $matches -eq 0; then

@@ -5,8 +5,8 @@ include /etc/nginx/include/rates.conf;
 
 # Maps ip address to $user_identifier variable if request is of type GET
 map $request_method $user_identifier {
-    'GET'       $http_x_forwarded_for;
-    default     '';
+    'GET'     ${RATE_LIMIT_NGINX_VAR};
+    default   '';
 }
 
 server {
