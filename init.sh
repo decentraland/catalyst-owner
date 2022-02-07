@@ -5,13 +5,10 @@ export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
 export nginx_rates_file="local/nginx/include/rates.conf"
-export nginx_rates_template_file="local/nginx/include/rates.conf.template"
+export nginx_routes_file="local/nginx/include/routes.conf"
 export nginx_content_file="local/nginx/include/content.conf"
-export nginx_content_template_file="local/nginx/include/content.conf.template"
 export nginx_comms_file="local/nginx/include/comms.conf"
-export nginx_comms_template_file="local/nginx/include/comms.conf.template"
 export nginx_lambdas_file="local/nginx/include/lambdas.conf"
-export nginx_lambdas_template_file="local/nginx/include/lambdas.conf.template"
 
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
@@ -177,26 +174,31 @@ generate_nginx_config_files() {
     exit 1
   fi
   echo -n "## Generating nginx config files..."
+  template_ext=".template"
   # Replacing $RATE_LIMIT_NGINX_VAR and $katalyst_host in $nginx_server_file
   sed "s/\${RATE_LIMIT_NGINX_VAR}/\$${RATE_LIMIT_NGINX_VAR}/g;s/\$katalyst_host/${nginx_url}/g" $1 > ${nginx_server_file}
   # Replacing $RATE_LIMIT_NGINX_VAR for rates.conf
-  sed "s/\${RATE_LIMIT_NGINX_VAR}/\$${RATE_LIMIT_NGINX_VAR}/g" ${nginx_rates_template_file} > ${nginx_rates_file}
-  # Creating content.conf, lambdas.conf and comms.conf with or without rate limiting enabled
-  if test $RATE_LIMIT_ENABLED -eq 1; then
-    cp ${nginx_content_template_file} ${nginx_content_file}
-    cp ${nginx_comms_template_file} ${nginx_comms_file}
-    cp ${nginx_lambdas_template_file} ${nginx_lambdas_file}
+  sed "s/\${RATE_LIMIT_NGINX_VAR}/\$${RATE_LIMIT_NGINX_VAR}/g" "${nginx_rates_file}${template_ext}" > ${nginx_rates_file}
+  # Creating content.conf, lambdas.conf and comms.conf and routes.conf with or without rate limiting enabled
+  if [ $RATE_LIMIT_ENABLED != 'true' ]; then
+    sed "/limit_req/,+1d" "${nginx_routes_file}${template_ext}" > ${nginx_routes_file}
+    sed "/limit_req/,+1d" "${nginx_content_file}${template_ext}" > ${nginx_content_file}
+    sed "/limit_req/,+1d" "${nginx_comms_file}${template_ext}" > ${nginx_comms_file}
+    sed "/limit_req/,+1d" "${nginx_lambdas_file}${template_ext}" > ${nginx_lambdas_file}
   else
-    sed "/limit_req/,+1d" ${nginx_content_template_file} > ${nginx_content_file}
-    sed "/limit_req/,+1d" ${nginx_comms_template_file} > ${nginx_comms_file}
-    sed "/limit_req/,+1d" ${nginx_lambdas_template_file} > ${nginx_lambdas_file}
+    cp "${nginx_routes_file}${template_ext}" ${nginx_routes_file}
+    cp "${nginx_content_file}${template_ext}" ${nginx_content_file}
+    cp "${nginx_comms_file}${template_ext}" ${nginx_comms_file}
+    cp "${nginx_lambdas_file}${template_ext}" ${nginx_lambdas_file}
   fi
   printMessage ok
   echo "## Generated nginx config files:"
   echo -n " - $nginx_server_file, from template: " ; echo -e "\033[33m ${1} \033[39m"
-  echo -n " - $nginx_content_file, from template: " ; echo -e "\033[33m ${nginx_content_template_file} \033[39m"
-  echo -n " - $nginx_comms_file, from template: " ; echo -e "\033[33m ${nginx_comms_template_file} \033[39m"
-  echo -n " - $nginx_lambdas_file, from template: " ; echo -e "\033[33m ${nginx_lambdas_template_file} \033[39m"
+  echo -n " - $nginx_rates_file, from template: " ; echo -e "\033[33m ${nginx_rates_file}${template_ext} \033[39m"
+  echo -n " - $nginx_routes_file, from template: " ; echo -e "\033[33m ${nginx_routes_file}${template_ext} \033[39m"
+  echo -n " - $nginx_content_file, from template: " ; echo -e "\033[33m ${nginx_content_file}${template_ext} \033[39m"
+  echo -n " - $nginx_comms_file, from template: " ; echo -e "\033[33m ${nginx_comms_file}${template_ext} \033[39m"
+  echo -n " - $nginx_lambdas_file, from template: " ; echo -e "\033[33m ${nginx_lambdas_file}${template_ext} \033[39m"
 }
 
 ##
@@ -254,7 +256,7 @@ fi
 DOCKER_TAG=${DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
-RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-0}
+RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-false}
 RATE_LIMIT_NGINX_VAR=${RATE_LIMIT_NGINX_VAR:-binary_remote_addr}
 
 if [ "$DOCKER_TAG" != "latest" ]; then
