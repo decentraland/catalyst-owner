@@ -2,7 +2,7 @@
 location ~ ^/lambdas/(contracts|crypto|explore|status|health)(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_a burst=20 nodelay;
+    # limit_req zone=tier_a burst=20 nodelay;
 
     proxy_pass http://lambdas/$1$2$is_args$args;
 }
@@ -11,21 +11,21 @@ location ~ ^/lambdas/(contracts|crypto|explore|status|health)(.*)$ {
 location ~ ^/lambdas/collections$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_b burst=15 nodelay;
+    # limit_req zone=tier_b burst=15 nodelay;
 
     proxy_pass http://lambdas/collections$is_args$args;
 }
 location ~ ^/lambdas/collections/(?!contents+)(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_b burst=8 nodelay;
+    # limit_req zone=tier_b burst=8 nodelay;
 
     proxy_pass http://lambdas/collections/$1$2$is_args$args;
 }
 location ~ ^/lambdas/contentv2/(parcel_info|scenes)(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_b burst=8 nodelay;
+    # limit_req zone=tier_b burst=8 nodelay;
 
     proxy_pass http://lambdas/contentv2/$1$2$is_args$args;
 }
@@ -34,21 +34,21 @@ location ~ ^/lambdas/contentv2/(parcel_info|scenes)(.*)$ {
 location ~ ^/lambdas/contentv2/contents/(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_c burst=50 nodelay;
+    # limit_req zone=tier_c burst=50 nodelay;
 
     proxy_pass http://lambdas/contentv2/contents/$1$is_args$args;
 }
 location ~ ^/lambdas/collections/contents(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_c burst=50 nodelay;
+    # limit_req zone=tier_c burst=50 nodelay;
 
     proxy_pass http://lambdas/collections/contents$1$is_args$args;
 }
 location ~ ^/lambdas/images(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_c burst=50 nodelay;
+    # limit_req zone=tier_c burst=50 nodelay;
 
     proxy_pass http://lambdas/images$1$is_args$args;
 }
@@ -57,7 +57,7 @@ location ~ ^/lambdas/images(.*)$ {
 location ~ ^/lambdas/(profile|profiles)(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=tier_d burst=50 nodelay;
+    # limit_req zone=tier_d burst=50 nodelay;
 
     proxy_pass http://lambdas/$1$2$is_args$args;
 }
@@ -66,7 +66,7 @@ location ~ ^/lambdas/(profile|profiles)(.*)$ {
 location ~ ^/lambdas/(.*)$ {
     include /etc/nginx/include/lambdas_proxy.conf;
 
-    limit_req zone=default_tier burst=5 nodelay;
+    # limit_req zone=default_tier burst=5 nodelay;
     
     proxy_pass http://lambdas/$1$is_args$args;
 

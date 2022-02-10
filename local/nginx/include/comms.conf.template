@@ -11,7 +11,7 @@ location  ~ ^/comms/(peers|islands)(.*)$ {
 location  ~ ^/comms/(status|config)(.*)$ {
     include /etc/nginx/include/comms_proxy.conf;
 
-    limit_req zone=tier_a burst=20 nodelay;
+    # limit_req zone=tier_a burst=20 nodelay;
 
     proxy_pass http://comms-server/$1$2$is_args$args;
 }
@@ -20,7 +20,7 @@ location  ~ ^/comms/(status|config)(.*)$ {
 location  ~ ^/comms/(.*)$ {
     include /etc/nginx/include/comms_proxy.conf;
 
-    limit_req zone=default_tier burst=5 nodelay;
+    # limit_req zone=default_tier burst=5 nodelay;
 
     proxy_pass http://comms-server/$1$is_args$args;
 }
