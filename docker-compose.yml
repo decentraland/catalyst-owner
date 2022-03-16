@@ -9,9 +9,8 @@ volumes:
 
 services:
   comms-server:
-    image: decentraland/katalyst:${DOCKER_TAG:-latest}
+    image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
     working_dir: /app
-    command: comms
     env_file:
       - .env
       - .env-advanced
@@ -82,9 +81,8 @@ services:
       options: { tag: node-exporter }
 
   content-server:
-    image: decentraland/katalyst:${DOCKER_TAG:-latest}
+    image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
     working_dir: /app
-    command: content
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
@@ -107,9 +105,8 @@ services:
       options: { tag: content-server }
 
   lambdas:
-    image: decentraland/katalyst:${DOCKER_TAG:-latest}
+    image: decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
     working_dir: /app
-    command: lambdas
     restart: always
     environment:
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
