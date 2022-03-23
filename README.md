@@ -6,7 +6,7 @@ Here you will find everything you need to set up you our Catalyst node.
 
 # Important notice!
 
-This repository is prepared to be auto updated with cron jobs. The updated branches are `development` and `master`. Where `development` is the canary release to test a configuration and `master` branch is the "stable" configuration for the catalysts.
+This repository is prepared to be auto updated with cron jobs. The updated branches are `development` and `master`. Where `development` is the canary release to test a configuration and `master` branch is the stable configuration for the catalysts.
 
 It is _highly recommended_ that you use a fork of this repository to avoid any security issues since it may run code directly in your catalyst.
 
@@ -181,3 +181,11 @@ This file is automatically configured by `userdata.sh` to run when the instance 
 ## `mount.sh`
 
 This file must be executed as root. Its only responsibiliy is to mount the MOUNT_DISK volume to the CONTENT_SERVER_STORAGE folder if necessary.
+
+## [FAQ](https://github.com/decentraland/catalyst-owner/blob/master/docs/FAQ.md)
+## [SNS Workflow](https://github.com/decentraland/catalyst-owner/blob/master/docs/SNS.md)
+## [Metrics](https://github.com/decentraland/catalyst-owner/blob/master/docs/METRICS.md)
+## [Compression](https://github.com/decentraland/catalyst-owner/blob/master/docs/COMPRESSION.md)
+## [Logs](https://github.com/decentraland/catalyst-owner/blob/master/docs/LOGS.md)
+## [Config](https://github.com/decentraland/catalyst-owner/blob/master/docs/CONFIG.md)
+
