@@ -91,3 +91,4 @@ To stop a specific container on your node:
 ## [Compression](https://github.com/decentraland/catalyst-owner/blob/master/docs/COMPRESSION.md)
 ## [Logs](https://github.com/decentraland/catalyst-owner/blob/master/docs/LOGS.md)
 ## [Config](https://github.com/decentraland/catalyst-owner/blob/master/docs/CONFIG.md)
+
