@@ -218,6 +218,7 @@ export DOCKER_TAG=${DOCKER_TAG:-latest}
 export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
+MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
 
 if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
@@ -375,11 +376,16 @@ fi
 
 echo "## Restarting containers... "
 docker-compose down
-docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
 
-if test $? -ne 0; then
-  echo -n "Failed to start catalyst node"
-  printMessage failed
-  exit 1
+if test ${MAINTENANCE_MODE} -eq 1; then
+  echo 'Running maintenance mode'
+  docker-compose -f docker-compose-maintenance.yml up --abort-on-container-exit
+else
+  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
+  if test $? -ne 0; then
+    echo -n "Failed to start catalyst node"
+    printMessage failed
+    exit 1
+  fi
+  echo "## Catalyst server is up and running at $CATALYST_URL"
 fi
-echo "## Catalyst server is up and running at $CATALYST_URL"
