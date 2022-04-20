@@ -83,13 +83,18 @@ To stop a specific container on your node:
 To stop a specific container on your node:
 
 ```
-./stop.sh [ nginx | lambdas | content-server | comms-server ]
+./stop.sh [ nginx | lambdas | content-server | comms-server | pow-auth-server | nats | archipelago | explorer-bff ]
 ```
 
 ## [FAQ](https://github.com/decentraland/catalyst-owner/blob/master/docs/FAQ.md)
+
 ## [SNS Workflow](https://github.com/decentraland/catalyst-owner/blob/master/docs/SNS.md)
+
 ## [Metrics](https://github.com/decentraland/catalyst-owner/blob/master/docs/METRICS.md)
+
 ## [Compression](https://github.com/decentraland/catalyst-owner/blob/master/docs/COMPRESSION.md)
+
 ## [Logs](https://github.com/decentraland/catalyst-owner/blob/master/docs/LOGS.md)
+
 ## [Config](https://github.com/decentraland/catalyst-owner/blob/master/docs/CONFIG.md)
 
