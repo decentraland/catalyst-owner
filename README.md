@@ -44,6 +44,7 @@ There is also some advanced configuration in the [.env-advanced](.env-advanced) 
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :------: |
 | ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production                                                                                                                                                                                                          | mainnet |   yes    |
 | REGENERATE  | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
+| MAINTENANCE_MODE  | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.  |    0    |    no    |
 
 ## Running your Catalyst
 
