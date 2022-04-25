@@ -378,7 +378,7 @@ echo "## Restarting containers... "
 docker-compose down
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
-  docker-compose -f docker-compose-maintenance.yml up --abort-on-container-exit -d
+  docker-compose -f docker-compose-maintenance.yml up -d
 else
   docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
   if test $? -ne 0; then
