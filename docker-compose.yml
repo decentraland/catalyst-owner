@@ -15,6 +15,7 @@ services:
       - .env
       - .env-advanced
     environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
       - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
     expose:
       - "9000"
@@ -84,6 +85,7 @@ services:
     image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
     working_dir: /app
     environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - STORAGE_ROOT_FOLDER=/app/storage/content_server/
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
@@ -109,6 +111,7 @@ services:
     working_dir: /app
     restart: always
     environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
@@ -178,17 +181,3 @@ services:
     logging:
       driver: syslog
       options: { tag: certbot }
-
-
-  pow-auth-server:
-    image: decentraland/pow-authorization-server:1.2.0
-    expose:
-      - "5000"
-    restart: always
-    volumes:
-      - shared_keys:/secrets
-    environment:
-      - SECRETS_DIRECTORY=/secrets
-    logging:
-      driver: syslog
-      options: { tag: pow-auth }

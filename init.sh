@@ -388,4 +388,3 @@ else
   fi
   echo "## Catalyst server is up and running at $CATALYST_URL"
 fi
-
