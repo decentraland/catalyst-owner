@@ -376,9 +376,9 @@ fi
 
 echo "## Restarting containers... "
 docker-compose down
-
 if test ${MAINTENANCE_MODE} -eq 1; then
-  echo 'running maintenance mode'
+  echo 'Running maintenance...'
+  docker-compose -f docker-compose-maintenance.yml up -d
 else
   docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
   if test $? -ne 0; then
@@ -388,5 +388,3 @@ else
   fi
   echo "## Catalyst server is up and running at $CATALYST_URL"
 fi
-
-
