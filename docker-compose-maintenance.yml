@@ -1,0 +1,53 @@
+version: "3"
+
+volumes:
+  content_server_storage: {}
+
+services:
+  postgres:
+    image: postgres:12
+    container_name: ${POSTGRES_HOST:-postgres}
+    env_file:
+      - .env-database-admin
+      - .env-database-content
+    expose:
+      - ${POSTGRES_PORT:-5432}
+    restart: always
+    shm_size: 2560MB
+    volumes:
+      - "${CONTENT_SERVER_STORAGE}/database:/var/lib/postgresql/data"
+      - "./local/postgres/custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro"
+      - "./local/postgres/postgresql.conf:/etc/postgresql/postgresql.conf"
+      - "./local/postgres/scripts/always:/always-initdb.d:ro"
+      - "./local/postgres/scripts/initial:/docker-entrypoint-initdb.d:ro"
+    command: custom-entrypoint.sh -c config_file=/etc/postgresql/postgresql.conf
+    logging:
+      driver: syslog
+      options: { tag: postgres }
+
+  content-server:
+    image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    working_dir: /app
+    command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "content/entrypoints/run-maintenance.js" ]
+    restart: "no"
+    environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
+      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - STORAGE_ROOT_FOLDER=/app/storage/content_server/
+      - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - PG_QUERY_TIMEOUT=600000
+    env_file:
+      - .env
+      - .env-advanced
+      - .env-database-content
+    depends_on:
+      - postgres
+    expose:
+      - "6969"
+    volumes:
+      - "${CONTENT_SERVER_STORAGE}:/app/storage/content_server/"
+    logging:
+      driver: syslog
+      options: { tag: content-server }
