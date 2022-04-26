@@ -46,7 +46,7 @@ services:
       - "NATS_URL=nats://nats:4222"
     restart: always
     expose:
-      - "5000"
+      - "3000"
     logging:
       driver: syslog
       options: { tag: explorer-bff }
