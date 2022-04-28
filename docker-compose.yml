@@ -29,6 +29,7 @@ services:
       - "LIVEKIT_API_KEY=${LIVEKIT_API_KEY}"
       - "LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}"
       - "WS_ROOM_SERVICE_URL=${WS_ROOM_SERVICE_URL}"
+      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
     restart: always
     logging:
       driver: syslog
@@ -44,6 +45,7 @@ services:
       - .env-advanced
     environment:
       - "NATS_URL=nats://nats:4222"
+      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
     restart: always
     expose:
       - "3000"
