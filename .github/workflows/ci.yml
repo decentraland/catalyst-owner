@@ -95,6 +95,9 @@ jobs:
       - name: test node_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 401
+      - name: test nats_metrics auth, must be 401
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/nats_metrics 401
 
       - name: add a user to enable system metrics
         if: ${{ always() }}
@@ -109,6 +112,9 @@ jobs:
       - name: test node_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
+      - name: test nats_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/nats_metrics 200 -u test-user:test-password
 
       - name: test comms_metrics auth, must be 401
         if: ${{ always() }}
