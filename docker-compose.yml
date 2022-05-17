@@ -20,8 +20,6 @@ services:
   archipelago:
     image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
     working_dir: /app
-    expose:
-      - "3000"
     env_file:
       - .env
       - .env-advanced
