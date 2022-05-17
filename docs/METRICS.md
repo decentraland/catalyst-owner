@@ -6,6 +6,7 @@ Metrics are exposed in the following endpoints:
 - `/content_metrics` - content server
 - `/lambdas_metrics` - lambdas
 - `/explorer_bff_metrics` - explorer-bff server
+- `/archipelago_metrics` - archipelago service
 - `/system_metrics` - cadvisor
 - `/postgres_metrics` - postgres exporter
 - `/pow_auth_metrics` - POW auth server

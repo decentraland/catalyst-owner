@@ -122,6 +122,9 @@ jobs:
       - name: test explorer_bff_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/explorer_bff_metrics 401
+      - name: test archipelago_metrics auth, must be 401
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago_metrics 401
 
       - name: add a user to enable metrics
         if: ${{ always() }}
@@ -139,6 +142,9 @@ jobs:
       - name: test explorer_bff_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/explorer_bff_metrics 200 -u test-user2:test-password2
+      - name: test archipelago_metrics auth, must be 200
+        if: ${{ always() }}
+        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago_metrics 200 -u test-user2:test-password2
 
       - name: smoke test endpoints
         if: ${{ always() }}
