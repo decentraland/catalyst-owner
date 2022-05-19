@@ -300,23 +300,23 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
-docker pull "decentraland/catalyst-content:${DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-content:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the content's docker image with tag ${DOCKER_TAG:latest}"
+  echo -n "Failed to pull the content's docker image with tag ${DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
 
-docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:latest}"
+  echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
 
-docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:latest}"
+  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
