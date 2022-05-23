@@ -138,9 +138,9 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     depends_on:
-      - comms-server
+      # - comms-server
       - content-server
-      - lambdas
+      # - lambdas
 
   nginx:
     container_name: nginx
@@ -160,10 +160,10 @@ services:
       - shared_keys:/secrets
     restart: always
     depends_on:
-      - lambdas
+      # - lambdas
       - cadvisor
       - content-server
-      - comms-server
+      # - comms-server
       - postgres-exporter
       - node-exporter
       - certbot

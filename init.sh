@@ -307,12 +307,12 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:latest}"
-if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:latest}"
-  printMessage failed
-  exit 1
-fi
+# docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:latest}"
+# if [ $? -ne 0 ]; then
+#   echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:latest}"
+#   printMessage failed
+#   exit 1
+# fi
 
 docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:latest}"
 if [ $? -ne 0 ]; then
