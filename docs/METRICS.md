@@ -2,16 +2,15 @@
 
 Metrics are exposed in the following endpoints:
 
-- `/comms_metrics` - communications server
-- `/content_metrics` - content server
-- `/lambdas_metrics` - lambdas
-- `/system_metrics` - cadvisor
-- `/postgres_metrics` - postgres exporter
-- `/pow_auth_metrics` - POW auth server
+- `/comms_metrics` - Communications server
+- `/content_metrics` - Content server
+- `/lambdas_metrics` - Lambdas server
+- `/system_metrics` - cAdvisor
+- `/postgres_metrics` - Postgres exporter
 
-Metrics are protected under basic auth since prometheus scrappers can handle it by default. System metrics (cadvisor + postgres) have a special set of .htpasswd credentials: .htpasswd-system.
+Metrics are protected under basic auth since Prometheus scrappers can handle it by default. System metrics (cAdvisor + Postgres) have a special set of `.htpasswd` credentials: `.htpasswd-system`.
 
-To add an user and password to that basic auth execute:
+To add a user and password to that basic auth execute:
 
 ```bash
 # for catalyst metrics:
