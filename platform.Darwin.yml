@@ -14,3 +14,7 @@ services:
   content-server: *COMMON
   lambdas: *COMMON
   cadvisor: *COMMON
+  nats: *COMMON
+  nats-exporter: *COMMON
+  explorer-bff: *COMMON
+  archipelago: *COMMON
