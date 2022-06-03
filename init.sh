@@ -228,6 +228,14 @@ if [ "$LIGHTHOUSE_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Lighthouse Node. \033[39m"
 fi
 
+if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Archipelago Node. \033[39m"
+fi
+
+if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Explorer BFF Node. \033[39m"
+fi
+
 echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
 echo -n " - LIGHTHOUSE_DOCKER_TAG:   " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
@@ -300,23 +308,37 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
-docker pull "decentraland/catalyst-content:${DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-content:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the content's docker image with tag ${DOCKER_TAG:latest}"
+  echo -n "Failed to pull the content's docker image with tag ${DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
 
-docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:latest}"
+  echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
 
-docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:latest}"
+docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:latest}"
+  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the explorer-bff's docker image with tag ${EXPLORER_BFF_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi

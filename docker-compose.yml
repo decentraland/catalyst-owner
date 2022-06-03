@@ -8,6 +8,66 @@ volumes:
   shared_keys:
 
 services:
+  nats:
+    image: nats:2.8
+    container_name: nats
+    expose:
+      - "4222"
+      - "8222"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: nats }
+
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:0.9.3
+    container_name: nats-exporter
+    command: "-varz -connz -subz -routez http://nats:8222"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: nats-exporter }
+    depends_on:
+      - nats
+
+  archipelago:
+    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+      - "LIVEKIT_URL=${LIVEKIT_URL}"
+      - "LIVEKIT_API_KEY=${LIVEKIT_API_KEY}"
+      - "LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}"
+      - "WS_ROOM_SERVICE_URL=${WS_ROOM_SERVICE_URL}"
+      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: archipelago }
+    depends_on:
+      - nats
+
+  explorer-bff:
+    image: quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
+    restart: always
+    expose:
+      - "3000"
+    logging:
+      driver: syslog
+      options: { tag: explorer-bff }
+    depends_on:
+      - nats
+
   comms-server:
     image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
     working_dir: /app
@@ -69,7 +129,7 @@ services:
     container_name: node-exporter
     restart: unless-stopped
     volumes:
-      - '/:/rootfs:ro'
+      - "/:/rootfs:ro"
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     command:
@@ -141,6 +201,8 @@ services:
       - comms-server
       - content-server
       - lambdas
+      - explorer-bff
+      - archipelago
 
   nginx:
     container_name: nginx
@@ -167,6 +229,10 @@ services:
       - postgres-exporter
       - node-exporter
       - certbot
+      - explorer-bff
+      - archipelago
+      - nats
+      - nats-exporter
     logging:
       driver: syslog
       options: { tag: nginx }
