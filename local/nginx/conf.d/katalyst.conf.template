@@ -1,34 +1,42 @@
 rewrite_log on;
 
-include /etc/nginx/include/upstream.conf;
+{{> ../include/upstream.conf}}
 include /etc/nginx/include/rates.conf;
 
 server {
-    
     listen 80 reuseport;
-    server_name $katalyst_host;
+    server_name {{KATALYST_HOST}};
 
     root /etc/nginx/html;
 
+    {{#LOCAL_RUN}}
+    client_max_body_size 256M;
+
+    include /etc/nginx/include/routes.conf;
+    include /etc/nginx/include/metrics.conf;
+    {{/LOCAL_RUN}}
+    
+    {{^LOCAL_RUN}}
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
         allow all;
     }
 
     location / {
-        return 301 https://$katalyst_host$request_uri;
+        return 301 https://{{KATALYST_HOST}}$request_uri;
     }
+    {{/LOCAL_RUN}}
 }
 
-
+{{^LOCAL_RUN}}
 server {
     
     listen 443 reuseport ssl http2;
-    server_name $katalyst_host;
+    server_name {{KATALYST_HOST}};
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-    ssl_certificate /etc/letsencrypt/live/$katalyst_host/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/{{KATALYST_HOST}}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{KATALYST_HOST}}/privkey.pem;
     client_max_body_size 256M;
 
     root /etc/nginx/html;
@@ -41,3 +49,4 @@ server {
     include /etc/nginx/include/routes.conf;
     include /etc/nginx/include/metrics.conf;
 }
+{{/LOCAL_RUN}}

@@ -1,9 +1,8 @@
 #!/bin/bash
 export rsa_key_size=4096
 export data_path="local/certbot"
-export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
-export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
-export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
+export nginx_server_file="local/nginx/conf.d/katalyst.conf"
+export nginx_server_template="local/nginx/conf.d/katalyst.conf.template"
 
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
@@ -316,7 +315,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ "${CONTENT_ONLY}" ]; then
-    echo "Running as CONTENT_ONLY - Lambda's docker image not being pulled"
+    echo "## Running as CONTENT_ONLY - Lambda's docker image not being pulled"
 else
   docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}"
   if [ $? -ne 0 ]; then
@@ -358,10 +357,11 @@ fi
 # Setup the nginx conf file with plain http
 # else, create new certs
 export nginx_url="$(echo "${CATALYST_URL##*/}")"
+echo "## Setting KATALYST_HOST = ${nginx_url} in .env"
+grep -qF 'KATALYST_HOST=' .env || echo "KATALYST_HOST=${nginx_url}" >> .env
 if [ "${CATALYST_URL}" != "http://localhost" ]; then
-    echo "## Using HTTPS."
-    echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
-    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
+    echo "## Using HTTPS. Setting LOCAL_RUN=false in .env"
+    grep -qF 'LOCAL_RUN=' .env || echo "LOCAL_RUN=false" >> .env
 
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
@@ -386,12 +386,14 @@ if [ "${CATALYST_URL}" != "http://localhost" ]; then
     echo -n "## Finalizing Let's Encrypt setup... "
     printMessage ok
 else
-    echo "## Using HTTP because CATALYST_URL is set to http://localhost"
-    echo -n "## Replacing value \$katalyst_host on nginx server file... "
-    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_http} > ${nginx_server_file}
+    echo "## Using HTTP because CATALYST_URL is set to http://localhost. Setting LOCAL_RUN=true in .env"
+    grep -qF 'LOCAL_RUN=' .env || echo "LOCAL_RUN=true" >> .env
     printMessage ok
 fi
 
+# Generate nginx_server_file from mustache templates
+echo "Generating $nginx_server_file..."
+mo -e -s=.env $nginx_server_template > $nginx_server_file
 
 matches=$(cat ${nginx_server_file} | grep ${nginx_url}  | wc -l)
 if test $matches -eq 0; then
