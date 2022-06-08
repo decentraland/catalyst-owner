@@ -25,8 +25,8 @@ server {
     client_max_body_size 256M;
     root /etc/nginx/html;
 
-    include /etc/nginx/include/routes.conf;
-    include /etc/nginx/include/metrics.conf;
+    {{> ../include/routes.conf}}
+    {{> ../include/metrics.conf}}
 }
 
 {{^LOCAL_RUN}}
