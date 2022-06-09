@@ -4,7 +4,6 @@ volumes:
   content_server_storage: {}
   nginx_storage: {}
   lighthouse_storage_volume: {}
-  lambdas_server_storage: {}
   shared_keys:
 
 services:
@@ -166,26 +165,6 @@ services:
       driver: syslog
       options: { tag: content-server }
 
-  lambdas:
-    image: decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
-    working_dir: /app
-    restart: always
-    environment:
-      - LOG_REQUESTS=false # Request logs are produced by NGINX
-      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
-      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
-      - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
-    env_file:
-      - .env
-      - .env-advanced
-    expose:
-      - "7070"
-    logging:
-      driver: syslog
-      options: { tag: lambdas }
-    volumes:
-      - "lambdas_server_storage:/app/storage/lambdas"
-
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
     container_name: cadvisor
@@ -198,11 +177,13 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     depends_on:
-      # - comms-server
       - content-server
+<<<<<<< HEAD:docker-compose.yml
       # - lambdas
       - explorer-bff
       - archipelago
+=======
+>>>>>>> fbbedb9 (chore: separate docker compose in content-only and comms-lambdas):docker-compose-content-only.yml
 
   nginx:
     container_name: nginx
@@ -222,10 +203,8 @@ services:
       - shared_keys:/secrets
     restart: always
     depends_on:
-      # - lambdas
       - cadvisor
       - content-server
-      # - comms-server
       - postgres-exporter
       - node-exporter
       - certbot

@@ -1,0 +1,59 @@
+version: "3"
+
+volumes:
+  lambdas_server_storage: {}
+
+services:
+  comms-server:
+    image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
+      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
+    expose:
+      - "9000"
+    volumes:
+      - "lighthouse_storage_volume:/app/storage/lighthouse"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: comms }
+
+  lambdas:
+    image: decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
+    working_dir: /app
+    restart: always
+    environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
+      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
+      - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
+    env_file:
+      - .env
+      - .env-advanced
+    expose:
+      - "7070"
+    logging:
+      driver: syslog
+      options: { tag: lambdas }
+    volumes:
+      - "lambdas_server_storage:/app/storage/lambdas"
+
+  cadvisor:
+    depends_on:
+      - comms-server
+      - content-server
+      - lambdas
+
+  nginx:
+    depends_on:
+      - lambdas
+      - cadvisor
+      - content-server
+      - comms-server
+      - postgres-exporter
+      - node-exporter
+      - certbot

@@ -408,7 +408,13 @@ if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
 else
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
+  if [ "${CONTENT_ONLY}" ]; then
+    echo 'Running as CONTENT-ONLY...'
+    docker-compose -f docker-compose-content-only.yml -f "platform-content-only.$(uname -s).yml" up -d nginx
+  else
+    docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml -f "platform-content-only.$(uname -s).yml" -f "platform-comms-lambdas.$(uname -s).yml" up -d nginx
+  fi
+
   if test $? -ne 0; then
     echo -n "Failed to start catalyst node"
     printMessage failed

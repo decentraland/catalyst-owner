@@ -1,0 +1,9 @@
+# defaults for mac, syslog is not present there
+
+version: "3"
+
+services:
+  comms-server: &COMMON
+    logging:
+      driver: local
+  lambdas: *COMMON
