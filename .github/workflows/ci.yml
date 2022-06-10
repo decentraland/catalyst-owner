@@ -38,7 +38,7 @@ jobs:
           cp docker-compose-content-only.yml docker-compose-content-only.yml.bak
           cp docker-compose-comms-lambdas.yml docker-compose-comms-lambdas.yml.bak
           sed "s/options: {.*}//g" docker-compose-content-only.yml.bak > docker-compose-content-only.yml
-          sed "s/options: {.*}//g" docker-compose-ccomms-lambdas.yml.bak > docker-compose-comms-lambdas.yml
+          sed "s/options: {.*}//g" docker-compose-comms-lambdas.yml.bak > docker-compose-comms-lambdas.yml
           git diff docker-compose-content-only.yml
           git diff docker-compose-comms-lambdas.yml
 
