@@ -47,13 +47,17 @@ services:
       - comms-server
       - content-server
       - lambdas
+      - explorer-bff
+      - archipelago
 
   nginx:
     depends_on:
-      - lambdas
       - cadvisor
       - content-server
-      - comms-server
       - postgres-exporter
       - node-exporter
       - certbot
+      - explorer-bff
+      - archipelago
+      - nats
+      - nats-exporter
