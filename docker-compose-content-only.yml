@@ -178,12 +178,8 @@ services:
       - /dev/disk/:/dev/disk:ro
     depends_on:
       - content-server
-<<<<<<< HEAD:docker-compose.yml
-      # - lambdas
       - explorer-bff
       - archipelago
-=======
->>>>>>> fbbedb9 (chore: separate docker compose in content-only and comms-lambdas):docker-compose-content-only.yml
 
   nginx:
     container_name: nginx
