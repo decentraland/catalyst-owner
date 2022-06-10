@@ -14,7 +14,7 @@ printMessage () {
 
 if test ${VARIABLE_SUM} -eq 0; then
   echo "## Stopping catalyst node..."
-  docker-compose stop
+  docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml stop
   if test $? -ne 0; then
     echo -n "Failed to stop catalyst node "
     printMessage failed
@@ -28,7 +28,7 @@ else
     #Check if the service exists
     echo ${CONTAINER_VALID_LIST} | grep --quiet ${i}
     if  test $? -eq 0; then
-      docker-compose stop ${i}
+      docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml stop ${i}
       if  test $? -eq 0; then
           echo "`printMessage ok`. Container ${i} was stopped"
         else
