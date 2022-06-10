@@ -31,11 +31,16 @@ jobs:
 
       - name: replacing syslog for default driver and print diff
         run: |
-          cp docker-compose.yml docker-compose.yml.bak
-          sed "s/syslog/local/g" docker-compose.yml.bak > docker-compose.yml
-          cp docker-compose.yml docker-compose.yml.bak
-          sed "s/options: {.*}//g" docker-compose.yml.bak > docker-compose.yml
-          git diff docker-compose.yml
+          cp docker-compose-content-only.yml docker-compose-content-only.yml.bak
+          cp docker-compose-comms-lambdas.yml docker-compose-comms-lambdas.yml.bak
+          sed "s/syslog/local/g" docker-compose-content-only.yml.bak > docker-compose-content-only.yml
+          sed "s/syslog/local/g" docker-compose-comms-lambdas.yml.bak > docker-compose-comms-lambdas.yml
+          cp docker-compose-content-only.yml docker-compose-content-only.yml.bak
+          cp docker-compose-comms-lambdas.yml docker-compose-comms-lambdas.yml.bak
+          sed "s/options: {.*}//g" docker-compose-content-only.yml.bak > docker-compose-content-only.yml
+          sed "s/options: {.*}//g" docker-compose-ccomms-lambdas.yml.bak > docker-compose-comms-lambdas.yml
+          git diff docker-compose-content-only.yml
+          git diff docker-compose-comms-lambdas.yml
 
       - name: run init.sh
         run: ./init.sh
@@ -51,11 +56,11 @@ jobs:
         timeout-minutes: 5
         run: |
           docker container ls
-          docker-compose logs
+          docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs nginx
+            docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs nginx
             sleep 10
           done
 
@@ -64,7 +69,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/comms/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs comms-server
+            docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs comms-server
             sleep 10
           done
 
@@ -73,7 +78,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs content-server
+            docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs content-server
             sleep 10
           done
 
@@ -82,7 +87,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs lambdas
+            docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs lambdas
             sleep 10
           done
 
@@ -167,5 +172,5 @@ jobs:
         if: ${{ always() }}
         run: |
           docker container ls
-          docker-compose logs
+          docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml logs
           tail -n 5000 /var/log/syslog
