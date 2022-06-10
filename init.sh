@@ -23,14 +23,14 @@ leCertEmit () {
   echo " Creating dummy certificate for $nginx_url..."
   path="/etc/letsencrypt/live/$nginx_url"
   mkdir -p "$data_path/conf/live/$nginx_url"
-  docker-compose run --rm --entrypoint "\
+  docker-compose -f docker-compose-content-only.yml run --rm --entrypoint "\
     openssl req -x509 -nodes -newkey rsa:1024 -days 1\
       -keyout '$path/privkey.pem' \
       -out '$path/fullchain.pem' \
       -subj '/CN=localhost'" certbot
 
   echo -n "## Starting nginx ..."
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --force-recreate -d nginx
+  docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml -f "platform-content-only.$(uname -s).yml" -f "platform-comms-lambdas.$(uname -s).yml" up --force-recreate -d nginx
 
   if test $? -ne 0; then
     echo -n "Failed to start nginx...  "
@@ -42,7 +42,7 @@ leCertEmit () {
   fi
 
     echo -n "## Deleting dummy certificate for $nginx_url ..."
-    docker-compose run --rm --entrypoint "\
+    docker-compose -f docker-compose-content-only.yml run --rm --entrypoint "\
             rm -Rf /etc/letsencrypt/live/$nginx_url && \
             rm -Rf /etc/letsencrypt/archive/$nginx_url && \
             rm -Rf /etc/letsencrypt/renewal/$nginx_url.conf" certbot
@@ -89,7 +89,7 @@ leCertEmit () {
           fi
         done
 
-        docker-compose run --rm --entrypoint "\
+        docker-compose -f docker-compose-content-only.yml run --rm --entrypoint "\
             certbot certonly --webroot -w /var/www/certbot \
             --no-eff-email \
             $staging_arg \
@@ -109,7 +109,7 @@ leCertEmit () {
         fi
 
         echo "## Reloading nginx ..."
-        docker-compose restart nginx
+        docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml restart nginx
         if test $? -ne 0; then
             echo -n "Failed to reload nginx... "
             printMessage failed
@@ -121,7 +121,7 @@ leCertEmit () {
 
         echo "## Going for the real certs..."
 
-        docker-compose run --rm --entrypoint "\
+        docker-compose -f docker-compose-content-only.yml run --rm --entrypoint "\
         certbot certonly --webroot -w /var/www/certbot \
             $email_arg \
             $domain_args \
@@ -141,7 +141,7 @@ leCertEmit () {
 
 
         echo "## Reloading nginx with real certs..."
-        docker-compose restart nginx
+        docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml restart nginx
         if test $? -ne 0; then
             echo -n "Failed to reload nginx... "
             printMessage failed
@@ -159,6 +159,30 @@ printMessage () {
       failed) echo -e "[\e[91m FAILED \e[39m]" ;;
       *) echo "";;
     esac
+}
+
+installMustacheEngine () {
+  # Check if mo is already installed
+  echo 'Checking if mo is already installed...'
+  if ! [ -x "$(command -v mo)" ]; then
+    echo 'Installing mustache engine to generate nginx configuration - https://github.com/tests-always-included/mo'
+
+    # Download
+    curl -sSL https://git.io/get-mo -o mo
+
+    # Make executable
+    chmod +x mo
+
+    # Move to the right folder
+    sudo mv mo /usr/local/bin/
+
+    # Fail if installation failed
+    if ! [ -x "$(command -v mo)" ]; then
+      echo -n "Error: failed while installing mustache engine" >&2
+      printMessage failed
+      exit 1
+    fi
+  fi
 }
 
 ##
@@ -346,7 +370,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker-compose stop nginx
+docker-compose -f docker-compose-content-only.yml stop nginx
 if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
@@ -391,6 +415,9 @@ else
     printMessage ok
 fi
 
+# Install mustache engine to generate nginx configuration files
+installMustacheEngine
+
 # Generate nginx_server_file from mustache templates
 echo "Generating $nginx_server_file..."
 mo -e -s=.env $nginx_server_template > $nginx_server_file
@@ -403,7 +430,7 @@ if test $matches -eq 0; then
 fi
 
 echo "## Restarting containers... "
-docker-compose down
+docker-compose -f docker-compose-content-only.yml -f docker-compose-comms-lambdas.yml down
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
