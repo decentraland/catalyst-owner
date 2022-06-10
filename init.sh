@@ -361,7 +361,7 @@ if [ $? -ne 0 ]; then
   echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
-
+fi
 
 docker pull "quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
