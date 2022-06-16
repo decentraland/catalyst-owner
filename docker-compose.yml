@@ -5,9 +5,25 @@ volumes:
   nginx_storage: {}
   lighthouse_storage_volume: {}
   lambdas_server_storage: {}
+  ipfs_staging: {}
+  ipfs_data: {}
   shared_keys:
 
+
 services:
+  ipfs:
+    image: ipfs/go-ipfs:v0.13.0
+    container_name: ipfs
+    environment:
+      - IPFS_PROFILE=server
+    restart: always
+    volumes:
+      - ipfs_staging:/export
+      - ipfs_data:/data/ipfs
+    logging:
+      driver: syslog
+      options: { tag: ipfs }
+
   comms-server:
     image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
     working_dir: /app
@@ -167,6 +183,7 @@ services:
       - postgres-exporter
       - node-exporter
       - certbot
+      - ipfs
     logging:
       driver: syslog
       options: { tag: nginx }
