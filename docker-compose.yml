@@ -38,7 +38,7 @@ services:
       - .env-advanced
     environment:
       - "NATS_URL=nats://nats:4222"
-      - "LAMBDAS_URL=http://lambdas"
+      - "LAMBDAS_URL=http://lambdas:7070"
     restart: always
     expose:
       - "3000"
