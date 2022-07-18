@@ -43,6 +43,7 @@ services:
       - "LIGHTHOUSE_URL=http://comms-server:9000"
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${REALM_NAMES:-$LIGHTHOUSE_NAMES}
+      - "COMMS_PROTOCOL=v3"
     restart: always
     expose:
       - "3000"
