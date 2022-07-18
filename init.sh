@@ -216,6 +216,7 @@ fi
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
 export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
+export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
 MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
@@ -226,10 +227,6 @@ fi
 
 if [ "$LIGHTHOUSE_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Lighthouse Node. \033[39m"
-fi
-
-if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Archipelago Node. \033[39m"
 fi
 
 if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
@@ -325,13 +322,6 @@ fi
 docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
-  printMessage failed
-  exit 1
-fi
-
-docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
-if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
