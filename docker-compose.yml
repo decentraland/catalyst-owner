@@ -3,7 +3,6 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
-  lighthouse_storage_volume: {}
   bff_storage_volume: {}
   lambdas_server_storage: {}
   shared_keys:
@@ -55,23 +54,20 @@ services:
     depends_on:
       - nats
 
-  comms-server:
-    image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
+  archipelago:
+    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
     working_dir: /app
     env_file:
       - .env
       - .env-advanced
     environment:
-      - LOG_REQUESTS=false # Request logs are produced by NGINX
-      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
-    expose:
-      - "9000"
-    volumes:
-      - "lighthouse_storage_volume:/app/storage/lighthouse"
+      - "NATS_URL=nats://nats:4222"
     restart: always
     logging:
       driver: syslog
-      options: { tag: comms }
+      options: { tag: archipelago }
+    depends_on:
+      - nats
 
   postgres:
     image: postgres:12
@@ -138,6 +134,7 @@ services:
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - DISABLE_SYNCHRONIZATION=true
     env_file:
       - .env
       - .env-advanced
@@ -160,7 +157,6 @@ services:
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
-      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
     env_file:
       - .env
@@ -185,10 +181,10 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     depends_on:
-      - comms-server
       - content-server
       - lambdas
       - explorer-bff
+      - archipelago
 
   nginx:
     container_name: nginx
@@ -211,13 +207,13 @@ services:
       - lambdas
       - cadvisor
       - content-server
-      - comms-server
       - postgres-exporter
       - node-exporter
       - certbot
       - explorer-bff
       - nats
       - nats-exporter
+      - archipelago
     logging:
       driver: syslog
       options: { tag: nginx }

@@ -215,7 +215,6 @@ fi
 
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
-export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
 export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
 export ARCHIPELAGO_DOCKER_TAG=${ARCHIPELAGO_DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
@@ -224,10 +223,6 @@ MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
 
 if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
-fi
-
-if [ "$LIGHTHOUSE_DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Lighthouse Node. \033[39m"
 fi
 
 if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
@@ -239,7 +234,6 @@ if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
 fi
 
 echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
-echo -n " - LIGHTHOUSE_DOCKER_TAG:   " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
 echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
@@ -320,13 +314,6 @@ fi
 docker pull "decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the lambda's docker image with tag ${DOCKER_TAG:-latest}"
-  printMessage failed
-  exit 1
-fi
-
-docker pull "decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
-if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
