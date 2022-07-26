@@ -34,7 +34,7 @@ Instance of an Entity deployed to a Content Server that failed to pass the [Cont
 
 ### Active Entity 
 
-Current Entity content deployed on a pointer, thus all active entities represent the live content of Decentraland: scenes, profiles, wearables, etc. 
+An entity that is current deployed on a pointer, thus all active entities represent the live content of Decentraland: scenes, profiles, wearables, etc. 
 
 ### Deployment History 
 
