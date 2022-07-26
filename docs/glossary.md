@@ -70,7 +70,7 @@ Content Servers have to offer the ability to deploy content on them, and also en
 
 ### Content SNAPSHOT 
 
-A set of all the  Active Entities of the specified type. This Content SNAPSHOTS are used to synchronize content between Catalyst nodes.
+A set of all the Active Entities of a specific type in a [content server](#content-server). This content snapshots are used to synchronize content between Catalyst nodes.
 
 ### Realm 
 
