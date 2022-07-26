@@ -9,7 +9,7 @@ slug: "/contributor/catalyst/glossary"
 
 ### Bootstrap
 
-The moment when the Catalyst is booted, the node will have a `Bootstrapping` until it is ready to serve content. 
+When the Catalyst is started, the node will have a `Bootstrapping` state while fetching content from other catalysts until it catches up with the others. And then it transitions to the next state `Syncing` in which it is ready to serve content.
 
 ### Catalyst Client
 
