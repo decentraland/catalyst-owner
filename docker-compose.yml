@@ -4,6 +4,7 @@ volumes:
   content_server_storage: {}
   nginx_storage: {}
   lighthouse_storage_volume: {}
+  bff_storage_volume: {}
   lambdas_server_storage: {}
   shared_keys:
 
@@ -30,26 +31,6 @@ services:
     depends_on:
       - nats
 
-  archipelago:
-    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
-      - "LIVEKIT_URL=${LIVEKIT_URL}"
-      - "LIVEKIT_API_KEY=${LIVEKIT_API_KEY}"
-      - "LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}"
-      - "WS_ROOM_SERVICE_URL=${WS_ROOM_SERVICE_URL}"
-      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: archipelago }
-    depends_on:
-      - nats
-
   explorer-bff:
     image: quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}
     working_dir: /app
@@ -58,10 +39,16 @@ services:
       - .env-advanced
     environment:
       - "NATS_URL=nats://nats:4222"
-      - "WS_ROOM_SERVICE_SECRET=${WS_ROOM_SERVICE_SECRET}"
+      - "LAMBDAS_URL=http://lambdas:7070"
+      - "CONTENT_URL=http://content-server:6969"
+      - "LIGHTHOUSE_URL=http://comms-server:9000"
+      - STORAGE_LOCATION=/app/storage
+      - REALM_NAMES=${REALM_NAMES:-$LIGHTHOUSE_NAMES}
     restart: always
     expose:
       - "3000"
+    volumes:
+      - "bff_storage_volume:/app/storage"
     logging:
       driver: syslog
       options: { tag: explorer-bff }
@@ -202,7 +189,6 @@ services:
       - content-server
       - lambdas
       - explorer-bff
-      - archipelago
 
   nginx:
     container_name: nginx
@@ -230,7 +216,6 @@ services:
       - node-exporter
       - certbot
       - explorer-bff
-      - archipelago
       - nats
       - nats-exporter
     logging:
