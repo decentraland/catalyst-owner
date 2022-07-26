@@ -82,7 +82,7 @@ A user connected to Decentraland.
 
 ### Lighthouse 
 
-The [Lighthouse](https://github.com/decentraland/lighthouse) is the name used t reference the previous version of the Communications Service hosted on the Catalyst nodes and used to group users in a P2P network. 
+The [Lighthouse](https://github.com/decentraland/lighthouse) is the name used to reference the previous version of the Communications Service hosted on the Catalyst nodes and used for grouping users in a P2P network. 
 Main responsibilities were to determine which are the candidates for a P2P connection and do the WebRTC signaling to establish the connection. Most of this logic was done through two external components: the PeerJS Server (connects [WebRTC](https://webrtc.org/) peers) and Archipelago (receives users positions and groups them in islands).
 
 ### Backend for Frontend (aka BFF) 
