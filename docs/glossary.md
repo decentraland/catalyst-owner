@@ -112,7 +112,7 @@ Uses [WebRTC](https://webrtc.org/) connections between Peers, no extra infrastru
 
 ### LiveKit Transport 
 
-[LiveKit](https://livekit.io/) is an open source project that provides scalable, multi-user conferencing over WebRTC. Instead of doing a P2P network, Peers are connected to a Selective Forwarding Unit (SFU) in charge of managing message rely and different quality aspects of the communication. The SFUs are the added infrastructure needed in order to provide high-performance/high-quality communications between crowds on designated scenes.
+[LiveKit](https://livekit.io/) is an open source project that provides scalable, multi-user conferencing over WebRTC. Instead of doing a P2P network, Peers are connected to a Selective Forwarding Unit (SFU) in charge of managing message relay and different quality aspects of the communication. The SFUs are the added infrastructure needed in order to provide high-performance / high-quality communications between crowds on designated scenes.
 
 ### WebSocket Transport 
 
