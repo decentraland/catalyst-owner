@@ -96,7 +96,7 @@ A [Catalyst Owner](https://github.com/decentraland/catalyst-owner) is an individ
 
 ### Archipelago Service 
 
-The [Archipelago Service](https://github.com/decentraland/archipelago-service) previously was a library used by the Lighthouse. This service will have the same responsibility that the library did: group Peers in clusters so they can communicate efficiently and each cluster is called an island. On the other hand, the service also needs to be able to balance islands using the available communications Transports and following a set of [Catalyst Owner](https://github.com/decentraland/catalyst-owner) defined rules, in order to, for example, use LiveKit for an island in the Casino scene and P2P in a Genesis Plaza.
+The [Archipelago Service](https://github.com/decentraland/archipelago-service) previously was a library used by the Lighthouse. This service will have the same responsibility that the library did: group peers into clusters so they can communicate efficiently between them. Each cluster is called an island. On the other hand, the service also needs to be able to balance islands using the available communications transports and following a set of [Catalyst Owner](https://github.com/decentraland/catalyst-owner) defined rules, in order to, for example, use LiveKit for an island in the Casino scene and P2P in a Genesis Plaza.
 
 ### Island
 
