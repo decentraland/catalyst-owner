@@ -47,7 +47,7 @@ Pointers are the ids or locations to which a Deployment belongs. Their format is
 
 ### URN 
 
-[URN](https://en.wikipedia.org/wiki/Uniform_Resource_Name) stands for  Uniform Resource Name, they are used as global unique identifiers for assets across the Metaverse projects. 
+[URN](https://en.wikipedia.org/wiki/Uniform_Resource_Name) stands for Uniform Resource Name. They are used as global unique identifiers for assets across the Metaverse projects. 
 
 - URN Resolver: https://github.com/decentraland/urn-resolver
 - URN Namespace: https://github.com/common-metaverse/urn-namespaces
