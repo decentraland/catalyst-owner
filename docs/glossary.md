@@ -116,7 +116,7 @@ Uses [WebRTC](https://webrtc.org/) connections between Peers, no extra infrastru
 
 ### WebSocket Transport 
 
-The [WebSocket Transport](https://github.com/decentraland/ws-room-service) is lighter than LiveKit, it also requires a Server that manages the relay of messages through WebSocket rooms, rooms are equivalent to islands. 
+The [WebSocket Transport](https://github.com/decentraland/ws-room-service) is lighter than LiveKit, it also requires a Server that manages the relay of messages through WebSocket rooms. Rooms are equivalent to islands. 
 This transport provides less latency and better performance than P2P islands but also requires the extra infrastructure. 
 
 ### NATS 
