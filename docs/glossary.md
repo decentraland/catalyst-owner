@@ -23,6 +23,7 @@ Data Type, defined with [schemas](https://github.com/decentraland/common-schemas
 - [Emote](https://github.com/decentraland/common-schemas/blob/main/src/platform/item/emote/emote.ts)
 - [Scene](https://github.com/decentraland/common-schemas/blob/main/src/platform/scene/scene.ts)
 - [Profile](https://github.com/decentraland/common-schemas/blob/main/src/platform/profile/profile.ts)
+- [Sotres](https://github.com/decentraland/common-schemas/blob/main/src/dapps/store.ts)
 
 ### Deployment
 
