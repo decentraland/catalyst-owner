@@ -5,7 +5,7 @@ slug: "/contributor/catalyst/glossary"
 
 ### Catalyst
 
-[Catalyst](https://github.com/decentraland/catalyst) is the name given to the **Decentraland Service Bundle**, each Catalyst [node](https://decentraland.github.io/catalyst-monitor) has a set of services that work as the backbone for the platform and exposes a public [API](https://decentraland.github.io/catalyst-api-specs/). 
+[Catalyst](https://github.com/decentraland/catalyst) is the name given to the **Decentraland Service Bundle**, each Catalyst [node](https://decentraland.github.io/catalyst-monitor) exposes a set of services that work as the backbone for the platform and also exposes a public [API](https://decentraland.github.io/catalyst-api-specs/). 
 
 ### Bootstrap
 
@@ -91,7 +91,7 @@ The [BFF](https://github.com/decentraland/explorer-bff) Service was created to r
 
 ### Catalyst Owner
 
-A [Catalyst Owner](https://github.com/decentraland/catalyst-owner) is an individual or organization running a Catalyst node that is part of the DAO. To add a Catalyst node to the DAO network a [proposal](https://governance.decentraland.org/?type=catalyst) needs to be submitted.
+A [Catalyst Owner](https://github.com/decentraland/catalyst-owner) is an individual or organization running a Catalyst node. To add a Catalyst node to the DAO network a [proposal](https://governance.decentraland.org/?type=catalyst) needs to be submitted and the DAO nodes represent the trusted Decentraland Network.
 
 
 ### Archipelago Service 
@@ -104,7 +104,7 @@ Cluster of connected peers.
 
 ### Communication Transport 
 
-Transport is the technology used to share updates between Peer connected to an Island.
+Transport is the technology used to share updates between Peers connected to an Island.
 
 ### P2P Transport 
 
