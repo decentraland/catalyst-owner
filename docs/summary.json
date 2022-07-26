@@ -10,6 +10,14 @@
                 {
                     "name": "Glossary",
                     "slug": "/contributor/catalyst/glossary"
+                }, 
+                {
+                    "name": "Comms Service",
+                    "slug": "/contributor/catalyst/comms"
+                },
+                {
+                    "name": "FAQ",
+                    "slug": "/contributor/catalyst/faq"
                 }
             ]
         }
