@@ -62,7 +62,7 @@ The [Content Server](https://github.com/decentraland/catalyst/tree/main/content)
 
 ### Lambdas
 
-The [Lambdas](https://github.com/decentraland/catalyst/tree/main/lambdas) Service is a part of the Catalyst node that that works as a reconciliation layer between the Content Servers and the Blockchain, sanitizing content, validating ownership and helping retrieve information for the Catalyst clients.
+The [Lambdas](https://github.com/decentraland/catalyst/tree/main/lambdas) Service is a part of the Catalyst node that works as a reconciliation layer between the Content Servers and the Blockchain, sanitizing content, validating ownership and helping retrieve information for the Catalyst clients.
 
 ### Synchronization 
 
