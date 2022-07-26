@@ -1,0 +1,17 @@
+{
+    "contributor": [
+        {
+            "name": "Catalyst Nodes",
+            "children": [
+                {
+                    "name": "About",
+                    "slug": "/contributor/catalyst/about"
+                },
+                {
+                    "name": "Glossary",
+                    "slug": "/contributor/catalyst/glossary"
+                }
+            ]
+        }
+    ]
+}
