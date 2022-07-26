@@ -58,7 +58,7 @@ Pointers are the ids or locations to which a Deployment belongs. Their format is
    
 ### Content Server
 
-The [Content Server](https://github.com/decentraland/catalyst/tree/main/content) is a part of the Catalyst node in charge of managing the Decentralized storage of Entities Deployments. Currently, all content stored in a Content Server is synchronized with the rest of the DAO Catalysts.
+The [Content Server](https://github.com/decentraland/catalyst/tree/main/content) is a part of the Catalyst node in charge of managing the Decentralized storage of Entitiy Deployments. Currently, all content stored in a Content Server is synchronized with the rest of the DAO Catalysts.
 
 ### Lambdas
 
