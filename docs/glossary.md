@@ -13,7 +13,7 @@ When the Catalyst is started, the node will have a `Bootstrapping` state while f
 
 ### Catalyst Client
 
-[Library](https://github.com/decentraland/catalyst-client) that can be used to interact with the Catalyst servers. You can both fetch data, or deploy new entities to the server you specify.
+[Library](https://github.com/decentraland/catalyst-client) that can be used to interact with the Catalyst servers. It allows both fetching data and deploying new entities to the specified server.
 
 ### Entity
 
