@@ -42,7 +42,7 @@ Each time a new version of a Deployment is done on a `pointer`, the `Active Enti
 
 ### Pointer 
 
-Pointers are the ids or locations to which a Deployment belongs, they change based on the `Entity Type`, for example: 
+Pointers are the ids or locations to which a Deployment belongs. Their format is different based on the `Entity Type`, for example: 
 
 - **Wearables**: Uses URN as pointers `urn:decentraland:ethereum:collections-v1:dg_atari_dillon_francis:gerald_patchwork_knit_sweater`
 - **Scenes**: Uses an array of parcels as pointers `[(0,0), (0,1), (0,-1)]`
