@@ -41,7 +41,7 @@ An entity that is currently deployed on a pointer, thus all active entities repr
 Pointers are the ids or locations to which a Deployment belongs. Their format is different based on the `Entity Type`, for example: 
 
 - **Wearables**: Uses URN as pointers `urn:decentraland:ethereum:collections-v1:dg_atari_dillon_francis:gerald_patchwork_knit_sweater`
-- **Scenes**: Uses an array of parcels as pointers `[(0,0), (0,1), (0,-1)]`
+- **Scenes**: Uses parcels or array of parcels as pointers, for example `--10,20` or `[(0,0), (0,1), (0,-1)]`
 - **Profiles**: Uses a Wallet address as pointer `0xb01ddb6d4c89314f74a32dfc2f3bd0f8311a6d75`
 - **Stores**: Uses a URN as pointer `urn:decentraland:off-chain:marketplace-stores:{wallet}`
 
