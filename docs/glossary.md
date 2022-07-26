@@ -66,7 +66,7 @@ The [Lambdas](https://github.com/decentraland/catalyst/tree/main/lambdas) Servic
 
 ### Synchronization 
 
-Content Servers have to offer the ability to deploy content on them, and also ensure that any content deployed on any other valid and running Catalyst from the DAO List is available there too. Resolving this is called **synchronization**. 
+Content Servers offer the ability to deploy content on them. They also ensure that any content deployed on the other Catalysts from the DAO is available there too. Resolving this is called **synchronization**. 
 
 ### Content SNAPSHOT 
 
