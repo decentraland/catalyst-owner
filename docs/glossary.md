@@ -121,7 +121,7 @@ This transport provides less latency and better performance than P2P islands but
 
 ### NATS 
 
-[NATS](https://nats.io/) is a message broker that enables the date exchange and communication between services. In the context of the Catalyst Server it is used to communicate Some of the internal Services.
+[NATS](https://nats.io/) is a message broker that enables the data exchange and communication between services. In the context of the Catalyst Server it is used to communicate some of the internal services.
 
 ### DAO
 
