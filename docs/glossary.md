@@ -34,11 +34,7 @@ Instance of an Entity deployed to a Content Server that failed to pass the [Cont
 
 ### Active Entity 
 
-An entity that is current deployed on a pointer, thus all active entities represent the live content of Decentraland: scenes, profiles, wearables, etc. 
-
-### Deployment History 
-
-Each time a new version of a Deployment is done on a `pointer`, the `Active Entity ` content changes and the previous active content passes to be part of the pointer history. The list of deployments done on a pointer order by timestamp represent the history.
+An entity that is currently deployed on a pointer, thus all active entities represent the live content of Decentraland: scenes, profiles, wearables, etc. 
 
 ### Pointer 
 
