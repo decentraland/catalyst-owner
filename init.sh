@@ -31,7 +31,7 @@ leCertEmit () {
       -subj '/CN=localhost'" certbot
 
   echo -n "## Starting nginx ..."
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --force-recreate -d nginx
+  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --remove-orphans --force-recreate -d nginx
 
   if test $? -ne 0; then
     echo -n "Failed to start nginx...  "
@@ -392,7 +392,7 @@ if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
 else
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up -d nginx
+  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --remove-orphans -d nginx
   if test $? -ne 0; then
     echo -n "Failed to start catalyst node"
     printMessage failed
