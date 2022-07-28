@@ -135,7 +135,6 @@ services:
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - DISABLE_SYNCHRONIZATION=true
     env_file:
       - .env
       - .env-advanced
