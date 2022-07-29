@@ -55,6 +55,23 @@ services:
     depends_on:
       - nats
 
+  stats:
+    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+    restart: always
+    expose:
+      - "3000"
+    logging:
+      driver: syslog
+      options: { tag: catalyst-stats }
+    depends_on:
+      - nats
+
   archipelago:
     image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
     working_dir: /app
@@ -211,6 +228,7 @@ services:
       - node-exporter
       - certbot
       - explorer-bff
+      - stats
       - nats
       - nats-exporter
       - archipelago

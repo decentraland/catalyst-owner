@@ -15,3 +15,4 @@ services:
   nats-exporter: *COMMON
   explorer-bff: *COMMON
   archipelagarchipelagoo: *COMMON
+  stats: *COMMON
