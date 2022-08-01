@@ -43,7 +43,7 @@ services:
       - "CONTENT_URL=http://content-server:6969"
       - "LIGHTHOUSE_URL=http://comms-server:9000"
       - STORAGE_LOCATION=/app/storage
-      - REALM_NAMES=${REALM_NAMES:-$LIGHTHOUSE_NAMES}
+      - REALM_NAMES=${LIGHTHOUSE_NAMES}
     restart: always
     expose:
       - "3000"
