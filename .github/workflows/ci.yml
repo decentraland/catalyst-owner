@@ -23,7 +23,7 @@ jobs:
             CATALYST_URL=${{ matrix.catalyst_url }}
           EOF
           cat <<EOF > .env-advanced
-            ETH_NETWORK=ropsten
+            ETH_NETWORK=goerli
             REGENERATE=0
             LOG_LEVEL=debug
             METRICS=true

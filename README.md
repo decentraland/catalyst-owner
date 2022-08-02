@@ -10,7 +10,7 @@ This repository is prepared to be auto updated with cron jobs. The updated branc
 
 It is _highly recommended_ that you use a fork of this repository to avoid any security issues since it may run code directly in your catalyst.
 
-We actively mix canary and stable configurations in several catalysts for Ropsten (dev) and Mainnet (prod).
+We actively mix canary and stable configurations in several catalysts for Goerli (dev) and Mainnet (prod).
 
 ## Set up
 
@@ -40,11 +40,11 @@ To configure your node, you will have to set three variables in the [.env](.env)
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
-| Name        | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :------: |
-| ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production                                                                                                                                                                                                          | mainnet |   yes    |
-| REGENERATE  | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
-| MAINTENANCE_MODE  | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.  |    0    |    no    |
+| Name             | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :-----: | :------: |
+| ETH_NETWORK      | Which Ethereum network you want to use. Usually is `goerli` for testing or `mainnet` for production                                                                                                                                                                                                           | mainnet |   yes    |
+| REGENERATE       | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
+| MAINTENANCE_MODE | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.                                                                                                                                                            |    0    |    no    |
 
 ## Running your Catalyst
 
