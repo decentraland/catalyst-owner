@@ -175,6 +175,7 @@ services:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
+      - "COMMS_PROTOCOL=v3"
     env_file:
       - .env
       - .env-advanced
