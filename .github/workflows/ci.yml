@@ -80,7 +80,7 @@ jobs:
       - name: wait for explorer-bff
         timeout-minutes: 2
         run: |
-          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}//bff/status 200; do
+          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200; do
             echo "Retrying in 10 seconds..."
             docker-compose logs explorer-bff
             sleep 10
