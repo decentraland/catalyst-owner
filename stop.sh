@@ -1,7 +1,7 @@
 #!/bin/bash
 VARIABLE_SUM=$#
 CONTAINER_NAMES=$@
-CONTAINER_VALID_LIST="nginx lambdas content-server comms-server nats nats-exporter explorer-bff"
+CONTAINER_VALID_LIST="nginx lambdas content-server archipelago nats nats-exporter explorer-bff stats"
 
 printMessage () {
     Type=$1
