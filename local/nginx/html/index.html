@@ -64,7 +64,6 @@
     <h2><span id="catalyst-name"></span></h2>
     <p>Content server status: <span id="content-status">loading...</span></p>
     <p>Content history height: <span id="content-count">loading...</span></p>
-    <p>Communications status: <span id="comms-status">loading...</span></p>
     <p>Current users: <span id="user-count">loading...</span></p>
   </section>
   <script type='text/javascript' async>
@@ -74,7 +73,6 @@
         document.getElementById('catalyst-name').innerText = window.location.host
         const contentStatusDiv = document.getElementById('content-status')
         const historyHeightDiv = document.getElementById('content-count')
-        const commsStatusDiv = document.getElementById('comms-status')
         const currentUsersDiv = document.getElementById('user-count')
           ; (async function fill() {
             fetch('/content/status').then(_ => {
@@ -91,16 +89,7 @@
               contentStatusDiv.innerText = 'Down'
               historyHeightDiv.innerText = '(unknown)'
             })
-            fetch('/comms/status').then(_ => {
-              return _.json()
-            }).then(_ => {
-              commsStatusDiv.innerText = _.ready ? 'Active' : 'Inactive'
-            }).catch(_ => {
-              commsStatusDiv.innerText = 'Unavailable'
-            })
-            fetch('/comms/layers').then(_ => {
-              return _.json()
-            }).then(_ => {
+            .then(_ => {
               currentUsersDiv.innerText = _.reduce((sum, elem) => sum + elem.usersCount, 0)
             }).catch(_ => {
               currentUsersDiv.innerText = '(unknown)'
