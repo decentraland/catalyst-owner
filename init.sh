@@ -312,6 +312,13 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
+docker-compose pull "nginx"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull nginx"
+  printMessage failed
+  exit 1
+fi
+
 docker pull "decentraland/catalyst-content:${DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the content's docker image with tag ${DOCKER_TAG:-latest}"
