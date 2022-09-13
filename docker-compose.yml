@@ -3,6 +3,7 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
+  lighthouse_storage_volume: {}
   bff_storage_volume: {}
   lambdas_server_storage: {}
   shared_keys:
@@ -43,7 +44,6 @@ services:
       - "LIGHTHOUSE_URL=http://comms-server:9000"
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
-      - "COMMS_PROTOCOL=v3"
     restart: always
     expose:
       - "3000"
@@ -55,37 +55,23 @@ services:
     depends_on:
       - nats
 
-  stats:
-    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
+  comms-server:
+    image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
     working_dir: /app
     env_file:
       - .env
       - .env-advanced
     environment:
-      - "NATS_URL=nats://nats:4222"
-    restart: always
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
+      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
     expose:
-      - "3000"
-    logging:
-      driver: syslog
-      options: { tag: catalyst-stats }
-    depends_on:
-      - nats
-
-  archipelago:
-    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
+      - "9000"
+    volumes:
+      - "lighthouse_storage_volume:/app/storage/lighthouse"
     restart: always
     logging:
       driver: syslog
-      options: { tag: archipelago }
-    depends_on:
-      - nats
+      options: { tag: comms }
 
   postgres:
     image: postgres:12
@@ -174,8 +160,8 @@ services:
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
-      - "COMMS_PROTOCOL=v3"
     env_file:
       - .env
       - .env-advanced
@@ -199,10 +185,10 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     depends_on:
+      - comms-server
       - content-server
       - lambdas
       - explorer-bff
-      - archipelago
 
   nginx:
     container_name: nginx
@@ -225,14 +211,13 @@ services:
       - lambdas
       - cadvisor
       - content-server
+      - comms-server
       - postgres-exporter
       - node-exporter
       - certbot
       - explorer-bff
-      - stats
       - nats
       - nats-exporter
-      - archipelago
     logging:
       driver: syslog
       options: { tag: nginx }
