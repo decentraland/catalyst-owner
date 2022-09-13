@@ -116,9 +116,6 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/nats_metrics 200 -u test-user:test-password
 
-      - name: test archipelago_metrics auth, must be 401
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago_metrics 401
       - name: test lambdas_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 401
@@ -133,9 +130,6 @@ jobs:
         if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
 
-      - name: test archipelago_metrics auth, must be 200
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago_metrics 200 -u test-user2:test-password2
       - name: test lambdas_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 200 -u test-user2:test-password2
@@ -151,7 +145,6 @@ jobs:
         run: |
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
-          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200
 
       - name: run stop.sh
         if: ${{ always() }}

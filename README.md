@@ -10,7 +10,7 @@ This repository is prepared to be auto updated with cron jobs. The updated branc
 
 It is _highly recommended_ that you use a fork of this repository to avoid any security issues since it may run code directly in your catalyst.
 
-We actively mix canary and stable configurations in several catalysts for Goerli (dev) and Mainnet (prod).
+We actively mix canary and stable configurations in several catalysts for Ropsten (dev) and Mainnet (prod).
 
 ## Set up
 
@@ -30,7 +30,7 @@ In order to run a public server, you will also need to:
 To configure your node, you will have to set three variables in the [.env](.env) file:
 
 | Name                   | Description                                                                                                                                                                                                                        | Default  | Required |
-|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------:|:--------:|
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: | :------: |
 | EMAIL                  | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.                                                                                                                            |    -     |   yes    |
 | CONTENT_SERVER_STORAGE | The path to the directory where the content will be stored. Path must be absolute.                                                                                                                                                 |    -     |   yes    |
 | CATALYST_URL           | The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost` |    -     |   yes    |
@@ -40,11 +40,11 @@ To configure your node, you will have to set three variables in the [.env](.env)
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
-| Name             | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
-| ETH_NETWORK      | Which Ethereum network you want to use. Usually is `goerli` for testing or `mainnet` for production                                                                                                                                                                                                           | mainnet |   yes    |
-| REGENERATE       | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
-| MAINTENANCE_MODE | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.                                                                                                                                                            |    0    |    no    |
+| Name        | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :------: |
+| ETH_NETWORK | Which Ethereum network you want to use. Usually is `ropsten` for testing or `mainnet` for production                                                                                                                                                                                                          | mainnet |   yes    |
+| REGENERATE  | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
+| MAINTENANCE_MODE  | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.  |    0    |    no    |
 
 ## Running your Catalyst
 
@@ -59,6 +59,7 @@ After you have configured everything, all you need to do is run:
 Once you started your Catalyst server, after a few seconds you should be able to test the different services by accessing:
 
 - Content: `CATALYST_URL/content/status`
+- Comms: `CATALYST_URL/comms/status`
 - Lambdas: `CATALYST_URL/lambdas/status`
 
 ## Updating your Catalyst
@@ -82,7 +83,7 @@ To stop a specific container on your node:
 To stop a specific container on your node:
 
 ```
-./stop.sh [ nginx | lambdas | content-server | archipelago | nats | nats-exporter | explorer-bff ]
+./stop.sh [ nginx | lambdas | content-server | comms-server | nats | nats-exporter | explorer-bff ]
 ```
 
 ## [FAQ](https://github.com/decentraland/catalyst-owner/blob/master/docs/FAQ.md)
