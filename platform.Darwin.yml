@@ -13,6 +13,7 @@ services:
   node-exporter: *COMMON
   content-server: *COMMON
   lambdas: *COMMON
+  lambdos: *COMMON
   cadvisor: *COMMON
   nats: *COMMON
   nats-exporter: *COMMON

@@ -178,6 +178,20 @@ services:
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
+  lambdos:
+    image: decentraland/lambdos:latest
+    working_dir: /app
+    restart: always
+    environment:
+      - HTTP_SERVER_PORT=7272
+      - CONTENT_SERVER_ADDRESS=https://peer.decentraland.org/content
+      - ETH_NETWORK=mainnet
+    env_file:
+      - .env
+      - .env-advanced
+    expose:
+      - "7272"
+  
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
     container_name: cadvisor
@@ -214,6 +228,7 @@ services:
     restart: always
     depends_on:
       - lambdas
+      - lambdos
       - cadvisor
       - content-server
       - comms-server
