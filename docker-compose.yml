@@ -44,6 +44,7 @@ services:
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
       - "COMMS_PROTOCOL=v3"
+      - "COMMS_MODE=archipelago"
     restart: always
     expose:
       - "3000"
