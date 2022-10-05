@@ -40,7 +40,6 @@ services:
       - "NATS_URL=nats://nats:4222"
       - "LAMBDAS_URL=${CATALYST_URL}/lambdas"
       - "CONTENT_URL=${CATALYST_URL}/content"
-      - "CONTENT_URL=${CATALYST_URL}/content"
       - "BFF_PUBLIC_URL=${CATALYST_URL}/bff"
       - "COMMS_PROTOCOL=v3"
     restart: always
