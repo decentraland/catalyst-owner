@@ -38,13 +38,9 @@ services:
       - .env-advanced
     environment:
       - "NATS_URL=nats://nats:4222"
-      - "LAMBDAS_URL=http://lambdas:7070"
-      - "CONTENT_URL=http://content-server:6969"
-      - "LIGHTHOUSE_URL=http://comms-server:9000"
-      - STORAGE_LOCATION=/app/storage
-      - REALM_NAMES=${LIGHTHOUSE_NAMES}
+      - "LAMBDAS_URL=${CATALYST_URL}/lambdas"
+      - "CONTENT_URL=${CATALYST_URL}/content"
       - "COMMS_PROTOCOL=v3"
-      - "COMMS_MODE=archipelago"
     restart: always
     expose:
       - "3000"
