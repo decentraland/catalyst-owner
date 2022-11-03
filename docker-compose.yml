@@ -37,11 +37,11 @@ services:
       - .env
       - .env-advanced
     environment:
-      - "NATS_URL=nats://nats:4222"
-      - "LAMBDAS_URL=${CATALYST_URL}/lambdas"
-      - "CONTENT_URL=${CATALYST_URL}/content"
-      - "BFF_PUBLIC_URL=${CATALYST_URL}/bff"
-      - "COMMS_PROTOCOL=v3"
+      - LAMBDAS_URL=${CATALYST_URL}/lambdas/
+      - CONTENT_URL=${CATALYST_URL}/content/
+      - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
+      - HEALTHCHECK_CONTENT_URL=http://content-server:6969
+      - COMMS_MODE=archipelago
     restart: always
     expose:
       - "3000"
