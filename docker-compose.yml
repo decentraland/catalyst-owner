@@ -48,6 +48,7 @@ services:
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
       - COMMS_MODE=lighthouse
+      - BFF_PUBLIC_URL=/bff
     restart: always
     expose:
       - "3000"
