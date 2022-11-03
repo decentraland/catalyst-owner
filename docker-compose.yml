@@ -37,6 +37,7 @@ services:
       - .env
       - .env-advanced
     environment:
+      - NATS_URL=nats://nats:4222
       - LAMBDAS_URL=${CATALYST_URL}/lambdas/
       - CONTENT_URL=${CATALYST_URL}/content/
       - BFF_PUBLIC_URL=/bff
