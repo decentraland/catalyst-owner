@@ -39,6 +39,7 @@ services:
     environment:
       - LAMBDAS_URL=${CATALYST_URL}/lambdas/
       - CONTENT_URL=${CATALYST_URL}/content/
+      - BFF_PUBLIC_URL=/bff
       - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
       - HEALTHCHECK_CONTENT_URL=http://content-server:6969
       - COMMS_MODE=archipelago
