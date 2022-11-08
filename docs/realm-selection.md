@@ -12,8 +12,8 @@ To mitigate this, then an algorithm for realm selection is implemented in Kernel
 It is a configurable algorithm that uses different criteria in an ordered list, if one of the conditions is strong enough to make a decision then it chooses a realm, if not then delegates the decision to the following criteria. If none condition was strong enough, then a default decision is made (random).
 
 The default configuration is:
-1. Prioritizes Peers with the most amount of users
-2. Prioritizes Peers with the most amount of users near (in the current parcel)
+1. Prioritizes Catalyst Nodes with the most amount of users
+2. Prioritizes Catalyst Nodes with more users in the visited location
 
 
 Other criterias that can be used are:
