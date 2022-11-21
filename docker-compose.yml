@@ -61,7 +61,7 @@ services:
       - nats
 
   comms-server:
-    image: decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
     working_dir: /app
     env_file:
       - .env
@@ -134,7 +134,7 @@ services:
       options: { tag: node-exporter }
 
   content-server:
-    image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-content:${DOCKER_TAG:-latest}
     working_dir: /app
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
@@ -159,7 +159,7 @@ services:
       options: { tag: content-server }
 
   lambdas:
-    image: decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
     working_dir: /app
     restart: always
     environment:
