@@ -44,6 +44,8 @@ services:
       - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
       - HEALTHCHECK_CONTENT_URL=http://content-server:6969
       - COMMS_MODE=archipelago
+      - STORAGE_LOCATION=/app/storage
+      - REALM_NAMES=${LIGHTHOUSE_NAMES}
     restart: always
     expose:
       - "3000"
@@ -143,7 +145,7 @@ services:
       options: { tag: node-exporter }
 
   content-server:
-    image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-content:${DOCKER_TAG:-latest}
     working_dir: /app
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
@@ -168,7 +170,7 @@ services:
       options: { tag: content-server }
 
   lambdas:
-    image: decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
     working_dir: /app
     restart: always
     environment:

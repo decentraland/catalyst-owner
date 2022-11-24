@@ -26,7 +26,7 @@ services:
       options: { tag: postgres }
 
   content-server:
-    image: decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst-content:${DOCKER_TAG:-latest}
     working_dir: /app
     command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "content/entrypoints/run-maintenance.js" ]
     restart: "no"
