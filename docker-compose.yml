@@ -235,6 +235,7 @@ services:
       - nats
       - nats-exporter
       - archipelago
+      - adapter
     logging:
       driver: syslog
       options: { tag: nginx }
