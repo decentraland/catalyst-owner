@@ -319,7 +319,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker-compose pull "livekit-adapter"
+docker-compose pull "adapter"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull livekit-adapter"
   printMessage failed
