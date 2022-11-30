@@ -255,5 +255,7 @@ services:
     image: quay.io/decentraland/livekit-adapter
     restart: always
     network_mode: "host"
+    environment:
+      - PREFIX=${LIVEKIT_PREFIX}
     env_file:
       - .env
