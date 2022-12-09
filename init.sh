@@ -12,6 +12,7 @@ export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
 # Functions
 #####
 
+
 leCertEmit () {
   if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
     echo "## Downloading recommended TLS parameters ..."
@@ -31,7 +32,7 @@ leCertEmit () {
       -subj '/CN=localhost'" certbot
 
   echo -n "## Starting nginx ..."
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --remove-orphans --force-recreate -d nginx
+  docker-compose $DOCKER_FILE_ARGS up --remove-orphans --force-recreate -d nginx
 
   if test $? -ne 0; then
     echo -n "Failed to start nginx...  "
@@ -218,27 +219,83 @@ export DOCKER_TAG=${DOCKER_TAG:-latest}
 export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
 export CATALYST_STATS_DOCKER_TAG=${CATALYST_STATS_DOCKER_TAG:-latest}
 export ARCHIPELAGO_DOCKER_TAG=${ARCHIPELAGO_DOCKER_TAG:-latest}
+export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
+export COMMS_VERSION=${COMMS_VERSION:-2}
+
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
 MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
 
-if [ "$DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
+###
+# Bundle setup 
+###
+
+cat local/nginx/include/upstream-common.conf > local/nginx/include/upstream.conf
+cat local/nginx/include/routes-common.conf > local/nginx/include/routes.conf
+cat local/nginx/include/metrics-common.conf > local/nginx/include/metrics.conf
+
+if [ $COMMS_VERSION -eq 2 ]; then
+  cat local/nginx/include/lambdas-commsv2.conf > local/nginx/include/lambdas.conf
+
+  cat local/nginx/include/upstream-commsv2.conf >> local/nginx/include/upstream.conf
+  cat local/nginx/include/routes-commsv2.conf >> local/nginx/include/routes.conf
+  cat local/nginx/include/metrics-commsv2.conf >> local/nginx/include/metrics.conf
+
+  if [ "$LIGHTHOUSE_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Lighthouse Node. \033[39m"
+  fi
+
+  docker pull "quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
+  if [ $? -ne 0 ]; then
+    echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
+    printMessage failed
+    exit 1
+  fi
+  
+  DOCKER_FILE_ARGS="-f common.yml -f docker-compose-comms-v2.yml -f platform.$(uname -s).yml"
+elif [ $COMMS_VERSION -eq 3 ]; then
+  cat local/nginx/include/lambdas-commsv3.conf > local/nginx/include/lambdas.conf
+
+  cat local/nginx/include/upstream-commsv3.conf >> local/nginx/include/upstream.conf
+  cat local/nginx/include/routes-commsv3.conf >> local/nginx/include/routes.conf
+  cat local/nginx/include/metrics-commsv3.conf >> local/nginx/include/metrics.conf
+
+  if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
+      echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Archipelago Node. \033[39m"
+  fi
+
+  if [ "$CATALYST_STATS_DOCKER_TAG" != "latest" ]; then
+      echo -e "\033[33m WARNING: You are not running latest image of Catalyst Stats Node. \033[39m"
+  fi
+
+  docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
+  if [ $? -ne 0 ]; then
+    echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
+    printMessage failed
+    exit 1
+  fi
+
+  docker pull "quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}"
+  if [ $? -ne 0 ]; then
+    echo -n "Failed to pull the catalyst-stats's docker image with tag ${CATALYST_STATS_DOCKER_TAG:-latest}"
+    printMessage failed
+    exit 1
+  fi
+
+  DOCKER_FILE_ARGS="-f common.yml -f docker-compose-comms-v3.yml -f platform.$(uname -s).yml"
 fi
 
-if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Archipelago Node. \033[39m"
+if [ "$DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
 fi
 
 if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Explorer BFF Node. \033[39m"
 fi
 
-if [ "$CATALYST_STATS_DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst Stats Node. \033[39m"
-fi
-
+echo -n " - COMMS_VERSION:             " ; echo -e "\033[33m ${COMMS_VERSION} \033[39m"
 echo -n " - DOCKER_TAG:                " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
+echo -n " - LIGHTHOUSE_DOCKER_TAG:     " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
 echo -n " - ARCHIPELAGO_DOCKER_TAG:    " ; echo -e "\033[33m ${ARCHIPELAGO_DOCKER_TAG} \033[39m"
 echo -n " - EXPLORER_BFF_DOCKER_TAG:   " ; echo -e "\033[33m ${EXPLORER_BFF_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_STATS_DOCKER_TAG: " ; echo -e "\033[33m ${CATALYST_STATS_DOCKER_TAG} \033[39m"
@@ -312,7 +369,7 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
-docker-compose pull "nginx"
+docker-compose -f common.yml pull "nginx"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull nginx"
   printMessage failed
@@ -333,13 +390,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
-if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
-  printMessage failed
-  exit 1
-fi
-
 docker pull "quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the explorer-bff's docker image with tag ${EXPLORER_BFF_DOCKER_TAG:-latest}"
@@ -347,14 +397,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker pull "quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}"
-if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the catalyst-stats's docker image with tag ${CATALYST_STATS_DOCKER_TAG:-latest}"
-  printMessage failed
-  exit 1
-fi
-
-docker-compose stop nginx
+docker-compose -f common.yml stop nginx
 if [ $? -ne 0 ]; then
   echo -n "Failed to stop nginx! "
   printMessage failed
@@ -408,12 +451,12 @@ if test $matches -eq 0; then
 fi
 
 echo "## Restarting containers... "
-docker-compose down
+docker-compose -f common.yml -f docker-compose-comms-v2.yml -f docker-compose-comms-v3.yml down
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
 else
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --remove-orphans -d nginx
+  docker-compose $DOCKER_FILE_ARGS up --remove-orphans -d nginx
   if test $? -ne 0; then
     echo -n "Failed to start catalyst node"
     printMessage failed

@@ -1,0 +1,88 @@
+version: "3"
+
+services:
+  explorer-bff:
+    extends:
+          file: common.yml
+          service: explorer-bff
+    environment:
+      - NATS_URL=nats://nats:4222
+      - COMMS_MODE=archipelago
+      - REALM_NAMES=${LIGHTHOUSE_NAMES}
+    depends_on:
+      - nats
+
+  nats:
+    image: nats:2.8
+    container_name: nats
+    expose:
+      - "4222"
+      - "8222"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: nats }
+
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:0.9.3
+    container_name: nats-exporter
+    command: "-varz -connz -subz -routez http://nats:8222"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: nats-exporter }
+    depends_on:
+      - nats
+
+  stats:
+    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+    restart: always
+    expose:
+      - "3000"
+    logging:
+      driver: syslog
+      options: { tag: catalyst-stats }
+    depends_on:
+      - nats
+
+  archipelago:
+    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: archipelago }
+    depends_on:
+      - nats
+
+  lambdas:
+    extends:
+          file: common.yml
+          service: lambdas
+    environment:
+      - "COMMS_PROTOCOL=v3"
+
+  nginx:
+    depends_on:
+      - lambdas
+      - cadvisor
+      - content-server
+      - postgres-exporter
+      - node-exporter
+      - certbot
+      - explorer-bff
+      - stats
+      - nats
+      - nats-exporter
+      - archipelago

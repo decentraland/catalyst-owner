@@ -21,6 +21,7 @@ jobs:
             EMAIL=developers@decentraland.org
             CONTENT_SERVER_STORAGE=/opt/catalyst-storage
             CATALYST_URL=${{ matrix.catalyst_url }}
+            COMMS_VERSION=3
           EOF
           cat <<EOF > .env-advanced
             ETH_NETWORK=goerli

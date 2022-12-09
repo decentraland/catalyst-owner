@@ -1,0 +1,44 @@
+version: "3"
+
+volumes:
+  lighthouse_storage_volume: {}
+
+services:
+  explorer-bff:
+    extends:
+          file: common.yml
+          service: explorer-bff
+    environment:
+      - REALM_NAMES=${LIGHTHOUSE_NAMES}
+      - LIGHTHOUSE_URL=${CATALYST_URL}/comms/
+      - HEALTHCHECK_LIGHTHOUSE_URL=http://comms-server:9000
+      - COMMS_MODE=lighthouse
+
+  comms-server:
+    image: quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - LOG_REQUESTS=false # Request logs are produced by NGINX
+      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
+    expose:
+      - "9000"
+    volumes:
+      - "lighthouse_storage_volume:/app/storage/lighthouse"
+    restart: always
+    logging:
+      driver: syslog
+      options: { tag: comms }
+
+  nginx:
+    depends_on:
+      - lambdas
+      - cadvisor
+      - content-server
+      - postgres-exporter
+      - node-exporter
+      - certbot
+      - explorer-bff
+      - comms-server

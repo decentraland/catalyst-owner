@@ -8,28 +8,6 @@ volumes:
   shared_keys:
 
 services:
-  nats:
-    image: nats:2.8
-    container_name: nats
-    expose:
-      - "4222"
-      - "8222"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: nats }
-
-  nats-exporter:
-    image: natsio/prometheus-nats-exporter:0.9.3
-    container_name: nats-exporter
-    command: "-varz -connz -subz -routez http://nats:8222"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: nats-exporter }
-    depends_on:
-      - nats
-
   explorer-bff:
     image: quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}
     working_dir: /app
@@ -37,15 +15,12 @@ services:
       - .env
       - .env-advanced
     environment:
-      - NATS_URL=nats://nats:4222
       - LAMBDAS_URL=${CATALYST_URL}/lambdas/
       - CONTENT_URL=${CATALYST_URL}/content/
       - BFF_PUBLIC_URL=/bff
       - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
       - HEALTHCHECK_CONTENT_URL=http://content-server:6969
-      - COMMS_MODE=archipelago
       - STORAGE_LOCATION=/app/storage
-      - REALM_NAMES=${LIGHTHOUSE_NAMES}
     restart: always
     expose:
       - "3000"
@@ -54,40 +29,6 @@ services:
     logging:
       driver: syslog
       options: { tag: explorer-bff }
-    depends_on:
-      - nats
-
-  stats:
-    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
-    restart: always
-    expose:
-      - "3000"
-    logging:
-      driver: syslog
-      options: { tag: catalyst-stats }
-    depends_on:
-      - nats
-
-  archipelago:
-    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: archipelago }
-    depends_on:
-      - nats
 
   postgres:
     image: postgres:12
@@ -177,7 +118,6 @@ services:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
-      - "COMMS_PROTOCOL=v3"
     env_file:
       - .env
       - .env-advanced
@@ -204,7 +144,6 @@ services:
       - content-server
       - lambdas
       - explorer-bff
-      - archipelago
 
   nginx:
     container_name: nginx
@@ -231,10 +170,6 @@ services:
       - node-exporter
       - certbot
       - explorer-bff
-      - stats
-      - nats
-      - nats-exporter
-      - archipelago
     logging:
       driver: syslog
       options: { tag: nginx }
@@ -249,4 +184,3 @@ services:
     logging:
       driver: syslog
       options: { tag: certbot }
-

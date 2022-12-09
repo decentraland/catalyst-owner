@@ -1,7 +1,7 @@
 #!/bin/bash
 VARIABLE_SUM=$#
 CONTAINER_NAMES=$@
-CONTAINER_VALID_LIST="nginx lambdas content-server archipelago nats nats-exporter explorer-bff stats"
+CONTAINER_VALID_LIST="nginx lambdas content-server archipelago nats nats-exporter explorer-bff stats comms-server"
 
 printMessage () {
     Type=$1
@@ -14,7 +14,7 @@ printMessage () {
 
 if test ${VARIABLE_SUM} -eq 0; then
   echo "## Stopping catalyst node..."
-  docker-compose stop
+  docker-compose -f common.yml -f docker-compose-comms-v2.yml -f docker-compose-comms-v3.yml stop
   if test $? -ne 0; then
     echo -n "Failed to stop catalyst node "
     printMessage failed
