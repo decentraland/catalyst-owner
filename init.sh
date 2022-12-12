@@ -285,6 +285,11 @@ elif [ $COMMS_VERSION -eq 3 ]; then
   DOCKER_FILE_ARGS="-f common.yml -f docker-compose-comms-v3.yml -f platform.$(uname -s).yml"
 fi
 
+echo $DOCKER_FILE_ARGS
+cat common.yml 
+cat docker-compose-comms-v3.yml 
+docker-compose --version
+
 if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
 fi
@@ -456,7 +461,9 @@ if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
 else
+  echo "about to start"
   docker-compose $DOCKER_FILE_ARGS up --remove-orphans -d nginx
+  echo "started"
   if test $? -ne 0; then
     echo -n "Failed to start catalyst node"
     printMessage failed
