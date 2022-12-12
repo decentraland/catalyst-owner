@@ -62,7 +62,7 @@ jobs:
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs nginx
+            docker-compose -f common.yml logs nginx
             sleep 10
           done
 
@@ -71,7 +71,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs content-server
+            docker-compose -f common.yml logs content-server
             sleep 10
           done
 
@@ -80,7 +80,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs lambdas
+            docker-compose -f common.yml logs lambdas
             sleep 10
           done
 
@@ -89,7 +89,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs explorer-bff
+            docker-compose -f common.yml logs explorer-bff
             sleep 10
           done
 
