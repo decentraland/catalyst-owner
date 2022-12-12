@@ -57,7 +57,7 @@ jobs:
       - name: wait for nginx
         timeout-minutes: 5
         run: |
-          docker container -f common.yml -f docker-compose-v3.yml ls
+          docker container -f common.yml -f docker-compose-comms-v3.yml ls
           docker-compose logs
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
@@ -167,6 +167,6 @@ jobs:
       - name: print syslog
         if: ${{ always() }}
         run: |
-          docker container -f common.yml -f docker-compose-v3.yml ls
+          docker container -f common.yml -f docker-compose-comms-v3.yml ls
           docker-compose logs
           tail -n 5000 /var/log/syslog
