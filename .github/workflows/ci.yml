@@ -32,11 +32,17 @@ jobs:
 
       - name: replacing syslog for default driver and print diff
         run: |
-          cp docker-compose.yml docker-compose.yml.bak
-          sed "s/syslog/local/g" docker-compose.yml.bak > docker-compose.yml
-          cp docker-compose.yml docker-compose.yml.bak
-          sed "s/options: {.*}//g" docker-compose.yml.bak > docker-compose.yml
-          git diff docker-compose.yml
+          cp common.yml common.yml.bak
+          sed "s/syslog/local/g" common.yml.bak > common.yml
+          cp common.yml common.yml.bak
+          sed "s/options: {.*}//g" common.yml.bak > common.yml
+          git diff common.yml
+
+          cp docker-compose-comms-v3.yml docker-compose-comms-v3.yml.bak
+          sed "s/syslog/local/g" docker-compose-comms-v3.yml.bak > docker-compose-comms-v3.yml
+          cp docker-compose-comms-v3.yml docker-compose-comms-v3.yml.bak
+          sed "s/options: {.*}//g" docker-compose-comms-v3.yml.bak > docker-compose-comms-v3.yml
+          git diff docker-compose-comms-v3.yml
 
       - name: run init.sh
         run: ./init.sh
