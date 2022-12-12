@@ -58,7 +58,7 @@ jobs:
         timeout-minutes: 5
         run: |
           docker container ls
-          docker-compose logs
+          docker-compose -f common.yml -f docker-compose-comms-v3.yml logs
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
@@ -168,5 +168,5 @@ jobs:
         if: ${{ always() }}
         run: |
           docker container ls
-          docker-compose logs
+          docker-compose -f common.yml -f docker-compose-comms-v3.yml logs
           tail -n 5000 /var/log/syslog
