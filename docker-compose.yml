@@ -179,7 +179,7 @@ services:
       - "lambdas_server_storage:/app/storage/lambdas"
 
   lambdos:
-    image: decentraland/lambdos:latest
+    image: decentraland/lambdos:${LAMBDOS_DOCKER_TAG:-latest}
     working_dir: /app
     restart: always
     environment:
