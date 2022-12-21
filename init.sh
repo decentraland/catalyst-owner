@@ -326,9 +326,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker pull "quay.io/decentraland/lambdos:${LAMBDOS_DOCKER_TAG:-latest}"
+docker pull "quay.io/decentraland/lamb2:${LAMB2_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lambdos' docker image with tag ${LAMBDOS_DOCKER_TAG:-latest}"
+  echo -n "Failed to pull the lamb2' docker image with tag ${LAMB2_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi

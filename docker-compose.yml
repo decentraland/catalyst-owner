@@ -178,8 +178,8 @@ services:
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
-  lambdos:
-    image: quay.io/decentraland/lambdos:${LAMBDOS_DOCKER_TAG:-latest}
+  lamb2:
+    image: quay.io/decentraland/lamb2:${LAMB2_DOCKER_TAG:-latest}
     working_dir: /app
     restart: always
     environment:
@@ -228,7 +228,7 @@ services:
     restart: always
     depends_on:
       - lambdas
-      - lambdos
+      - lamb2
       - cadvisor
       - content-server
       - comms-server
