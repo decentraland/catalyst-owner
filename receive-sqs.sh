@@ -1,57 +1,52 @@
 #!/bin/bash
 
-# reads a message from an SQS named SQS_QUEUE_NAME and performs the update based on the .version field of the message
+source .env-cron
 
 if [ -n "${SQS_QUEUE_NAME}" ]; then
   SQS_URL=$(aws sqs get-queue-url --queue-name "${SQS_QUEUE_NAME}" | jq -r .QueueUrl)
+  MSG=$(aws sqs receive-message --queue-url $SQS_URL)
+  if [ ! -z "$MSG" ]
+  then
+    COUNT=$(echo $MSG | jq ".Messages|length")
+    if [ $COUNT > 0 ]
+    then
+      RECEIPT=$(echo $MSG | jq ".Messages[0].ReceiptHandle")
+      aws sqs delete-message --queue-url $SQS_URL --receipt-handle "$RECEIPT"
+      BODY=$(echo $MSG | jq ".Messages[0].Body | fromjson")
+      DOCKER_TAG_CONTENT=$(echo $BODY | jq -r '.tag')
+      DOCKER_TAG_LIGHTOUSE=$(echo $BODY | jq -r '.lighthouse');
+      DOCKER_TAG_EXPLORER=$(echo $BODY | jq -r '.explorerbff');
 
-  # Update the version if we have messages in the SQS
-  if [ -n "${SQS_URL}" ]; then
-    MSG=$(aws sqs receive-message --queue-url "$SQS_URL");
-
-    if [ -n "$MSG" ]; then
-      export DOCKER_TAG
-      export TARGETED_REGION
-      export EXIT_CODE
-
-      DOCKER_TAG=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .version);
-      TARGETED_REGION=$(echo "$MSG" | jq -r '.Messages[0].Body' | jq -r .Message | jq -r .region);
-
-      if [ -n "$TARGETED_REGION" ] && [ "$DEPLOYMENT_REGION" != "$TARGETED_REGION" ]; then
-       exit 0
+      WAIT=$(echo $BODY | jq -r '.wait')
+      cd /opt/ebs/catalyst-owner
+      # Content docker tag
+      if grep -P '^#?DOCKER_TAG.*' .env; then
+        sed -i "s/^#\?DOCKER_TAG.*/DOCKER_TAG=$DOCKER_TAG_CONTENT/g" .env
+      else
+        echo "DOCKER_TAG=$DOCKER_TAG_CONTENT"
       fi
-
-      if [ -n "$DOCKER_TAG" ]; then
-        if ! [ -f ".env" ]; then
-          echo -n "Error: .env does not exist" >&2
-        else
-          escapedDockerTag=$(echo "$DOCKER_TAG" | jq -MR '.')
-          {
-            echo "";
-            echo "# $(date)";
-            echo "DOCKER_TAG=${escapedDockerTag}";
-          } >> .env
+      # Lighthouse docker tag
+      if grep -P '^#?LIGHTHOUSE_DOCKER_TAG.*' .env; then
+        sed -i "s/^#\?LIGHTHOUSE_DOCKER_TAG.*/LIGHTHOUSE_DOCKER_TAG=$DOCKER_TAG_LIGHTOUSE/g" .env
+      else
+        echo "LIGHTHOUSE_DOCKER_TAG=$DOCKER_TAG_LIGHTOUSE"
+      fi
+      # Explorer BFF docker tag
+      if grep -P '^#?EXPLORER_BFF_DOCKER_TAG.*' .env; then
+        sed -i "s/^#\?EXPLORER_BFF_DOCKER_TAG.*/EXPLORER_BFF_DOCKER_TAG=$DOCKER_TAG_EXPLORER/g" .env
+      else
+        echo "EXPLORER_BFF_DOCKER_TAG=$DOCKER_TAG_EXPLORER"
+      fi
+      if [ $WAIT != "null" ]; then
+        RANDNUM=$((RANDOM % 18000 + 3600))
+        DATETEXT=$(date -u -d@$(($RANDNUM)) +"%Hh %Mm")
+        source .env
+        if [[ -v SLACK_WEBHOOK ]]; then
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"\`$LIGHTHOUSE_NAMES\` will update in $DATETEXT.\"}" $SLACK_WEBHOOK
         fi
-
-        export SLEEP_TIME=0
-        bash ./init.sh
-
-        EXIT_CODE=$?
-      else
-        EXIT_CODE=1
+        sleep $RANDNUM
       fi
-
-      # Only remove the message from the queue if the update was successful
-      if [ $EXIT_CODE -eq 0 ]; then
-        echo "$MSG" | jq -r '.Messages[0] | .ReceiptHandle' | (xargs -I {} aws sqs delete-message --queue-url "$SQS_URL" --receipt-handle {});
-      else
-        echo "[ERROR] consuming message $MSG"
-        exit 1
-      fi
+      ./init.sh
     fi
-  else
-    echo 'No SQS_URL is set'
   fi
-else
-  echo 'No SQS_QUEUE_NAME is set'
 fi
