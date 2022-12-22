@@ -195,7 +195,7 @@ services:
     restart: always
     environment:
       - HTTP_SERVER_PORT=7272
-      - CONTENT_SERVER_ADDRESS=https://peer.decentraland.org/content
+      - CONTENT_SERVER_ADDRESS=http://content-server:6969
       - ETH_NETWORK=mainnet
     env_file:
       - .env
