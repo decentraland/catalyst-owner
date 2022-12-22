@@ -326,6 +326,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+docker pull "quay.io/decentraland/lamb2:${LAMB2_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the lamb2' docker image with tag ${LAMB2_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
 docker pull "quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"

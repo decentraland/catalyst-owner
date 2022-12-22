@@ -178,6 +178,19 @@ services:
     volumes:
       - "lambdas_server_storage:/app/storage/lambdas"
 
+  lamb2:
+    image: quay.io/decentraland/lamb2:${LAMB2_DOCKER_TAG:-latest}
+    working_dir: /app
+    restart: always
+    environment:
+      - HTTP_SERVER_PORT=7272
+      - CONTENT_SERVER_ADDRESS=http://content-server:6969
+    env_file:
+      - .env
+      - .env-advanced
+    expose:
+      - "7272"
+  
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
     container_name: cadvisor
@@ -214,6 +227,7 @@ services:
     restart: always
     depends_on:
       - lambdas
+      - lamb2
       - cadvisor
       - content-server
       - comms-server
