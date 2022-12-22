@@ -333,6 +333,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+
+docker pull "quay.io/decentraland/lamb2:${LAMB2_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the lamb2' docker image with tag ${LAMB2_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
 docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"

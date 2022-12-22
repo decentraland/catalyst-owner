@@ -3,16 +3,19 @@
 version: "3"
 
 services:
-  nginx: *COMMON
+  nginx: &COMMON
+    logging:
+      driver: local
   certbot: *COMMON
   postgres: *COMMON
   postgres-exporter: *COMMON
   node-exporter: *COMMON
   content-server: *COMMON
   lambdas: *COMMON
+  lamb2: *COMMON
   cadvisor: *COMMON
   nats: *COMMON
   nats-exporter: *COMMON
   explorer-bff: *COMMON
-  archipelagarchipelago: *COMMON
+  archipelago: *COMMON
   stats: *COMMON
