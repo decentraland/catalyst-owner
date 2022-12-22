@@ -10,7 +10,7 @@ services:
   node-exporter: *COMMON
   content-server: *COMMON
   lambdas: *COMMON
-  lambdos: *COMMON
+  lamb2: *COMMON
   cadvisor: *COMMON
   nats: *COMMON
   nats-exporter: *COMMON
