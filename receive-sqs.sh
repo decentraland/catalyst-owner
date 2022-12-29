@@ -23,19 +23,19 @@ if [ -n "${SQS_QUEUE_NAME}" ]; then
       if grep -P '^#?DOCKER_TAG.*' .env; then
         sed -i "s/^#\?DOCKER_TAG.*/DOCKER_TAG=$DOCKER_TAG_CONTENT/g" .env
       else
-        echo "DOCKER_TAG=$DOCKER_TAG_CONTENT"
+        echo "DOCKER_TAG=$DOCKER_TAG_CONTENT" >> .env
       fi
       # Lighthouse docker tag
       if grep -P '^#?LIGHTHOUSE_DOCKER_TAG.*' .env; then
         sed -i "s/^#\?LIGHTHOUSE_DOCKER_TAG.*/LIGHTHOUSE_DOCKER_TAG=$DOCKER_TAG_LIGHTOUSE/g" .env
       else
-        echo "LIGHTHOUSE_DOCKER_TAG=$DOCKER_TAG_LIGHTOUSE"
+        echo "LIGHTHOUSE_DOCKER_TAG=$DOCKER_TAG_LIGHTOUSE" >> .env
       fi
       # Explorer BFF docker tag
       if grep -P '^#?EXPLORER_BFF_DOCKER_TAG.*' .env; then
         sed -i "s/^#\?EXPLORER_BFF_DOCKER_TAG.*/EXPLORER_BFF_DOCKER_TAG=$DOCKER_TAG_EXPLORER/g" .env
       else
-        echo "EXPLORER_BFF_DOCKER_TAG=$DOCKER_TAG_EXPLORER"
+        echo "EXPLORER_BFF_DOCKER_TAG=$DOCKER_TAG_EXPLORER" >> .env
       fi
       if [ $WAIT != "null" ]; then
         RANDNUM=$((RANDOM % 18000 + 3600))
