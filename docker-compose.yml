@@ -9,7 +9,6 @@ volumes:
   ipfs_data: {}
   shared_keys:
 
-
 services:
   ipfs:
     image: ipfs/go-ipfs:v0.13.0
