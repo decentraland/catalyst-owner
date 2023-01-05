@@ -215,7 +215,7 @@ fi
 
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
-export LAMB2_TAG=${LAMB2_TAG:-latest}
+export LAMB2_DOCKER_TAG=${LAMB2_DOCKER_TAG:-latest}
 export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
 export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
@@ -226,7 +226,7 @@ if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
 fi
 
-if [ "$LAMB2_TAG" != "latest" ]; then
+if [ "$LAMB2_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Lamb2 Node. \033[39m"
 fi
 
@@ -239,7 +239,7 @@ if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
 fi
 
 echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
-echo -n " - LAMB2_TAG:               " ; echo -e "\033[33m ${LAMB2_TAG} \033[39m"
+echo -n " - LAMB2_DOCKER_TAG:               " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
 echo -n " - LIGHTHOUSE_DOCKER_TAG:   " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
