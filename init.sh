@@ -244,7 +244,7 @@ if [ "$CATALYST_STATS_DOCKER_TAG" != "latest" ]; then
 fi
 
 echo -n " - DOCKER_TAG:                " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
-echo -n " - LAMB2_DOCKER_TAG:               " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
+echo -n " - LAMB2_DOCKER_TAG:          " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
 echo -n " - ARCHIPELAGO_DOCKER_TAG:    " ; echo -e "\033[33m ${ARCHIPELAGO_DOCKER_TAG} \033[39m"
 echo -n " - EXPLORER_BFF_DOCKER_TAG:   " ; echo -e "\033[33m ${EXPLORER_BFF_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_STATS_DOCKER_TAG: " ; echo -e "\033[33m ${CATALYST_STATS_DOCKER_TAG} \033[39m"
