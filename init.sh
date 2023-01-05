@@ -239,7 +239,7 @@ if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
 fi
 
 echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
-echo -n " - LAMB2_DOCKER_TAG:               " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
+echo -n " - LAMB2_DOCKER_TAG:        " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
 echo -n " - LIGHTHOUSE_DOCKER_TAG:   " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
