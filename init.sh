@@ -215,6 +215,7 @@ fi
 
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
+export LAMB2_DOCKER_TAG=${LAMB2_DOCKER_TAG:-latest}
 export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
 export CATALYST_STATS_DOCKER_TAG=${CATALYST_STATS_DOCKER_TAG:-latest}
 export ARCHIPELAGO_DOCKER_TAG=${ARCHIPELAGO_DOCKER_TAG:-latest}
@@ -224,6 +225,10 @@ MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
 
 if [ "$DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Content and Catalyst's Lambdas Nodes. \033[39m"
+fi
+
+if [ "$LAMB2_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Lamb2 Node. \033[39m"
 fi
 
 if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
@@ -239,6 +244,7 @@ if [ "$CATALYST_STATS_DOCKER_TAG" != "latest" ]; then
 fi
 
 echo -n " - DOCKER_TAG:                " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
+echo -n " - LAMB2_DOCKER_TAG:               " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
 echo -n " - ARCHIPELAGO_DOCKER_TAG:    " ; echo -e "\033[33m ${ARCHIPELAGO_DOCKER_TAG} \033[39m"
 echo -n " - EXPLORER_BFF_DOCKER_TAG:   " ; echo -e "\033[33m ${EXPLORER_BFF_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_STATS_DOCKER_TAG: " ; echo -e "\033[33m ${CATALYST_STATS_DOCKER_TAG} \033[39m"
