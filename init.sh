@@ -216,8 +216,9 @@ fi
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
 export LAMB2_DOCKER_TAG=${LAMB2_DOCKER_TAG:-latest}
-export LIGHTHOUSE_DOCKER_TAG=${LIGHTHOUSE_DOCKER_TAG:-latest}
 export EXPLORER_BFF_DOCKER_TAG=${EXPLORER_BFF_DOCKER_TAG:-latest}
+export CATALYST_STATS_DOCKER_TAG=${CATALYST_STATS_DOCKER_TAG:-latest}
+export ARCHIPELAGO_DOCKER_TAG=${ARCHIPELAGO_DOCKER_TAG:-latest}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
 MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
@@ -230,22 +231,28 @@ if [ "$LAMB2_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Lamb2 Node. \033[39m"
 fi
 
-if [ "$LIGHTHOUSE_DOCKER_TAG" != "latest" ]; then
-    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Lighthouse Node. \033[39m"
+if [ "$ARCHIPELAGO_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Archipelago Node. \033[39m"
 fi
 
 if [ "$EXPLORER_BFF_DOCKER_TAG" != "latest" ]; then
     echo -e "\033[33m WARNING: You are not running latest image of Catalyst's Explorer BFF Node. \033[39m"
 fi
 
-echo -n " - DOCKER_TAG:              " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
-echo -n " - LAMB2_DOCKER_TAG:        " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
-echo -n " - LIGHTHOUSE_DOCKER_TAG:   " ; echo -e "\033[33m ${LIGHTHOUSE_DOCKER_TAG} \033[39m"
-echo -n " - CATALYST_URL:            " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
-echo -n " - CONTENT_SERVER_STORAGE:  " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
-echo -n " - EMAIL:                   " ; echo -e "\033[33m ${EMAIL} \033[39m"
-echo -n " - ETH_NETWORK:             " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
-echo -n " - REGENERATE:              " ; echo -e "\033[33m ${REGENERATE} \033[39m"
+if [ "$CATALYST_STATS_DOCKER_TAG" != "latest" ]; then
+    echo -e "\033[33m WARNING: You are not running latest image of Catalyst Stats Node. \033[39m"
+fi
+
+echo -n " - DOCKER_TAG:                " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
+echo -n " - LAMB2_DOCKER_TAG:          " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
+echo -n " - ARCHIPELAGO_DOCKER_TAG:    " ; echo -e "\033[33m ${ARCHIPELAGO_DOCKER_TAG} \033[39m"
+echo -n " - EXPLORER_BFF_DOCKER_TAG:   " ; echo -e "\033[33m ${EXPLORER_BFF_DOCKER_TAG} \033[39m"
+echo -n " - CATALYST_STATS_DOCKER_TAG: " ; echo -e "\033[33m ${CATALYST_STATS_DOCKER_TAG} \033[39m"
+echo -n " - CATALYST_URL:              " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
+echo -n " - CONTENT_SERVER_STORAGE:    " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
+echo -n " - EMAIL:                     " ; echo -e "\033[33m ${EMAIL} \033[39m"
+echo -n " - ETH_NETWORK:               " ; echo -e "\033[33m ${ETH_NETWORK} \033[39m"
+echo -n " - REGENERATE:                " ; echo -e "\033[33m ${REGENERATE} \033[39m"
 echo ""
 echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
@@ -339,9 +346,15 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-docker pull "quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
-  echo -n "Failed to pull the lighthouse's docker image with tag ${LIGHTHOUSE_DOCKER_TAG:-latest}"
+  echo -n "Failed to pull the lamb2' docker image with tag ${LAMB2_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi
@@ -349,6 +362,13 @@ fi
 docker pull "quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the explorer-bff's docker image with tag ${EXPLORER_BFF_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the catalyst-stats's docker image with tag ${CATALYST_STATS_DOCKER_TAG:-latest}"
   printMessage failed
   exit 1
 fi

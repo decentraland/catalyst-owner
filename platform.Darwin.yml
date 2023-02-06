@@ -3,10 +3,9 @@
 version: "3"
 
 services:
-  comms-server: &COMMON
+  nginx: &COMMON
     logging:
       driver: local
-  nginx: *COMMON
   certbot: *COMMON
   postgres: *COMMON
   postgres-exporter: *COMMON
@@ -18,3 +17,5 @@ services:
   nats: *COMMON
   nats-exporter: *COMMON
   explorer-bff: *COMMON
+  archipelago: *COMMON
+  stats: *COMMON
