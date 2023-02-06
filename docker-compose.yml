@@ -3,7 +3,6 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
-  lighthouse_storage_volume: {}
   bff_storage_volume: {}
   lambdas_server_storage: {}
   shared_keys:
@@ -41,14 +40,12 @@ services:
       - NATS_URL=nats://nats:4222
       - LAMBDAS_URL=${CATALYST_URL}/lambdas/
       - CONTENT_URL=${CATALYST_URL}/content/
-      - LIGHTHOUSE_URL=${CATALYST_URL}/comms/
+      - BFF_PUBLIC_URL=/bff
       - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
       - HEALTHCHECK_CONTENT_URL=http://content-server:6969
-      - HEALTHCHECK_LIGHTHOUSE_URL=http://comms-server:9000
+      - COMMS_MODE=archipelago
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
-      - COMMS_MODE=lighthouse
-      - BFF_PUBLIC_URL=/bff
     restart: always
     expose:
       - "3000"
@@ -60,23 +57,37 @@ services:
     depends_on:
       - nats
 
-  comms-server:
-    image: quay.io/decentraland/catalyst-lighthouse:${LIGHTHOUSE_DOCKER_TAG:-latest}
+  stats:
+    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
     working_dir: /app
     env_file:
       - .env
       - .env-advanced
     environment:
-      - LOG_REQUESTS=false # Request logs are produced by NGINX
-      - LIGHTHOUSE_STORAGE_LOCATION=/app/storage/lighthouse
+      - "NATS_URL=nats://nats:4222"
+    restart: always
     expose:
-      - "9000"
-    volumes:
-      - "lighthouse_storage_volume:/app/storage/lighthouse"
+      - "3000"
+    logging:
+      driver: syslog
+      options: { tag: catalyst-stats }
+    depends_on:
+      - nats
+
+  archipelago:
+    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
     restart: always
     logging:
       driver: syslog
-      options: { tag: comms }
+      options: { tag: archipelago }
+    depends_on:
+      - nats
 
   postgres:
     image: postgres:12
@@ -165,8 +176,8 @@ services:
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
       - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
-      - COMMS_SERVER_ADDRESS=${CATALYST_URL}/comms/
       - LAMBDAS_STORAGE_LOCATION=/app/storage/lambdas
+      - "COMMS_PROTOCOL=v3"
     env_file:
       - .env
       - .env-advanced
@@ -203,14 +214,14 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     depends_on:
-      - comms-server
       - content-server
       - lambdas
       - explorer-bff
+      - archipelago
 
   nginx:
     container_name: nginx
-    image: nginx:1.21-alpine
+    image: nginx:1.22-alpine
     ports:
       - "80:80"
       - "443:443"
@@ -230,13 +241,14 @@ services:
       - lamb2
       - cadvisor
       - content-server
-      - comms-server
       - postgres-exporter
       - node-exporter
       - certbot
       - explorer-bff
+      - stats
       - nats
       - nats-exporter
+      - archipelago
     logging:
       driver: syslog
       options: { tag: nginx }
@@ -251,3 +263,4 @@ services:
     logging:
       driver: syslog
       options: { tag: certbot }
+
