@@ -21,6 +21,10 @@ jobs:
             EMAIL=developers@decentraland.org
             CONTENT_SERVER_STORAGE=/opt/catalyst-storage
             CATALYST_URL=${{ matrix.catalyst_url }}
+            LIVEKIT_HOST=wss://dcl.livekit.cloud
+            LIVEKIT_API_KEY=key
+            LIVEKIT_API_SECRET=secret
+            ROOM_PREFIX=prefix
           EOF
           cat <<EOF > .env-advanced
             ETH_NETWORK=goerli
