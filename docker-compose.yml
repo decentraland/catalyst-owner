@@ -84,6 +84,8 @@ services:
       - .env-advanced
     environment:
       - "NATS_URL=nats://nats:4222"
+    expose:
+      - "5000"
     restart: always
     logging:
       driver: syslog
