@@ -47,7 +47,7 @@ services:
       - COMMS_MODE=archipelago
       - STORAGE_LOCATION=/app/storage
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
-      - MAX_USERS=${MAX_USERS:-300}
+      - MAX_USERS=${MAX_USERS:-400}
     restart: always
     expose:
       - "3000"
