@@ -16,6 +16,5 @@ services:
   cadvisor: *COMMON
   nats: *COMMON
   nats-exporter: *COMMON
-  explorer-bff: *COMMON
   archipelago: *COMMON
   stats: *COMMON

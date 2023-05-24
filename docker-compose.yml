@@ -3,7 +3,6 @@ version: "3"
 volumes:
   content_server_storage: {}
   nginx_storage: {}
-  bff_storage_volume: {}
   lambdas_server_storage: {}
   shared_keys:
 
@@ -27,35 +26,6 @@ services:
     logging:
       driver: syslog
       options: { tag: nats-exporter }
-    depends_on:
-      - nats
-
-  explorer-bff:
-    image: quay.io/decentraland/explorer-bff:${EXPLORER_BFF_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - NATS_URL=nats://nats:4222
-      - LAMBDAS_URL=${CATALYST_URL}/lambdas/
-      - CONTENT_URL=${CATALYST_URL}/content/
-      - BFF_PUBLIC_URL=/bff
-      - HEALTHCHECK_LAMBDAS_URL=http://lambdas:7070
-      - HEALTHCHECK_LAMB2_URL=http://lamb2:7272
-      - HEALTHCHECK_CONTENT_URL=http://content-server:6969
-      - COMMS_MODE=archipelago
-      - STORAGE_LOCATION=/app/storage
-      - REALM_NAMES=${LIGHTHOUSE_NAMES}
-      - MAX_USERS=${MAX_USERS:-400}
-    restart: always
-    expose:
-      - "3000"
-    volumes:
-      - "bff_storage_volume:/app/storage"
-    logging:
-      driver: syslog
-      options: { tag: explorer-bff }
     depends_on:
       - nats
 
@@ -199,13 +169,20 @@ services:
     restart: always
     environment:
       - HTTP_SERVER_PORT=7272
-      - CONTENT_SERVER_ADDRESS=${CATALYST_URL}/content/
+      - LAMBDAS_URL=${CATALYST_URL}/lambdas/
+      - ARCHIPELAGO_URL={CATALYST_URL}/archipelago/
+      - CONTENT_URL=${CATALYST_URL}/content/
+      - INTERNAL_LAMBDAS_URL=http://lambdas:7070
+      - INTERNAL_ARCHIPELAGO_URL=http://lamb2:7272
+      - INTERNAL_CONTENT_URL=http://content-server:6969
+      - REALM_NAMES=${LIGHTHOUSE_NAMES}
+      - MAX_USERS=${MAX_USERS:-400}
     env_file:
       - .env
       - .env-advanced
     expose:
       - "7272"
-  
+
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
     container_name: cadvisor
@@ -220,7 +197,6 @@ services:
     depends_on:
       - content-server
       - lambdas
-      - explorer-bff
       - archipelago
 
   nginx:
@@ -248,7 +224,6 @@ services:
       - postgres-exporter
       - node-exporter
       - certbot
-      - explorer-bff
       - stats
       - nats
       - nats-exporter
@@ -267,4 +242,3 @@ services:
     logging:
       driver: syslog
       options: { tag: certbot }
-

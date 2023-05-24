@@ -4,7 +4,6 @@ Metrics are exposed in the following endpoints:
 
 - `/content_metrics` - content server
 - `/lambdas_metrics` - lambdas
-- `/explorer_bff_metrics` - explorer-bff server
 - `/system_metrics` - cadvisor
 - `/postgres_metrics` - postgres exporter
 - `/nats_metrics` - NATS exporter
@@ -24,4 +23,3 @@ htpasswd -b local/nginx/auth/.htpasswd-system [username] [password]
 ```
 
 Notice: by default, a user named `decentraland-crawler` is added to scrape metrics to help the Decentraland Foundation members to debug production issues. Feel free to remove it.
-
