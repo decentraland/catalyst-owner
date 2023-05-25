@@ -175,7 +175,7 @@ services:
       - INTERNAL_LAMBDAS_URL=http://lambdas:7070
       - INTERNAL_ARCHIPELAGO_URL=http://archipelago:5000
       - INTERNAL_CONTENT_URL=http://content-server:6969
-      - REALM_NAMES=${LIGHTHOUSE_NAMES}
+      - REALM_NAME=${REALM_NAME}
       - MAX_USERS=${MAX_USERS:-400}
     env_file:
       - .env

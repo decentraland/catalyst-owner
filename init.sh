@@ -213,6 +213,13 @@ else
     exit 1
 fi
 
+echo -n "## Checking if realm name is configured... "
+if test ${REALM_NAME}; then
+  printMessage ok
+else
+    echo -e "\033[33m WARNING: REALM_NAME variable is undefined \033[39m"
+fi
+
 # Define defaults
 export DOCKER_TAG=${DOCKER_TAG:-latest}
 export LAMB2_DOCKER_TAG=${LAMB2_DOCKER_TAG:-latest}
