@@ -215,7 +215,7 @@ fi
 
 echo -n "## Checking if realm name is configured... "
 if test ${REALM_NAME}; then
-  printMessage ok
+    printMessage ok
 else
     printMessage failed
     echo -e "\033[33m WARNING: REALM_NAME variable is undefined \033[39m"
