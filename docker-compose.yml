@@ -173,7 +173,7 @@ services:
       - ARCHIPELAGO_URL={CATALYST_URL}/archipelago/
       - CONTENT_URL=${CATALYST_URL}/content/
       - INTERNAL_LAMBDAS_URL=http://lambdas:7070
-      - INTERNAL_ARCHIPELAGO_URL=http://lamb2:7272
+      - INTERNAL_ARCHIPELAGO_URL=http://archipelago:5000
       - INTERNAL_CONTENT_URL=http://content-server:6969
       - REALM_NAMES=${LIGHTHOUSE_NAMES}
       - MAX_USERS=${MAX_USERS:-400}
