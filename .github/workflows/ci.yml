@@ -146,7 +146,7 @@ jobs:
         run: |
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
-          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago/status 200
 
       - name: run stop.sh
         if: ${{ always() }}
