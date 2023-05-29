@@ -81,15 +81,6 @@ jobs:
             sleep 10
           done
 
-      - name: wait for explorer-bff
-        timeout-minutes: 2
-        run: |
-          until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200; do
-            echo "Retrying in 10 seconds..."
-            docker-compose logs explorer-bff
-            sleep 10
-          done
-
       - name: test system_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/system_metrics 401
@@ -132,9 +123,6 @@ jobs:
       - name: test content_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content_metrics 401
-      - name: test explorer_bff_metrics auth, must be 401
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/explorer_bff_metrics 401
 
       - name: add a user to enable metrics
         if: ${{ always() }}
@@ -152,16 +140,13 @@ jobs:
       - name: test content_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content_metrics 200 -u test-user2:test-password2
-      - name: test explorer_bff_metrics auth, must be 200
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/explorer_bff_metrics 200 -u test-user2:test-password2
 
       - name: smoke test endpoints
         if: ${{ always() }}
         run: |
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200
           ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200
-          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/bff/status 200
+          ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/archipelago/status 200
 
       - name: run stop.sh
         if: ${{ always() }}
