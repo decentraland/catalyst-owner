@@ -31,15 +31,15 @@
     }
 
     h1 {
-      color: #212121;
+      color: #0e3802;
     }
 
     h2 {
-      color: #424242;
+      color: #176700;
     }
 
     h3 {
-      color: #636363;
+      color: #287a11;
     }
 
     a {
@@ -55,49 +55,82 @@
     }
   </style>
 </head>
-
 <body>
   <header>
-    <h1>Server status</h1>
+    <h1><span id="catalyst-name">Server status...</span></h1>
+    <h2 id="catalyst-nick"></h2>
   </header>
   <section>
-    <h2><span id="catalyst-name"></span></h2>
-    <p>Content server status: <span id="content-status">loading...</span></p>
-    <p>Content history height: <span id="content-count">loading...</span></p>
     <p>Current users: <span id="user-count">loading...</span></p>
+    <p>Server accepting users: <span id="user-acceptance">loading...</span></p>
+    <p>Network: <span id="network">loading...</span></p>
+    <p>Protocol: <span id="protocol">loading...</span></p>
   </section>
-  <script type='text/javascript' async>
+  <section>
+    <h3>Content server: <span id="content-status">loading...</span></h3>
+    <p>Version: <span id="content-version">loading...</span></p>
+    <p>Commit hash: <span id="content-hash">loading...</span></p>
+    <p>Public URL: <span id="content-url">loading...</span></p>
+  </section>
+  <section>
+    <h3>Lambdas server: <span id="lambda-status">loading...</span></h3>
+    <p>Version: <span id="lambda-version">loading...</span></p>
+    <p>Commit hash: <span id="lambda-hash">loading...</span></p>
+    <p>Public URL: <span id="lambda-url">loading...</span></p>
+  </section>
+  <script type="text/javascript" async="">
     ; (function (window, document) {
-      window.addEventListener('load', function () {
-        const document = window.document
+      function load () {
         document.getElementById('catalyst-name').innerText = window.location.host
-        const contentStatusDiv = document.getElementById('content-status')
-        const historyHeightDiv = document.getElementById('content-count')
+        const catalystNickSpan = document.getElementById('catalyst-nick')
         const currentUsersDiv = document.getElementById('user-count')
-          ; (async function fill() {
-            fetch('/content/status').then(_ => {
-              return _.json()
-            }).then(_ => {
-              const status = _.synchronizationStatus.synchronizationState
-              const time = _.synchronizationStatus.lastSyncWithOtherServers
-              contentStatusDiv.innerText = status === 'Bootstrapping' ?
-                status : status + ' ('
-                + ((new Date().getTime() - new Date(time).getTime()) / 1000).toFixed(0)
-                + ' seconds ago)'
-              historyHeightDiv.innerText = _.historySize
-            }).catch(_ => {
-              contentStatusDiv.innerText = 'Down'
-              historyHeightDiv.innerText = '(unknown)'
-            })
-            .then(_ => {
-              currentUsersDiv.innerText = _.reduce((sum, elem) => sum + elem.usersCount, 0)
-            }).catch(_ => {
-              currentUsersDiv.innerText = '(unknown)'
-            })
-          })()
-      })
-    })(window, window.document)
+        const userAcceptanceDiv = document.getElementById('user-acceptance')
+        const networkDiv = document.getElementById('network')
+        const protocolDiv = document.getElementById('protocol')
+        const contentStatusDiv = document.getElementById('content-status')
+        const contentVersionDiv = document.getElementById('content-version')
+        const contentHashDiv = document.getElementById('content-hash')
+        const contentUrlDiv = document.getElementById('content-url')
+        const lambdaStatusDiv = document.getElementById('lambda-status')
+        const lambdaVersionDiv = document.getElementById('lambda-version')
+        const lambdaHashDiv = document.getElementById('lambda-hash')
+        const lambdaUrlDiv = document.getElementById('lambda-url')
+        ; (async function fill() {
+          try {
+            const request = await fetch('/about')
+            const _ = await request.json()
+            catalystNickSpan.innerText = 'Server status for "' + _.configurations.realmName + '"'
+            currentUsersDiv.innerText = _.bff.userCount
+            userAcceptanceDiv.innerText = _.acceptingUsers
+            networkDiv.innerText = (_.configurations.networkId === 1) ? 'mainnet' : ('test: ' + _.configurations.networkId)
+            protocolDiv.innerText = _.bff.protocolVersion
+            contentStatusDiv.innerText = _.content.healthy ? 'healthy' : 'needs attention (unhealthy)'
+            contentVersionDiv.innerText = _.content.version
+            contentHashDiv.innerText = _.content.commitHash
+            contentUrlDiv.innerText = _.content.publicUrl
+            lambdaStatusDiv.innerText = _.lambdas.healthy ? 'healthy' : 'needs attention (unhealthy)'
+            lambdaVersionDiv.innerText = _.lambdas.version
+            lambdaHashDiv.innerText = _.lambdas.commitHash
+            lambdaUrlDiv.innerText = _.lambdas.publicUrl
+          } catch (e) {
+            currentUsersDiv.innerText = '(unknown)'
+            userAcceptanceDiv.innerText = '(unknown)'
+            networkDiv.innerText = '(unknown)'
+            protocolDiv.innerText = '(unknown)'
+            contentStatusDiv.innerText = 'Down'
+            contentVersionDiv.innerText = '(unknown)'
+            contentHashDiv.innerText = '(unknown)'
+            contentUrlDiv.innerText = '(unknown)'
+            lambdaStatusDiv.innerText = 'Down'
+            lambdaVersionDiv.innerText = '(unknown)'
+            lambdaHashDiv.innerText = '(unknown)'
+            lambdaUrlDiv.innerText = '(unknown)'
+          }
+        })()
+      }
+      window.load = load
+      window.addEventListener('load', load)
+    })(window, window.document);
   </script>
 </body>
-
 </html>
