@@ -184,6 +184,9 @@ services:
       - .env-advanced
     expose:
       - "7272"
+    logging:
+      driver: syslog
+      options: { tag: lamb2 }
 
   cadvisor:
     image: gcr.io/google_containers/cadvisor:v0.35.0
