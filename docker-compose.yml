@@ -8,62 +8,6 @@ volumes:
 
 
 services:
-  nats:
-    image: nats:2.8
-    container_name: nats
-    expose:
-      - "4222"
-      - "8222"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: nats }
-
-  nats-exporter:
-    image: natsio/prometheus-nats-exporter:0.9.3
-    container_name: nats-exporter
-    command: "-varz -connz -subz -routez http://nats:8222"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: nats-exporter }
-    depends_on:
-      - nats
-
-  stats:
-    image: quay.io/decentraland/catalyst-stats:${CATALYST_STATS_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
-    restart: always
-    expose:
-      - "3000"
-    logging:
-      driver: syslog
-      options: { tag: catalyst-stats }
-    depends_on:
-      - nats
-
-  archipelago:
-    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
-    working_dir: /app
-    env_file:
-      - .env
-      - .env-advanced
-    environment:
-      - "NATS_URL=nats://nats:4222"
-    expose:
-      - "5000"
-    restart: always
-    logging:
-      driver: syslog
-      options: { tag: archipelago }
-    depends_on:
-      - nats
-
   postgres:
     image: postgres:12
     container_name: ${POSTGRES_HOST:-postgres}
@@ -171,10 +115,8 @@ services:
     environment:
       - HTTP_SERVER_PORT=7272
       - LAMBDAS_URL=${CATALYST_URL}/lambdas/
-      - ARCHIPELAGO_URL=${CATALYST_URL}/archipelago/
       - CONTENT_URL=${CATALYST_URL}/content/
       - INTERNAL_LAMBDAS_URL=http://lambdas:7070
-      - INTERNAL_ARCHIPELAGO_URL=http://archipelago:5000
       - INTERNAL_CONTENT_URL=http://content-server:6969
       - REALM_NAME=${REALM_NAME}
       - MAX_USERS=${MAX_USERS:-400}
@@ -202,7 +144,6 @@ services:
     depends_on:
       - content-server
       - lambdas
-      - archipelago
 
   nginx:
     container_name: nginx
@@ -229,10 +170,6 @@ services:
       - postgres-exporter
       - node-exporter
       - certbot
-      - stats
-      - nats
-      - nats-exporter
-      - archipelago
     logging:
       driver: syslog
       options: { tag: nginx }

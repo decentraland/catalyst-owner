@@ -8,8 +8,6 @@ Metrics are exposed in the following endpoints:
 - `/postgres_metrics` - postgres exporter
 - `/nats_metrics` - NATS exporter
 - `/pow_auth_metrics` - POW auth server
-- `/archipelago_metrics` - archipelago service
-- `/stats_metrics` - stats service
 
 Metrics are protected under basic auth since prometheus scrappers can handle it by default. System metrics (cadvisor + postgres) have a special set of .htpasswd credentials: .htpasswd-system.
 
