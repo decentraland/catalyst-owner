@@ -48,7 +48,7 @@ services:
       - nats
 
   archipelago:
-    image: quay.io/decentraland/archipelago-service:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    image: quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_DOCKER_TAG:-latest}
     working_dir: /app
     env_file:
       - .env
@@ -58,9 +58,28 @@ services:
     expose:
       - "5000"
     restart: always
+    command: ['/usr/local/bin/node', '--trace-warnings', '--abort-on-uncaught-exception', '--unhandled-rejections=strict', 'ws-connector/dist/index.js']
     logging:
       driver: syslog
       options: { tag: archipelago }
+    depends_on:
+      - nats
+
+  archipelago-core:
+    image: quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    working_dir: /app
+    env_file:
+      - .env
+      - .env-advanced
+    environment:
+      - "NATS_URL=nats://nats:4222"
+    expose:
+      - "5000"
+    restart: always
+    command: ['/usr/local/bin/node', '--trace-warnings', '--abort-on-uncaught-exception', '--unhandled-rejections=strict', 'core/dist/index.js']
+    logging:
+      driver: syslog
+      options: { tag: archipelago-core }
     depends_on:
       - nats
 
@@ -233,6 +252,7 @@ services:
       - nats
       - nats-exporter
       - archipelago
+      - archipelago-core
     logging:
       driver: syslog
       options: { tag: nginx }
