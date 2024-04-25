@@ -139,7 +139,8 @@ services:
       options: { tag: node-exporter }
 
   content-server:
-    image: quay.io/decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst:${DOCKER_TAG:-latest}
+    command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "content/entrypoints/run-server.js" ]
     working_dir: /app
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
@@ -164,7 +165,8 @@ services:
       options: { tag: content-server }
 
   lambdas:
-    image: quay.io/decentraland/catalyst-lambdas:${DOCKER_TAG:-latest}
+    image: quay.io/decentraland/catalyst:${DOCKER_TAG:-latest}
+    command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "lambdas/entrypoints/run-server.js" ]
     working_dir: /app
     restart: always
     environment:
