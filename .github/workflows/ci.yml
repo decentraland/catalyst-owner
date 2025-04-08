@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
       - name: create env files ${{ matrix.catalyst_url }}
         run: |
           mkdir -p /opt/catalyst-storage
@@ -25,6 +25,7 @@ jobs:
             LIVEKIT_API_KEY=key
             LIVEKIT_API_SECRET=secret
             ROOM_PREFIX=prefix
+            REALM_NAME=test
           EOF
           cat <<EOF > .env-advanced
             ETH_NETWORK=goerli
