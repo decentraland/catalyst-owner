@@ -142,7 +142,7 @@ services:
       options: { tag: lamb2 }
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.56.2
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     container_name: cadvisor
     command: --docker_only=true --disable_root_cgroup_stats=true
     restart: always
