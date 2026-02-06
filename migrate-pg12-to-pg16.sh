@@ -327,10 +327,25 @@ fix_schema_permissions() {
     log_info "  Granted ALL on schema public to ${POSTGRES_CONTENT_USER} in database ${POSTGRES_CONTENT_DB}."
 }
 
-# -- Step 9: Verify the migration --------------------------------------------
+# -- Step 9: Vacuum and analyze -----------------------------------------------
+
+vacuum_analyze() {
+    log_info "Step 9: Running VACUUM ANALYZE on all databases..."
+
+    # After a dump/restore, pg_statistic (planner statistics) is empty. Without
+    # stats the query planner falls back on default estimates, which can produce
+    # very poor plans. VACUUM ANALYZE rebuilds visibility maps (enabling
+    # index-only scans) and collects fresh statistics for every table.
+    docker exec postgres psql -U postgres -d "${POSTGRES_CONTENT_DB:-content}" \
+        -c "VACUUM ANALYZE;" 2>/dev/null
+
+    log_info "  VACUUM ANALYZE completed."
+}
+
+# -- Step 10: Verify the migration -------------------------------------------
 
 verify_migration() {
-    log_info "Step 9: Verifying migration..."
+    log_info "Step 10: Verifying migration..."
 
     # Check PG version
     local pg_version
@@ -364,10 +379,10 @@ verify_migration() {
     log_info "  Verification complete."
 }
 
-# -- Step 10: Start all services ----------------------------------------------
+# -- Step 11: Start all services ----------------------------------------------
 
 start_all_services() {
-    log_info "Step 10: Starting all services..."
+    log_info "Step 11: Starting all services..."
     ${COMPOSE_CMD} up -d
     log_info "  All services started."
 }
@@ -409,6 +424,8 @@ main() {
     restore_database
     echo ""
     fix_schema_permissions
+    echo ""
+    vacuum_analyze
     echo ""
     verify_migration
     echo ""
