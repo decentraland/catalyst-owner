@@ -83,7 +83,8 @@ services:
       - nats
 
   postgres:
-    image: postgres:12
+    # Updated from postgres:12 (EOL Nov 2024) to postgres:16 for security patches and performance improvements
+    image: postgres:16
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
