@@ -304,10 +304,33 @@ restore_database() {
     fi
 }
 
-# -- Step 8: Verify the migration --------------------------------------------
+# -- Step 8: Fix public schema permissions for PG 16 -------------------------
+
+fix_schema_permissions() {
+    log_info "Step 8: Granting public schema permissions (required for PG 15+)..."
+
+    # In PostgreSQL 15+, the default CREATE privilege on the public schema was
+    # revoked for non-superuser roles. After restoring a PG 12 dump into PG 16,
+    # we must explicitly grant CREATE on public to the content user.
+    # shellcheck source=/dev/null
+    source "${SCRIPT_DIR}/.env-database-content"
+
+    if [ -z "${POSTGRES_CONTENT_USER:-}" ] || [ -z "${POSTGRES_CONTENT_DB:-}" ]; then
+        log_warn "  Could not determine POSTGRES_CONTENT_USER or POSTGRES_CONTENT_DB from .env-database-content."
+        log_warn "  You may need to manually run: GRANT ALL ON SCHEMA public TO <content_user>;"
+        return
+    fi
+
+    docker exec postgres psql -U postgres -d "${POSTGRES_CONTENT_DB}" \
+        -c "GRANT ALL ON SCHEMA public TO \"${POSTGRES_CONTENT_USER}\";" 2>/dev/null
+
+    log_info "  Granted ALL on schema public to ${POSTGRES_CONTENT_USER} in database ${POSTGRES_CONTENT_DB}."
+}
+
+# -- Step 9: Verify the migration --------------------------------------------
 
 verify_migration() {
-    log_info "Step 8: Verifying migration..."
+    log_info "Step 9: Verifying migration..."
 
     # Check PG version
     local pg_version
@@ -341,10 +364,10 @@ verify_migration() {
     log_info "  Verification complete."
 }
 
-# -- Step 9: Start all services -----------------------------------------------
+# -- Step 10: Start all services ----------------------------------------------
 
 start_all_services() {
-    log_info "Step 9: Starting all services..."
+    log_info "Step 10: Starting all services..."
     ${COMPOSE_CMD} up -d
     log_info "  All services started."
 }
@@ -384,6 +407,8 @@ main() {
     start_pg16
     echo ""
     restore_database
+    echo ""
+    fix_schema_permissions
     echo ""
     verify_migration
     echo ""
