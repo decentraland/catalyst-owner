@@ -207,7 +207,7 @@ stop_app_services() {
         fi
 
         log_warn "  Waiting for containers to stop: ${still_running// /, }"
-        sleep 2
+        sleep 5
     done
 
     log_info "  All application services stopped. Only postgres is still running."
