@@ -6,7 +6,6 @@ volumes:
   lambdas_server_storage: {}
   shared_keys:
 
-
 services:
   nats:
     image: nats:2.8
@@ -140,7 +139,12 @@ services:
 
   content-server:
     image: quay.io/decentraland/catalyst:${DOCKER_TAG:-latest}
-    command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "content/entrypoints/run-server.js" ]
+    command:
+      [
+        "/usr/local/bin/node",
+        "--max-old-space-size=8192",
+        "content/entrypoints/run-server.js",
+      ]
     working_dir: /app
     environment:
       - LOG_REQUESTS=false # Request logs are produced by NGINX
@@ -166,7 +170,12 @@ services:
 
   lambdas:
     image: quay.io/decentraland/catalyst:${DOCKER_TAG:-latest}
-    command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "lambdas/entrypoints/run-server.js" ]
+    command:
+      [
+        "/usr/local/bin/node",
+        "--max-old-space-size=8192",
+        "lambdas/entrypoints/run-server.js",
+      ]
     working_dir: /app
     restart: always
     environment:
@@ -210,7 +219,7 @@ services:
       options: { tag: lamb2 }
 
   cadvisor:
-    image: gcr.io/google_containers/cadvisor:v0.35.0
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     container_name: cadvisor
     command: --docker_only=true --disable_root_cgroup_stats=true
     restart: always
