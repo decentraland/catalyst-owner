@@ -1,5 +1,4 @@
-# Security: rewrite_log disabled to prevent sensitive URL data (e.g. tokens in query params) from leaking into error logs
-rewrite_log off;
+rewrite_log on;
 
 include /etc/nginx/include/upstream.conf;
 include /etc/nginx/include/rates.conf;
@@ -9,9 +8,7 @@ server {
     listen 80 reuseport;
     
     server_name $katalyst_host;
-    # Security: default body size limit kept low to prevent abuse on most endpoints;
-    # only /content/entities is allowed 256M for content deployments (see content.conf)
-    client_max_body_size 10M;
+    client_max_body_size 256M;
 
     root /etc/nginx/html;
     

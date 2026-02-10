@@ -149,8 +149,7 @@ services:
 
   nginx:
     container_name: nginx
-    # Updated from 1.22-alpine to 1.28-alpine (latest stable) to patch known CVEs including CVE-2026-1642
-    image: nginx:1.28-alpine
+    image: nginx:1.22-alpine
     ports:
       - "80:80"
       - "443:443"
