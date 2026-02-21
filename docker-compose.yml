@@ -99,6 +99,11 @@ services:
       - "./local/postgres/scripts/always:/always-initdb.d:ro"
       - "./local/postgres/scripts/initial:/docker-entrypoint-initdb.d:ro"
     command: custom-entrypoint.sh -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     logging:
       driver: syslog
       options: { tag: postgres }
@@ -114,7 +119,8 @@ services:
       - ./local/postgres-exporter:/etc/postgres-exporter
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     shm_size: 512mb
     logging:
       driver: syslog
@@ -158,7 +164,8 @@ services:
       - .env-advanced
       - .env-database-content
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     expose:
       - "6969"
     restart: always
