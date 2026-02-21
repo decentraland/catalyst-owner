@@ -119,8 +119,7 @@ services:
       - ./local/postgres-exporter:/etc/postgres-exporter
     restart: always
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     shm_size: 512mb
     logging:
       driver: syslog
@@ -164,8 +163,7 @@ services:
       - .env-advanced
       - .env-database-content
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     expose:
       - "6969"
     restart: always
