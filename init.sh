@@ -413,7 +413,7 @@ if test $matches -eq 0; then
 fi
 
 echo "## Restarting containers... "
-docker-compose down
+docker-compose down --remove-orphans
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d
