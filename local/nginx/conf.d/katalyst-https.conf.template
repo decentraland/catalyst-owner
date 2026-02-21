@@ -24,7 +24,8 @@ server {
 
 server {
     
-    listen 443 reuseport ssl http2;
+    listen 443 reuseport ssl;
+    http2 on;
     server_name $katalyst_host;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
