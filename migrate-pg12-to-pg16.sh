@@ -81,16 +81,19 @@ preflight_checks() {
     log_info "Running pre-flight checks..."
 
     # Must be run from project root
+    log_info "  Checking docker-compose.yml..."
     if [ ! -f "${SCRIPT_DIR}/docker-compose.yml" ]; then
         fail "docker-compose.yml not found. Run this script from the catalyst-owner root directory."
     fi
 
     # Check docker is available
+    log_info "  Checking Docker..."
     if ! command -v docker &> /dev/null; then
         fail "docker is not installed or not in PATH."
     fi
 
     # Check docker compose is available (try both forms)
+    log_info "  Checking Docker Compose..."
     if ! ${COMPOSE_CMD} version &> /dev/null 2>&1; then
         COMPOSE_CMD="docker-compose"
         if ! ${COMPOSE_CMD} version &> /dev/null 2>&1; then
@@ -99,6 +102,7 @@ preflight_checks() {
     fi
 
     # Check required env files exist
+    log_info "  Checking required env files..."
     for envfile in .env .env-database-admin .env-database-content; do
         if [ ! -f "${SCRIPT_DIR}/${envfile}" ]; then
             fail "Required file '${envfile}' not found. Has init.sh been run?"
@@ -106,6 +110,7 @@ preflight_checks() {
     done
 
     # Load CONTENT_SERVER_STORAGE from .env
+    log_info "  Loading .env and resolving data directory..."
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/.env"
     if [ -z "${CONTENT_SERVER_STORAGE:-}" ]; then
@@ -117,7 +122,9 @@ preflight_checks() {
         fail "PostgreSQL data directory '${DATA_DIR}' does not exist. Is this a fresh install? If so, just start with PG 16 directly."
     fi
 
-    # Check available disk space (need roughly 2x the data directory size)
+    # Check available disk space (need roughly 3x the data directory size for dump + backup + new data)
+    # Note: du on a large PG data dir can take several minutes
+    log_info "  Checking disk space (may take a few minutes for large databases)..."
     local data_size_kb
     data_size_kb=$(du -sk "${DATA_DIR}" 2>/dev/null | awk '{print $1}')
     local available_kb
