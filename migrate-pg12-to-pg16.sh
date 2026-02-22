@@ -123,27 +123,43 @@ preflight_checks() {
     fi
 
     # Check available disk space (need roughly 3x the data directory size for dump + backup + new data)
-    # Note: du on a large PG data dir can take several minutes
+    # Note: du on a large PG data dir can take several minutes and may fail (e.g. permissions)
     log_info "  Checking disk space (may take a few minutes for large databases)..."
     local data_size_kb
-    data_size_kb=$(du -sk "${DATA_DIR}" 2>/dev/null | awk '{print $1}')
     local available_kb
-    available_kb=$(df -k "${DATA_DIR}" | tail -1 | awk '{print $4}')
+    data_size_kb=$(du -sk "${DATA_DIR}" 2>/dev/null | awk '{print $1}') || data_size_kb=""
+    available_kb=$(df -P -k "${DATA_DIR}" 2>/dev/null | tail -1 | awk '{print $4}') || available_kb=""
 
-    local needed_kb=$((data_size_kb * 3))
-    if [ "${available_kb}" -lt "${needed_kb}" ]; then
-        log_warn "Low disk space detected."
-        log_warn "  Data directory size: $((data_size_kb / 1024)) MB"
-        log_warn "  Available space:     $((available_kb / 1024)) MB"
-        log_warn "  Recommended:         $((needed_kb / 1024)) MB (3x data size for dump + backup + new data)"
-        if ! confirm "Continue anyway?"; then
-            fail "Aborted due to low disk space."
+    if [ -z "${available_kb}" ] || ! [ "${available_kb}" -eq "${available_kb}" ] 2>/dev/null; then
+        fail "Could not determine available disk space for '${DATA_DIR}'. Check permissions and that the path is a mounted filesystem."
+    fi
+
+    local needed_kb
+    if [ -n "${data_size_kb}" ] && [ "${data_size_kb}" -gt 0 ] 2>/dev/null; then
+        needed_kb=$((data_size_kb * 3))
+        if [ "${available_kb}" -lt "${needed_kb}" ]; then
+            log_warn "Low disk space detected."
+            log_warn "  Data directory size: $((data_size_kb / 1024)) MB"
+            log_warn "  Available space:     $((available_kb / 1024)) MB"
+            log_warn "  Recommended:         $((needed_kb / 1024)) MB (3x data size for dump + backup + new data)"
+            if ! confirm "Continue anyway?"; then
+                fail "Aborted due to low disk space."
+            fi
         fi
+    else
+        # du failed or returned nothing; require at least 20GB free and warn
+        needed_kb=$((20 * 1024 * 1024))
+        if [ "${available_kb}" -lt "${needed_kb}" ]; then
+            fail "Could not measure data directory size (du failed or timed out). Available space: $((available_kb / 1024)) MB. Recommend at least 20 GB free for migration. Check permissions on ${DATA_DIR}."
+        fi
+        log_warn "  Could not measure data directory size; ensuring at least 20 GB free (available: $((available_kb / 1024)) MB)."
     fi
 
     log_info "Pre-flight checks passed."
     log_info "  Data directory: ${DATA_DIR}"
-    log_info "  Data size:      $((data_size_kb / 1024)) MB"
+    if [ -n "${data_size_kb}" ] && [ "${data_size_kb}" -gt 0 ] 2>/dev/null; then
+        log_info "  Data size:      $((data_size_kb / 1024)) MB"
+    fi
     log_info "  Dump file:      ${DUMP_FILE}"
 }
 
