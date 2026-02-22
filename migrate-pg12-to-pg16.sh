@@ -128,6 +128,17 @@ preflight_checks() {
     local data_size_kb
     local available_kb
     data_size_kb=$(du -sk "${DATA_DIR}" 2>/dev/null | awk '{print $1}') || data_size_kb=""
+
+    # If host du failed (e.g. permissions; postgres often owns the dir), try from inside the container
+    if [ -z "${data_size_kb}" ] || ! [ "${data_size_kb}" -gt 0 ] 2>/dev/null; then
+        local pg_container
+        pg_container=$(${COMPOSE_CMD} ps -q postgres 2>/dev/null || true)
+        if [ -n "${pg_container}" ] && docker ps -q --no-trunc 2>/dev/null | grep -qF "${pg_container}"; then
+            log_info "  Measuring data size from postgres container (host du had no access)..."
+            data_size_kb=$(docker exec "${pg_container}" du -sk /var/lib/postgresql/data 2>/dev/null | awk '{print $1}') || data_size_kb=""
+        fi
+    fi
+
     available_kb=$(df -P -k "${DATA_DIR}" 2>/dev/null | tail -1 | awk '{print $4}') || available_kb=""
 
     if [ -z "${available_kb}" ] || ! [ "${available_kb}" -eq "${available_kb}" ] 2>/dev/null; then
@@ -327,10 +338,37 @@ restore_database() {
     fi
 }
 
-# -- Step 8: Fix public schema permissions for PG 16 -------------------------
+# -- Step 8: Sync content user password ---------------------------------------
+
+sync_content_user_password() {
+    log_info "Step 8: Syncing content user password from .env-database-content..."
+
+    # The restore brings back roles with passwords from the dump. The app uses
+    # credentials from .env-database-content, so we must set the content user's
+    # password to match the current file or the content server will get 28P01.
+    # shellcheck source=/dev/null
+    source "${SCRIPT_DIR}/.env-database-content"
+
+    if [ -z "${POSTGRES_CONTENT_USER:-}" ] || [ -z "${POSTGRES_CONTENT_PASSWORD:-}" ]; then
+        log_warn "  Could not read POSTGRES_CONTENT_USER or POSTGRES_CONTENT_PASSWORD from .env-database-content. Skipping password sync."
+        return
+    fi
+
+    # Escape single quotes in password for use inside a single-quoted SQL string
+    local escaped_password
+    escaped_password="${POSTGRES_CONTENT_PASSWORD//\'/\'\'}"
+
+    if docker exec postgres psql -U postgres -d postgres -c "ALTER USER \"${POSTGRES_CONTENT_USER}\" WITH PASSWORD '${escaped_password}';" 2>/dev/null; then
+        log_info "  Content user '${POSTGRES_CONTENT_USER}' password synced."
+    else
+        log_warn "  Failed to set password for ${POSTGRES_CONTENT_USER}. The content server may fail to connect. You can run: docker exec postgres psql -U postgres -d postgres -c \"ALTER USER \\\"${POSTGRES_CONTENT_USER}\\\" WITH PASSWORD '<password>';\""
+    fi
+}
+
+# -- Step 9: Fix public schema permissions for PG 16 -------------------------
 
 fix_schema_permissions() {
-    log_info "Step 8: Granting public schema permissions (required for PG 15+)..."
+    log_info "Step 9: Granting public schema permissions (required for PG 15+)..."
 
     # In PostgreSQL 15+, the default CREATE privilege on the public schema was
     # revoked for non-superuser roles. After restoring a PG 12 dump into PG 16,
@@ -350,10 +388,10 @@ fix_schema_permissions() {
     log_info "  Granted ALL on schema public to ${POSTGRES_CONTENT_USER} in database ${POSTGRES_CONTENT_DB}."
 }
 
-# -- Step 9: Vacuum and analyze -----------------------------------------------
+# -- Step 10: Vacuum and analyze ----------------------------------------------
 
 vacuum_analyze() {
-    log_info "Step 9: Running VACUUM ANALYZE on all databases..."
+    log_info "Step 10: Running VACUUM ANALYZE on all databases..."
 
     # After a dump/restore, pg_statistic (planner statistics) is empty. Without
     # stats the query planner falls back on default estimates, which can produce
@@ -365,10 +403,10 @@ vacuum_analyze() {
     log_info "  VACUUM ANALYZE completed."
 }
 
-# -- Step 10: Verify the migration -------------------------------------------
+# -- Step 11: Verify the migration --------------------------------------------
 
 verify_migration() {
-    log_info "Step 10: Verifying migration..."
+    log_info "Step 11: Verifying migration..."
 
     # Check PG version
     local pg_version
@@ -386,13 +424,18 @@ verify_migration() {
         return 1
     fi
 
-    # Check that pg_stat_statements extension exists
+    # Ensure pg_stat_statements extension exists in content database (for monitoring/query stats)
     local ext_exists
     ext_exists=$(docker exec postgres psql -U postgres -d content -tAc "SELECT 1 FROM pg_extension WHERE extname='pg_stat_statements';" 2>/dev/null || echo "0")
     if [ "${ext_exists// /}" = "1" ]; then
         log_info "  pg_stat_statements extension: OK"
     else
-        log_warn "  pg_stat_statements extension not found in content database. It will be created on next restart."
+        log_info "  Creating pg_stat_statements extension in content database..."
+        if docker exec postgres psql -U postgres -d content -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;" 2>/dev/null; then
+            log_info "  pg_stat_statements extension created."
+        else
+            log_warn "  Could not create pg_stat_statements in content database (optional; used for query statistics). It may be created on next postgres restart."
+        fi
     fi
 
     # List databases for visual confirmation
@@ -402,10 +445,10 @@ verify_migration() {
     log_info "  Verification complete."
 }
 
-# -- Step 11: Start all services ----------------------------------------------
+# -- Step 12: Start all services ----------------------------------------------
 
 start_all_services() {
-    log_info "Step 11: Starting all services..."
+    log_info "Step 12: Starting all services..."
     ${COMPOSE_CMD} up -d
     log_info "  All services started."
 }
@@ -445,6 +488,8 @@ main() {
     start_pg16
     echo ""
     restore_database
+    echo ""
+    sync_content_user_password
     echo ""
     fix_schema_permissions
     echo ""
