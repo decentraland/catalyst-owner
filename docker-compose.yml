@@ -194,6 +194,7 @@ services:
       - .env-advanced
     expose:
       - "7070"
+      - "9090"
     logging:
       driver: syslog
       options: { tag: lambdas }
