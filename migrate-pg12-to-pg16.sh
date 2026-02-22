@@ -266,8 +266,8 @@ dump_database() {
         fail "Dump file is empty. Something went wrong."
     fi
 
-    # Check that the dump ends with expected content
-    if ! tail -5 "${DUMP_FILE}" | grep -q "PostgreSQL database dump complete" 2>/dev/null; then
+    # Check that the dump ends with expected content (pg_dumpall: "database cluster dump complete" in PG 13+; "database dump complete" in older)
+    if ! tail -5 "${DUMP_FILE}" | grep -qE "PostgreSQL database (cluster )?dump complete" 2>/dev/null; then
         log_warn "  Dump file may be incomplete (missing expected footer). Proceeding anyway."
     fi
 }
