@@ -23,7 +23,7 @@ leCertEmit () {
   path="/etc/letsencrypt/live/$nginx_url"
   mkdir -p "$data_path/conf/live/$nginx_url"
   docker-compose run --rm --entrypoint "\
-    openssl req -x509 -nodes -newkey rsa:1024 -days 1\
+    openssl req -x509 -nodes -newkey rsa:2048 -days 1\
       -keyout '$path/privkey.pem' \
       -out '$path/fullchain.pem' \
       -subj '/CN=localhost'" certbot
