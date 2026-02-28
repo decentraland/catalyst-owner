@@ -13,19 +13,17 @@ export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
 #####
 
 leCertEmit () {
-  if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
-    echo "## Downloading recommended TLS parameters ..."
-    mkdir -p "$data_path/conf"
-    curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-    curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
-    echo
-  fi
+  echo "## Downloading recommended TLS parameters ..."
+  mkdir -p "$data_path/conf"
+  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
+  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
+  echo
 
   echo " Creating dummy certificate for $nginx_url..."
   path="/etc/letsencrypt/live/$nginx_url"
   mkdir -p "$data_path/conf/live/$nginx_url"
   docker-compose run --rm --entrypoint "\
-    openssl req -x509 -nodes -newkey rsa:1024 -days 1\
+    openssl req -x509 -nodes -newkey rsa:2048 -days 1\
       -keyout '$path/privkey.pem' \
       -out '$path/fullchain.pem' \
       -subj '/CN=localhost'" certbot
@@ -382,6 +380,16 @@ if [ "${CATALYST_URL}" != "http://localhost" ]; then
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
         echo "Existing data found for \$nginx_url."
 
+        # Check if existing certificate key is at least 2048 bits (required by OpenSSL 3.x)
+        cert_file="$data_path/conf/live/$nginx_url/fullchain.pem"
+        if [ -f "$cert_file" ]; then
+            key_length=$(openssl x509 -in "$cert_file" -noout -text 2>/dev/null | grep "Public-Key:" | grep -o '[0-9]*')
+            if [ -n "$key_length" ] && [ "$key_length" -lt 2048 ]; then
+                echo "## Certificate key too small (${key_length} bits). Regenerating..."
+                REGENERATE=1
+            fi
+        fi
+
         if test ${REGENERATE} -eq 1; then
             leCertEmit $nginx_url
         else
@@ -415,7 +423,7 @@ if test $matches -eq 0; then
 fi
 
 echo "## Restarting containers... "
-docker-compose down
+docker-compose down --remove-orphans
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo 'Running maintenance...'
   docker-compose -f docker-compose-maintenance.yml up -d

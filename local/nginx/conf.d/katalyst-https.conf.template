@@ -1,4 +1,5 @@
-rewrite_log on;
+# Security: rewrite_log disabled to prevent sensitive URL data (e.g. tokens in query params) from leaking into error logs
+rewrite_log off;
 
 include /etc/nginx/include/upstream.conf;
 include /etc/nginx/include/rates.conf;
@@ -23,13 +24,21 @@ server {
 
 server {
     
-    listen 443 reuseport ssl http2;
+    listen 443 reuseport ssl;
+    http2 on;
     server_name $katalyst_host;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     ssl_certificate /etc/letsencrypt/live/$katalyst_host/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
-    client_max_body_size 256M;
+
+    # Security: HSTS header tells browsers to only connect via HTTPS for the next year,
+    # preventing SSL stripping attacks and insecure HTTP downgrade attempts
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Security: default body size limit kept low to prevent abuse on most endpoints;
+    # only /content/entities is allowed 256M for content deployments (see content.conf)
+    client_max_body_size 10M;
 
     root /etc/nginx/html;
 
