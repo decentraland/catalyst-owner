@@ -380,6 +380,16 @@ if [ "${CATALYST_URL}" != "http://localhost" ]; then
     if [ -d "$data_path/conf/live/$nginx_url" ]; then
         echo "Existing data found for \$nginx_url."
 
+        # Check if existing certificate key is at least 2048 bits (required by OpenSSL 3.x)
+        cert_file="$data_path/conf/live/$nginx_url/fullchain.pem"
+        if [ -f "$cert_file" ]; then
+            key_length=$(openssl x509 -in "$cert_file" -noout -text 2>/dev/null | grep "Public-Key:" | grep -o '[0-9]*')
+            if [ -n "$key_length" ] && [ "$key_length" -lt 2048 ]; then
+                echo "## Certificate key too small (${key_length} bits). Regenerating..."
+                REGENERATE=1
+            fi
+        fi
+
         if test ${REGENERATE} -eq 1; then
             leCertEmit $nginx_url
         else
