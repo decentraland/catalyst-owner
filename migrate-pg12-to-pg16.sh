@@ -36,7 +36,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-DUMP_FILE="${SCRIPT_DIR}/backup_pg12_${TIMESTAMP}.sql"
+DUMP_FILE="${SCRIPT_DIR}/backup_pg12_${TIMESTAMP}.sql.gz"
 COMPOSE_CMD="docker compose"
 
 # Colors for output
@@ -122,7 +122,8 @@ preflight_checks() {
         fail "PostgreSQL data directory '${DATA_DIR}' does not exist. Is this a fresh install? If so, just start with PG 16 directly."
     fi
 
-    # Check available disk space (need roughly 3x the data directory size for dump + backup + new data)
+    # Check available disk space (need roughly 2.2x the data directory size: compressed dump + backup + new data)
+    # The dump is gzip-compressed (SQL text typically compresses 5-10x), so it adds ~0.1-0.2x.
     # Note: du on a large PG data dir can take several minutes and may fail (e.g. permissions)
     log_info "  Checking disk space (may take a few minutes for large databases)..."
     local data_size_kb
@@ -147,12 +148,12 @@ preflight_checks() {
 
     local needed_kb
     if [ -n "${data_size_kb}" ] && [ "${data_size_kb}" -gt 0 ] 2>/dev/null; then
-        needed_kb=$((data_size_kb * 3))
+        needed_kb=$(( (data_size_kb * 22) / 10 ))
         if [ "${available_kb}" -lt "${needed_kb}" ]; then
             log_warn "Low disk space detected."
             log_warn "  Data directory size: $((data_size_kb / 1024)) MB"
             log_warn "  Available space:     $((available_kb / 1024)) MB"
-            log_warn "  Recommended:         $((needed_kb / 1024)) MB (3x data size for dump + backup + new data)"
+            log_warn "  Recommended:         $((needed_kb / 1024)) MB (~2.2x data size for compressed dump + backup + new data)"
             if ! confirm "Continue anyway?"; then
                 fail "Aborted due to low disk space."
             fi
@@ -253,21 +254,26 @@ dump_database() {
     log_info "Step 3: Creating full database dump (no active writers)..."
     log_info "  This may take a while depending on database size."
 
-    if ! docker exec postgres pg_dumpall -U postgres > "${DUMP_FILE}"; then
+    if ! docker exec postgres pg_dumpall -U postgres | gzip > "${DUMP_FILE}"; then
         fail "pg_dumpall failed. Check PostgreSQL logs for details."
     fi
 
     local dump_size
     dump_size=$(du -sh "${DUMP_FILE}" | awk '{print $1}')
-    log_info "  Dump completed successfully: ${DUMP_FILE} (${dump_size})"
+    log_info "  Dump completed successfully: ${DUMP_FILE} (${dump_size}, gzip-compressed)"
 
     # Basic sanity check on the dump
     if [ ! -s "${DUMP_FILE}" ]; then
         fail "Dump file is empty. Something went wrong."
     fi
 
+    # Verify the file is a valid gzip archive
+    if ! gzip -t "${DUMP_FILE}" 2>/dev/null; then
+        fail "Dump file is not a valid gzip archive. Something went wrong."
+    fi
+
     # Check that the dump ends with expected content (pg_dumpall: "database cluster dump complete" in PG 13+; "database dump complete" in older)
-    if ! tail -5 "${DUMP_FILE}" | grep -qE "PostgreSQL database (cluster )?dump complete" 2>/dev/null; then
+    if ! gunzip -c "${DUMP_FILE}" | tail -5 | grep -qE "PostgreSQL database (cluster )?dump complete" 2>/dev/null; then
         log_warn "  Dump file may be incomplete (missing expected footer). Proceeding anyway."
     fi
 }
@@ -327,9 +333,9 @@ restore_database() {
     log_info "Step 7: Restoring database dump into PostgreSQL 16..."
     log_info "  This may take a while depending on database size."
 
-    # Restore the dump. We use -f instead of stdin redirection for better error handling.
+    # Decompress and restore the dump. We pipe through gunzip since the dump is gzip-compressed.
     # Note: Some warnings about existing roles (e.g., 'postgres') are expected and harmless.
-    if docker exec -i postgres psql -U postgres -f - < "${DUMP_FILE}" > /dev/null 2>&1; then
+    if gunzip -c "${DUMP_FILE}" | docker exec -i postgres psql -U postgres -f - > /dev/null 2>&1; then
         log_info "  Restore completed successfully."
     else
         # psql may return non-zero due to harmless warnings (e.g., "role postgres already exists")
