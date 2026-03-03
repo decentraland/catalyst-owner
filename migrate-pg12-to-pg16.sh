@@ -359,17 +359,17 @@ rehash_passwords() {
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/.env-database-admin"
 
-    if [ -n "${POSTGRES_PASSWORD:-}" ]; then
+    if [ -z "${POSTGRES_USER:-}" ] || [ -z "${POSTGRES_PASSWORD:-}" ]; then
+        log_warn "  Could not read POSTGRES_USER or POSTGRES_PASSWORD from .env-database-admin. Skipping admin password rehash."
+    else
         local escaped_admin_password
         escaped_admin_password="${POSTGRES_PASSWORD//\'/\'\'}"
 
-        if docker exec postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD '${escaped_admin_password}';" 2>/dev/null; then
-            log_info "  Postgres superuser password rehashed to scram-sha-256."
+        if docker exec postgres psql -U postgres -d postgres -c "ALTER USER \"${POSTGRES_USER}\" WITH PASSWORD '${escaped_admin_password}';" 2>/dev/null; then
+            log_info "  Admin user '${POSTGRES_USER}' password rehashed to scram-sha-256."
         else
-            log_warn "  Failed to rehash postgres superuser password. The postgres-exporter may fail to connect."
+            log_warn "  Failed to rehash ${POSTGRES_USER} password. The postgres-exporter may fail to connect."
         fi
-    else
-        log_warn "  Could not read POSTGRES_PASSWORD from .env-database-admin. Skipping superuser password rehash."
     fi
 
     # -- Content user (used by the application) --
