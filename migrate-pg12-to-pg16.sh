@@ -26,7 +26,8 @@
 #   5. Backs up the existing PG 12 data directory
 #   6. Starts PG 16 to initialize a fresh data directory
 #   7. Restores the dump into PG 16
-#   8. Starts all services and verifies health
+#   8. Rehashes all user passwords from md5 to scram-sha-256
+#   9. Starts all services and verifies health
 #
 # =============================================================================
 
@@ -344,30 +345,49 @@ restore_database() {
     fi
 }
 
-# -- Step 8: Sync content user password ---------------------------------------
+# -- Step 8: Rehash passwords for scram-sha-256 --------------------------------
 
-sync_content_user_password() {
-    log_info "Step 8: Syncing content user password from .env-database-content..."
+rehash_passwords() {
+    log_info "Step 8: Rehashing passwords for scram-sha-256 (PG 16 default)..."
 
-    # The restore brings back roles with passwords from the dump. The app uses
-    # credentials from .env-database-content, so we must set the content user's
-    # password to match the current file or the content server will get 28P01.
+    # PG 12 stored passwords as md5 hashes. PG 16 defaults to scram-sha-256.
+    # After restoring a PG 12 dump, passwords are still md5-hashed. We must
+    # re-set them so they are stored as scram-sha-256, otherwise clients
+    # (including postgres-exporter) will fail to authenticate.
+
+    # -- Postgres superuser (used by postgres-exporter for metrics) --
+    # shellcheck source=/dev/null
+    source "${SCRIPT_DIR}/.env-database-admin"
+
+    if [ -z "${POSTGRES_USER:-}" ] || [ -z "${POSTGRES_PASSWORD:-}" ]; then
+        log_warn "  Could not read POSTGRES_USER or POSTGRES_PASSWORD from .env-database-admin. Skipping admin password rehash."
+    else
+        local escaped_admin_password
+        escaped_admin_password="${POSTGRES_PASSWORD//\'/\'\'}"
+
+        if docker exec postgres psql -U postgres -d postgres -c "ALTER USER \"${POSTGRES_USER}\" WITH PASSWORD '${escaped_admin_password}';" 2>/dev/null; then
+            log_info "  Admin user '${POSTGRES_USER}' password rehashed to scram-sha-256."
+        else
+            log_warn "  Failed to rehash ${POSTGRES_USER} password. The postgres-exporter may fail to connect."
+        fi
+    fi
+
+    # -- Content user (used by the application) --
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/.env-database-content"
 
     if [ -z "${POSTGRES_CONTENT_USER:-}" ] || [ -z "${POSTGRES_CONTENT_PASSWORD:-}" ]; then
-        log_warn "  Could not read POSTGRES_CONTENT_USER or POSTGRES_CONTENT_PASSWORD from .env-database-content. Skipping password sync."
+        log_warn "  Could not read POSTGRES_CONTENT_USER or POSTGRES_CONTENT_PASSWORD from .env-database-content. Skipping content user password rehash."
         return
     fi
 
-    # Escape single quotes in password for use inside a single-quoted SQL string
-    local escaped_password
-    escaped_password="${POSTGRES_CONTENT_PASSWORD//\'/\'\'}"
+    local escaped_content_password
+    escaped_content_password="${POSTGRES_CONTENT_PASSWORD//\'/\'\'}"
 
-    if docker exec postgres psql -U postgres -d postgres -c "ALTER USER \"${POSTGRES_CONTENT_USER}\" WITH PASSWORD '${escaped_password}';" 2>/dev/null; then
-        log_info "  Content user '${POSTGRES_CONTENT_USER}' password synced."
+    if docker exec postgres psql -U postgres -d postgres -c "ALTER USER \"${POSTGRES_CONTENT_USER}\" WITH PASSWORD '${escaped_content_password}';" 2>/dev/null; then
+        log_info "  Content user '${POSTGRES_CONTENT_USER}' password rehashed to scram-sha-256."
     else
-        log_warn "  Failed to set password for ${POSTGRES_CONTENT_USER}. The content server may fail to connect. You can run: docker exec postgres psql -U postgres -d postgres -c \"ALTER USER \\\"${POSTGRES_CONTENT_USER}\\\" WITH PASSWORD '<password>';\""
+        log_warn "  Failed to rehash password for ${POSTGRES_CONTENT_USER}. The content server may fail to connect. You can run: docker exec postgres psql -U postgres -d postgres -c \"ALTER USER \\\"${POSTGRES_CONTENT_USER}\\\" WITH PASSWORD '<password>';\""
     fi
 }
 
@@ -495,7 +515,7 @@ main() {
     echo ""
     restore_database
     echo ""
-    sync_content_user_password
+    rehash_passwords
     echo ""
     fix_schema_permissions
     echo ""
