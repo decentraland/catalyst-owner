@@ -27,26 +27,26 @@ In order to run a public server, you will also need to:
 
 ### What you will need to configure
 
-To configure your node, you will have to set three variables in the [.env](.env) file:
+To configure your node, you will have to set a number of variables in the [.env](.env) file:
 
-| Name                                   | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
-|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
-| EMAIL                                  | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.                                                                                                                                                                                                           |    -    |   yes    |
-| CONTENT_SERVER_STORAGE                 | The path to the directory where the content will be stored. Path must be absolute.                                                                                                                                                                                                                            |    -    |   yes    |
-| CATALYST_URL                           | The public domain of the node. For example `https://peer.decentraland.org`. It is really important that you add `https://` at the beginning of the URL. If you are running your node locally, then simply write `http://localhost`                                                                                                                                          |    -    |   yes    |
-| CATALYST_OWNER_CHANNEL                 | Which update channel in the cloud bootstrap configurations to use `stable` or `latest`.                                                                                                                                                                                                                     | latest  |    no    |
-| SQS_QUEUE_NAME                         | Which Amazon SQS to consume in `crontab.sh`                                                                                                                                                                                                                                                                  |    -    |    no    |
-| MOUNT_DISK                             | Useful to mount a disk to the folder `$CONTENT_SERVER_STORAGE` when working with persistent storage in cloud instances.                                                                                                                                                                                     |    -    |    no    |
-| DISABLE_THIRD_PARTY_PROVIDERS_RESOLVER_SERVICE_USAGE | Used to prevent the retrieval of Third Party Providers from the resolver service and exclusively fetch them from TheGraph.                                                                                                                                           |  false  |    no    |
+| Name                   | Description                                                                                                             | Default | Required |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
+| EMAIL                  | Needed to handle the TLS certificates. For example, you will be notified when they are about to expire.                 |    -    |   yes    |
+| CONTENT_SERVER_STORAGE | The path to the directory where the content will be stored. ~~Path must be absolute.~~                                  |    -    |   yes    |
+| CATALYST_URL           | Node's public domain, e.g. `https://peer.decentraland.org`. Must start with `https://`. Locally, use `http://localhost` |    -    |   yes    |
+| CATALYST_OWNER_CHANNEL | Which update channel in the cloud bootstrap configurations to use, `stable` or `latest`.                                | latest  |    no    |
+| SQS_QUEUE_NAME         | Which Amazon SQS to consume in `crontab.sh`.                                                                            |    -    |    no    |
+| MOUNT_DISK             | Useful to mount a disk to the folder `$CONTENT_SERVER_STORAGE` when working with persistent storage in cloud instances. |    -    |    no    |
+| DISABLE_THIRD_PARTY_PROVIDERS_RESOLVER_SERVICE_USAGE | Used to prevent the retrieval of Third Party Providers from the resolver service and exclusively fetch them from TheGraph |  false  |    no    |
 
 
 There is also some advanced configuration in the [.env-advanced](.env-advanced) file. Normally, it shouldn't be modified.
 
-| Name             | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
-| ETH_NETWORK      | Which Ethereum network you want to use. Usually is `goerli` for testing or `mainnet` for production                                                                                                                                                                                                           | mainnet |   yes    |
+| Name             | Description                                                                                                                   | Default | Required |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
+| ETH_NETWORK      | Which Ethereum network you want to use. Usually is `goerli` for testing or `mainnet` for production.                          | mainnet |   yes    |
 | REGENERATE       | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
-| MAINTENANCE_MODE | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.                                                                                                                                                            |    0    |    no    |
+| MAINTENANCE_MODE | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally, `1` will run the maintenance mode |    0    |    no    |
 
 ## Running your Catalyst
 
@@ -87,14 +87,14 @@ To stop a specific container on your node:
 ./stop.sh [ nginx | lambdas | content-server ]
 ```
 
-## [FAQ](https://github.com/decentraland/catalyst-owner/blob/master/docs/FAQ.md)
+## [FAQ](docs/FAQ.md)
 
-## [SNS Workflow](https://github.com/decentraland/catalyst-owner/blob/master/docs/SNS.md)
+## [SNS Workflow](docs/SNS.md)
 
-## [Metrics](https://github.com/decentraland/catalyst-owner/blob/master/docs/METRICS.md)
+## [Metrics](docs/METRICS.md)
 
-## [Compression](https://github.com/decentraland/catalyst-owner/blob/master/docs/COMPRESSION.md)
+## [Compression](docs/COMPRESSION.md)
 
-## [Logs](https://github.com/decentraland/catalyst-owner/blob/master/docs/LOGS.md)
+## [Logs](docs/LOGS.md)
 
-## [Config](https://github.com/decentraland/catalyst-owner/blob/master/docs/CONFIG.md)
+## [Config](docs/CONFIG.md)
