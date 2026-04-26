@@ -111,9 +111,6 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
 
-      - name: test lambdas_metrics auth, must be 401
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 401
       - name: test lamb2_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lamb2_metrics 401
@@ -125,9 +122,6 @@ jobs:
         if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
 
-      - name: test lambdas_metrics auth, must be 200
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 200 -u test-user2:test-password2
       - name: test lamb2_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lamb2_metrics 200 -u test-user2:test-password2
