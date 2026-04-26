@@ -3,7 +3,7 @@
 Metrics are exposed in the following endpoints:
 
 - `/content_metrics` - content server
-- `/lambdas_metrics` - lambdas
+- `/lamb2_metrics` - lamb2
 - `/system_metrics` - cadvisor
 - `/postgres_metrics` - postgres exporter
 - `/nats_metrics` - NATS exporter
