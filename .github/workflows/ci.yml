@@ -78,12 +78,12 @@ jobs:
             sleep 10
           done
 
-      - name: wait for lambdas
+      - name: wait for lamb2
         timeout-minutes: 2
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs lambdas
+            docker-compose logs lamb2
             sleep 10
           done
 
@@ -111,9 +111,6 @@ jobs:
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/node_metrics 200 -u test-user:test-password
 
-      - name: test lambdas_metrics auth, must be 401
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 401
       - name: test lamb2_metrics auth, must be 401
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lamb2_metrics 401
@@ -125,9 +122,6 @@ jobs:
         if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-metrics test-user2 test-password2
 
-      - name: test lambdas_metrics auth, must be 200
-        if: ${{ always() }}
-        run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas_metrics 200 -u test-user2:test-password2
       - name: test lamb2_metrics auth, must be 200
         if: ${{ always() }}
         run: ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lamb2_metrics 200 -u test-user2:test-password2

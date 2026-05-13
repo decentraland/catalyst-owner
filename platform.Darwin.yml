@@ -11,6 +11,5 @@ services:
   postgres-exporter: *COMMON
   node-exporter: *COMMON
   content-server: *COMMON
-  lambdas: *COMMON
   lamb2: *COMMON
   cadvisor: *COMMON
