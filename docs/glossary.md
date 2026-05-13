@@ -57,9 +57,9 @@ Pointers are the ids or locations to which a Deployment belongs. Their format is
 
 The [Content Server](https://github.com/decentraland/catalyst/tree/main/content) is a part of the Catalyst node in charge of managing the Decentralized storage of Entitiy Deployments. Currently, all content stored in a Content Server is synchronized with the rest of the DAO Catalysts.
 
-### Lambdas
+### Lamb2
 
-The [Lambdas](https://github.com/decentraland/catalyst/tree/main/lambdas) Service is a part of the Catalyst node that works as a reconciliation layer between the Content Servers and the Blockchain, sanitizing content, validating ownership and helping retrieve information for the Catalyst clients.
+The [Lamb2](https://github.com/decentraland/lamb2) Service is a part of the Catalyst node that works as a reconciliation layer between the Content Servers and the Blockchain, sanitizing content, validating ownership and helping retrieve information for the Catalyst clients. It is exposed publicly under the `/lambdas/*` URL prefix for backward compatibility with existing clients.
 
 ### Synchronization 
 
