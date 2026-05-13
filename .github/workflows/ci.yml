@@ -78,12 +78,12 @@ jobs:
             sleep 10
           done
 
-      - name: wait for lambdas
+      - name: wait for lamb2
         timeout-minutes: 2
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs lambdas
+            docker-compose logs lamb2
             sleep 10
           done
 

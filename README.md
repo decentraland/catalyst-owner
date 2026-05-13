@@ -61,7 +61,7 @@ After you have configured everything, all you need to do is run:
 Once you started your Catalyst server, after a few seconds you should be able to test the different services by accessing:
 
 - Content: `CATALYST_URL/content/status`
-- Lambdas: `CATALYST_URL/lambdas/status`
+- Lamb2: `CATALYST_URL/lambdas/status`
 
 ## Updating your Catalyst
 
@@ -84,7 +84,7 @@ To stop a specific container on your node:
 To stop a specific container on your node:
 
 ```
-./stop.sh [ nginx | lambdas | content-server ]
+./stop.sh [ nginx | lamb2 | content-server ]
 ```
 
 ## [FAQ](https://github.com/decentraland/catalyst-owner/blob/master/docs/FAQ.md)
