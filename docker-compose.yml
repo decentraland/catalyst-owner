@@ -8,7 +8,8 @@ volumes:
 services:
   postgres:
     # Updated from postgres:12 (EOL Nov 2024) to postgres:16 for security patches and performance improvements
-    image: postgres:16
+    # Pinned by digest to the latest postgres:16 at pin time (2026-05-27) for reproducible deploys
+    image: postgres:16@sha256:4b7183ac05f8ef417db21fd72d71047a4238340c261d3cc3ddb6d579ab5071ae
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
@@ -34,7 +35,8 @@ services:
       options: { tag: postgres }
 
   postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter
+    # Pinned to v0.19.1 by digest (was floating :latest)
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
     container_name: postgres-exporter
     environment:
       - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres-exporter/queries.yaml
@@ -51,7 +53,8 @@ services:
       options: { tag: postgres-exporter }
 
   node-exporter:
-    image: quay.io/prometheus/node-exporter:latest
+    # Pinned to v1.11.1 by digest (was floating :latest)
+    image: quay.io/prometheus/node-exporter:v1.11.1@sha256:0f422f62c15f154af8d8572b23d623aebfb10cec73a5c654d18f911f3f9df241
     container_name: node-exporter
     restart: unless-stopped
     volumes:
@@ -121,7 +124,8 @@ services:
       options: { tag: lamb2 }
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    # Pinned by digest to the v0.55.1 release for reproducible deploys
+    image: gcr.io/cadvisor/cadvisor:v0.55.1@sha256:3de2bd5203120b866d74a9b283b2ffb8ec382fbf9dc321814700c6ea6f44ec57
     container_name: cadvisor
     command: --docker_only=true --disable_root_cgroup_stats=true
     restart: always
@@ -136,7 +140,9 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:1.31-alpine
+    # Pinned by digest to guarantee the patched binary
+    # (>= 1.31.1 fixes CVE-2026-9256, a heap overflow in ngx_http_rewrite_module)
+    image: nginx:1.31.1-alpine@sha256:8b1e78743a03dbb2c95171cc58639fef29abc8816598e27fb910ed2e621e589a
     ports:
       - "80:80"
       - "443:443"
@@ -163,7 +169,8 @@ services:
       options: { tag: nginx }
 
   certbot:
-    image: certbot/certbot
+    # Pinned to v5.6.0 by digest (was floating :latest)
+    image: certbot/certbot:v5.6.0@sha256:0107d084c225631fc64a8313e19adb07275f7296fde338f7dfa93986c80b2e3e
     restart: always
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     volumes:
