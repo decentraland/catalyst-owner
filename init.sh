@@ -15,8 +15,19 @@ export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
 leCertEmit () {
   echo "## Downloading recommended TLS parameters ..."
   mkdir -p "$data_path/conf"
-  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
+  # --fail makes curl exit non-zero on HTTP errors (e.g. 404) instead of writing
+  # the error body into the file, which would leave nginx with an unparseable
+  # config ("unexpected end of file"). Write to the target only on success.
+  if ! curl -fsS https://raw.githubusercontent.com/certbot/certbot/main/certbot/src/certbot/_internal/plugins/nginx/tls_configs/options-ssl-nginx.conf -o "$data_path/conf/options-ssl-nginx.conf"; then
+    echo -n "Failed to download options-ssl-nginx.conf... "
+    printMessage failed
+    exit 1
+  fi
+  if ! curl -fsS https://raw.githubusercontent.com/certbot/certbot/main/certbot/src/certbot/ssl-dhparams.pem -o "$data_path/conf/ssl-dhparams.pem"; then
+    echo -n "Failed to download ssl-dhparams.pem... "
+    printMessage failed
+    exit 1
+  fi
   echo
 
   echo " Creating dummy certificate for $nginx_url..."
