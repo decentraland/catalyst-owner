@@ -1,6 +1,10 @@
 #!/bin/bash
 export rsa_key_size=4096
 export data_path="local/certbot"
+# Certbot release whose TLS config we download. Pinned (not "main") so a given
+# repo revision always fetches identical files; keep in sync with the certbot
+# container image tag in docker-compose.yml.
+export certbot_ref="v5.7.0"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
@@ -12,22 +16,40 @@ export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
 # Functions
 #####
 
+# Download $1 to $2, atomically. Streams to a temp file in the target directory
+# and only moves it into place on success, so neither an HTTP error (--fail nets
+# the error body) nor an interrupted transfer can leave a partial/unparseable
+# file at the final path (which would make nginx fail to start). $3 is a label
+# for error messages.
+downloadTlsFile () {
+  local url="$1" target="$2" name="$3" tmp
+  tmp="$(mktemp "${target}.XXXXXX")" || {
+    echo -n "Failed to create temp file for $name... "
+    printMessage failed
+    exit 1
+  }
+  if curl -fsS "$url" -o "$tmp"; then
+    # mktemp creates the file 0600; these are public TLS config files, so restore
+    # the world-readable perms the previous `curl -o` produced before moving.
+    chmod 0644 "$tmp"
+    mv "$tmp" "$target"
+  else
+    rm -f "$tmp"
+    echo -n "Failed to download $name... "
+    printMessage failed
+    exit 1
+  fi
+}
+
 leCertEmit () {
   echo "## Downloading recommended TLS parameters ..."
   mkdir -p "$data_path/conf"
-  # --fail makes curl exit non-zero on HTTP errors (e.g. 404) instead of writing
-  # the error body into the file, which would leave nginx with an unparseable
-  # config ("unexpected end of file"). Write to the target only on success.
-  if ! curl -fsS https://raw.githubusercontent.com/certbot/certbot/main/certbot/src/certbot/_internal/plugins/nginx/tls_configs/options-ssl-nginx.conf -o "$data_path/conf/options-ssl-nginx.conf"; then
-    echo -n "Failed to download options-ssl-nginx.conf... "
-    printMessage failed
-    exit 1
-  fi
-  if ! curl -fsS https://raw.githubusercontent.com/certbot/certbot/main/certbot/src/certbot/ssl-dhparams.pem -o "$data_path/conf/ssl-dhparams.pem"; then
-    echo -n "Failed to download ssl-dhparams.pem... "
-    printMessage failed
-    exit 1
-  fi
+  downloadTlsFile \
+    "https://raw.githubusercontent.com/certbot/certbot/${certbot_ref}/certbot/src/certbot/_internal/plugins/nginx/tls_configs/options-ssl-nginx.conf" \
+    "$data_path/conf/options-ssl-nginx.conf" "options-ssl-nginx.conf"
+  downloadTlsFile \
+    "https://raw.githubusercontent.com/certbot/certbot/${certbot_ref}/certbot/src/certbot/ssl-dhparams.pem" \
+    "$data_path/conf/ssl-dhparams.pem" "ssl-dhparams.pem"
   echo
 
   echo " Creating dummy certificate for $nginx_url..."
