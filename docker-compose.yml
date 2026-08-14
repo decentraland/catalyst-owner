@@ -86,6 +86,14 @@ services:
       - BOOTSTRAP_FROM_SCRATCH=${BOOTSTRAP_FROM_SCRATCH:-false}
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      # Per-client rate limit on POST /entities. Defaulted here rather than left to .env-advanced
+      # because the header is a property of this topology, not an operator preference: the container
+      # only `expose`s 6969, so nginx is its sole ingress, and content_proxy.conf sets X-Real-IP with
+      # `$remote_addr` — overwriting anything the client sent, which is what makes it safe to key on.
+      # Without it the socket peer is nginx for every request and all clients would share one budget.
+      - TRUSTED_CLIENT_IP_HEADER=${TRUSTED_CLIENT_IP_HEADER:-x-real-ip}
+      - POST_ENTITIES_RATE_LIMIT_MAX=${POST_ENTITIES_RATE_LIMIT_MAX:-200}
+      - POST_ENTITIES_RATE_LIMIT_WINDOW_SECONDS=${POST_ENTITIES_RATE_LIMIT_WINDOW_SECONDS:-60}
     env_file:
       - .env
       - .env-advanced
