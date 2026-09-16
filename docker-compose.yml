@@ -134,7 +134,6 @@ services:
   cadvisor:
     # Pinned by digest to the v0.55.1 release for reproducible deploys
     image: gcr.io/cadvisor/cadvisor:v0.55.1@sha256:3de2bd5203120b866d74a9b283b2ffb8ec382fbf9dc321814700c6ea6f44ec57
-    container_name: cadvisor
     command: --docker_only=true --disable_root_cgroup_stats=true
     restart: always
     volumes:
