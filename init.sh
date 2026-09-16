@@ -193,6 +193,44 @@ printMessage () {
     esac
 }
 
+ensureDockerCompose () {
+  local required_version="1.29.2"
+  local current_version=""
+  local temporary_binary=""
+  local install_path="/usr/local/bin/docker-compose"
+
+  if [ -x "$(command -v docker-compose 2>/dev/null)" ]; then
+    current_version="$(docker-compose version --short 2>/dev/null || true)"
+  fi
+
+  if [ "$current_version" = "$required_version" ]; then
+    return 0
+  fi
+
+  echo "## Installing Docker Compose ${required_version} (found: ${current_version:-none})..."
+  temporary_binary="$(mktemp)" || return 1
+
+  if ! curl -fsSL \
+    "https://github.com/docker/compose/releases/download/${required_version}/docker-compose-Linux-$(uname -m)" \
+    -o "$temporary_binary"; then
+    rm -f "$temporary_binary"
+    return 1
+  fi
+
+  chmod 0755 "$temporary_binary"
+  if [ "$(id -u)" -eq 0 ]; then
+    install -m 0755 "$temporary_binary" "$install_path"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo install -m 0755 "$temporary_binary" "$install_path"
+  else
+    rm -f "$temporary_binary"
+    return 1
+  fi
+  rm -f "$temporary_binary"
+
+  [ "$(docker-compose version --short 2>/dev/null || true)" = "$required_version" ]
+}
+
 ##
 # Main program
 ##
@@ -277,9 +315,9 @@ echo -n " - REGENERATE:                " ; echo -e "\033[33m ${REGENERATE} \033[
 echo ""
 echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
-# Check if docker compose is installed
-if ! [ -x "$(command -v docker-compose)" ]; then
-  echo -n "Error: docker-compose is not installed..." >&2
+# Check that the legacy command used by the operational scripts is compatible
+if ! ensureDockerCompose; then
+  echo -n "Error: compatible docker-compose is not installed..." >&2
   printMessage failed
   exit 1
 fi
