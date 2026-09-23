@@ -65,6 +65,13 @@ Once you started your Catalyst server, after a few seconds you should be able to
 
 ## Updating your Catalyst
 
+On the `full-realm` branch, `ARCHIPELAGO_CORE_DOCKER_TAG` defaults to `0.2.3`, the last release
+containing `core/dist/index.js`. Archipelago Workers `0.2.4` removed core in favor of Pulse.
+`ARCHIPELAGO_DOCKER_TAG` continues to select the WebSocket connector image independently.
+Set `ARCHIPELAGO_CORE_DOCKER_TAG` in `.env` only when selecting another image that includes legacy core.
+Realms migrating to Pulse must retire legacy core after verifying Pulse and comms-gatekeeper
+publish the required feeds on that realm's NATS broker; do not run both clustering publishers.
+
 To update your Catalyst to a newer version, you can do the same as above:
 
 ```
