@@ -257,6 +257,7 @@ export DOCKER_TAG=${DOCKER_TAG:-latest}
 export LAMB2_DOCKER_TAG=${LAMB2_DOCKER_TAG:-latest}
 export CATALYST_STATS_DOCKER_TAG=${CATALYST_STATS_DOCKER_TAG:-latest}
 export ARCHIPELAGO_DOCKER_TAG=${ARCHIPELAGO_DOCKER_TAG:-latest}
+export ARCHIPELAGO_CORE_DOCKER_TAG=${ARCHIPELAGO_CORE_DOCKER_TAG:-0.2.3}
 REGENERATE=${REGENERATE:-0}
 SLEEP_TIME=${SLEEP_TIME:-5}
 MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
@@ -280,6 +281,7 @@ fi
 echo -n " - DOCKER_TAG:                " ; echo -e "\033[33m ${DOCKER_TAG} \033[39m"
 echo -n " - LAMB2_DOCKER_TAG:          " ; echo -e "\033[33m ${LAMB2_DOCKER_TAG} \033[39m"
 echo -n " - ARCHIPELAGO_DOCKER_TAG:    " ; echo -e "\033[33m ${ARCHIPELAGO_DOCKER_TAG} \033[39m"
+echo -n " - ARCHIPELAGO_CORE_DOCKER_TAG: " ; echo -e "\033[33m ${ARCHIPELAGO_CORE_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_STATS_DOCKER_TAG: " ; echo -e "\033[33m ${CATALYST_STATS_DOCKER_TAG} \033[39m"
 echo -n " - CATALYST_URL:              " ; echo -e "\033[33m ${CATALYST_URL} \033[39m"
 echo -n " - CONTENT_SERVER_STORAGE:    " ; echo -e "\033[33m ${CONTENT_SERVER_STORAGE} \033[39m"
@@ -381,6 +383,13 @@ fi
 docker pull "quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_DOCKER_TAG:-latest}"
 if [ $? -ne 0 ]; then
   echo -n "Failed to pull the archipelago's docker image with tag ${ARCHIPELAGO_DOCKER_TAG:-latest}"
+  printMessage failed
+  exit 1
+fi
+
+docker pull "quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_CORE_DOCKER_TAG:-0.2.3}"
+if [ $? -ne 0 ]; then
+  echo -n "Failed to pull the archipelago-core docker image with tag ${ARCHIPELAGO_CORE_DOCKER_TAG:-0.2.3}"
   printMessage failed
   exit 1
 fi

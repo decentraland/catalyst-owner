@@ -64,7 +64,8 @@ services:
       - nats
 
   archipelago-core:
-    image: quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_DOCKER_TAG:-latest}
+    # Versions >= 0.2.4 removed core in favor of Pulse; full-realm still runs legacy core.
+    image: quay.io/decentraland/archipelago-workers:${ARCHIPELAGO_CORE_DOCKER_TAG:-0.2.3}
     working_dir: /app
     env_file:
       - .env
