@@ -29,8 +29,8 @@ server {
     server_name $katalyst_host;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-    ssl_certificate /etc/letsencrypt/live/$katalyst_host/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$katalyst_host/privkey.pem;
+    ssl_certificate $certificate_path/fullchain.pem;
+    ssl_certificate_key $certificate_path/privkey.pem;
 
     # Security: HSTS header tells browsers to only connect via HTTPS for the next year,
     # preventing SSL stripping attacks and insecure HTTP downgrade attempts

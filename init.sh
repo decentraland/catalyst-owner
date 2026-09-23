@@ -8,6 +8,7 @@ export certbot_ref="v5.7.0"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
+source "$(dirname "${BASH_SOURCE[0]}")/tooling/certificates.sh" || exit 1
 
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
@@ -53,13 +54,17 @@ leCertEmit () {
   echo
 
   echo " Creating dummy certificate for $nginx_url..."
-  path="/etc/letsencrypt/live/$nginx_url"
-  mkdir -p "$data_path/conf/live/$nginx_url"
+  # Keep bootstrap files outside Certbot's live/archive/renewal directories.
+  # Regeneration must never overwrite or delete an existing certificate lineage.
+  path="/etc/letsencrypt/bootstrap/$nginx_url"
+  mkdir -p "$data_path/conf/bootstrap/$nginx_url"
   docker-compose run --rm --entrypoint "\
     openssl req -x509 -nodes -newkey rsa:2048 -days 1\
       -keyout '$path/privkey.pem' \
       -out '$path/fullchain.pem' \
-      -subj '/CN=localhost'" certbot
+      -subj '/CN=localhost'" certbot || exit 1
+
+  renderHttpsConfig "$nginx_url" "$path" "$nginx_server_template_https" "$nginx_server_file" || exit 1
 
   echo -n "## Starting nginx ..."
   docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" up --remove-orphans --force-recreate -d nginx
@@ -72,22 +77,6 @@ leCertEmit () {
     echo -n "## Dummy certificates created ..."
     printMessage ok
   fi
-
-    echo -n "## Deleting dummy certificate for $nginx_url ..."
-    docker-compose run --rm --entrypoint "\
-            rm -Rf /etc/letsencrypt/live/$nginx_url && \
-            rm -Rf /etc/letsencrypt/archive/$nginx_url && \
-            rm -Rf /etc/letsencrypt/renewal/$nginx_url.conf" certbot
-        echo
-
-        if test $? -ne 0; then
-            echo -n "Failed to remove files... "
-            printMessage failed
-            exit 1
-        else
-            echo -n "## Files deleted ... "
-            printMessage ok
-        fi
 
         echo "## Requesting Let's Encrypt certificate for $nginx_url... "
         domain_args=""
@@ -123,6 +112,7 @@ leCertEmit () {
 
         docker-compose run --rm --entrypoint "\
             certbot certonly --webroot -w /var/www/certbot \
+            --cert-name '$certificate_name' \
             --no-eff-email \
             $staging_arg \
             $email_arg \
@@ -140,6 +130,14 @@ leCertEmit () {
             printMessage ok
         fi
 
+        # Use the explicitly selected lineage, never assume its name is the host.
+        if ! certificateMatchesHost "$nginx_url" "$data_path/conf/live/$certificate_name"; then
+          echo "Certificate missing or mismatched for $certificate_name; keeping bootstrap configuration."
+          exit 1
+        fi
+        renderHttpsConfig "$nginx_url" "/etc/letsencrypt/live/$certificate_name" \
+          "$nginx_server_template_https" "$nginx_server_file" || exit 1
+        docker-compose exec -T nginx nginx -t || exit 1
         echo "## Reloading nginx ..."
         docker-compose restart nginx
         if test $? -ne 0; then
@@ -155,6 +153,7 @@ leCertEmit () {
 
         docker-compose run --rm --entrypoint "\
         certbot certonly --webroot -w /var/www/certbot \
+            --cert-name '$certificate_name' \
             $email_arg \
             $domain_args \
             --no-eff-email \
@@ -172,6 +171,7 @@ leCertEmit () {
         fi
 
 
+        docker-compose exec -T nginx nginx -t || exit 1
         echo "## Reloading nginx with real certs..."
         docker-compose restart nginx
         if test $? -ne 0; then
@@ -413,23 +413,20 @@ fi
 # else, create new certs
 export nginx_url="$(echo "${CATALYST_URL##*/}")"
 if [ "${CATALYST_URL}" != "http://localhost" ]; then
+    certificate_name=$(certificateNameForHost "$nginx_url" "$data_path/conf/live") || exit 1
     echo "## Using HTTPS."
     echo -n "## Replacing value \"\$katalyst_host\" on nginx server file ${nginx_url}... "
-    sed "s/\$katalyst_host/${nginx_url}/g" ${nginx_server_template_https} > ${nginx_server_file}
+    renderHttpsConfig "$nginx_url" "/etc/letsencrypt/live/$certificate_name" \
+      "$nginx_server_template_https" "$nginx_server_file" || exit 1
 
     # This is the URL without the 'http/s'
     # Needed to place the server on nginx conf file
-    if [ -d "$data_path/conf/live/$nginx_url" ]; then
-        echo "Existing data found for \$nginx_url."
-
-        # Check if existing certificate key is at least 2048 bits (required by OpenSSL 3.x)
-        cert_file="$data_path/conf/live/$nginx_url/fullchain.pem"
-        if [ -f "$cert_file" ]; then
-            key_length=$(openssl x509 -in "$cert_file" -noout -text 2>/dev/null | grep "Public-Key:" | grep -o '[0-9]*')
-            if [ -n "$key_length" ] && [ "$key_length" -lt 2048 ]; then
-                echo "## Certificate key too small (${key_length} bits). Regenerating..."
-                REGENERATE=1
-            fi
+    if certificateMatchesHost "$nginx_url" "$data_path/conf/live/$certificate_name"; then
+        echo "Existing certificate found: $certificate_name."
+        cert_file="$data_path/conf/live/$certificate_name/fullchain.pem"
+        if certificateNeedsRenewal "$cert_file"; then
+            echo "## Certificate expired, invalid, or RSA key too small. Regenerating..."
+            REGENERATE=1
         fi
 
         if test ${REGENERATE} -eq 1; then
