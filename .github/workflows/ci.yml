@@ -2,6 +2,13 @@ name: ci validations
 
 on: push
 jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: certificate tests
+        run: python3 -m unittest discover -s tests -v
+
   test-localhost:
     runs-on: ubuntu-latest
     strategy:
@@ -100,6 +107,19 @@ jobs:
       - name: add a user to enable system metrics
         if: ${{ always() }}
         run: htpasswd -bc local/nginx/auth/.htpasswd-system test-user test-password
+
+      # The exporters behind these endpoints may still be starting when the
+      # content and lamb2 checks above pass on their first attempt.
+      - name: wait for system metrics backends
+        if: ${{ always() }}
+        timeout-minutes: 2
+        run: |
+          for path in system_metrics postgres_metrics node_metrics; do
+            until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/$path 200 -u test-user:test-password; do
+              echo "Retrying $path in 5 seconds..."
+              sleep 5
+            done
+          done
 
       - name: test system_metrics auth, must be 200
         if: ${{ always() }}

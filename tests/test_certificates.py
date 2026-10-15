@@ -4,14 +4,14 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = 'peer-testing.decentraland.org'
 INIT = (ROOT / 'init.sh').read_text()
 FUNCTIONS = INIT.split('##\n# Main program\n##', 1)[0]
-HTTPS_SETUP = INIT.split('export nginx_url=', 1)[1].split('\nmatches=', 1)[0]
-HTTPS_SETUP = 'export nginx_url=' + HTTPS_SETUP
+TWO_DAYS_AGO = time.time() - 2 * 86400
 
 
 class CertificateTests(unittest.TestCase):
@@ -19,14 +19,20 @@ class CertificateTests(unittest.TestCase):
     def setUpClass(cls):
         cls.fixtures = tempfile.TemporaryDirectory()
         cls.fixture_dir = Path(cls.fixtures.name)
-        for name, host, key in [('ec', HOST, 'ec'), ('other', 'other.example.org', 'ec'),
-                                ('rsa', HOST, 'rsa:2048'), ('weak', HOST, 'rsa:1024')]:
+        for name, subject, host, key, days in [
+                ('ec', HOST, HOST, 'ec', 90),
+                ('other', 'other.example.org', 'other.example.org', 'ec', 90),
+                ('rsa', HOST, HOST, 'rsa:2048', 90),
+                ('weak', HOST, HOST, 'rsa:1024', 90),
+                ('expiring', HOST, HOST, 'ec', 2),
+                # Self-signed, so the issuer carries the staging name too.
+                ('staging', '(STAGING) Ersatz Edamame E1', HOST, 'ec', 90)]:
             directory = cls.fixture_dir / name
             directory.mkdir()
             args = ['openssl', 'req', '-x509', '-nodes', '-newkey', key]
             if key == 'ec':
                 args += ['-pkeyopt', 'ec_paramgen_curve:prime256v1']
-            subprocess.run(args + ['-days', '2', '-subj', f'/CN={host}',
+            subprocess.run(args + ['-days', str(days), '-subj', f'/CN={subject}',
                            '-addext', f'subjectAltName=DNS:{host}',
                            '-keyout', str(directory / 'privkey.pem'),
                            '-out', str(directory / 'fullchain.pem')],
@@ -40,153 +46,141 @@ class CertificateTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.live = self.root / 'conf/live'
-        self.live.mkdir(parents=True)
-        self.config = self.root / 'nginx.conf'
+        self.le = self.root / 'letsencrypt'
+        (self.le / 'live').mkdir(parents=True)
+        (self.le / 'renewal').mkdir()
 
     def shell(self, code, **extra):
-        env = dict(os.environ, TEST_ROOT=str(self.root), HOST=HOST,
-                   FIXTURE=str(self.fixture_dir / 'ec'), **extra)
+        env = dict(os.environ, TEST_ROOT=str(self.root), LE_DIR=str(self.le),
+                   DOMAIN=HOST, RENEW_DAYS='30', **extra)
         return subprocess.run(['bash', '-c', FUNCTIONS + '\n' + code], cwd=ROOT,
                               env=env, text=True, capture_output=True)
 
-    def lineage(self, name, fixture='ec'):
-        directory = self.live / name
+    def lineage(self, name, fixture='ec', renewal=True, recent=False):
+        directory = self.le / 'live' / name
         shutil.copytree(self.fixture_dir / fixture, directory)
+        if not recent:
+            for pem in directory.iterdir():
+                os.utime(pem, (TWO_DAYS_AGO, TWO_DAYS_AGO))
+        if renewal:
+            (self.le / 'renewal' / f'{name}.conf').write_text('renewal settings')
         return directory
 
-    def select(self):
-        result = self.shell('certificateNameForHost "$HOST" "$TEST_ROOT/conf/live"')
+    def state(self):
+        # The same script init.sh runs inside the certbot container.
+        result = self.shell('sh -c "$cert_state_script"')
         self.assertEqual(result.returncode, 0, result.stderr)
-        return result.stdout.strip()
+        return tuple(result.stdout.split())
 
     def test_select_existing_numbered_lineage(self):
         self.lineage(HOST + '-0001')
-        self.assertEqual(self.select(), HOST + '-0001')
+        self.assertEqual(self.state(), (HOST + '-0001', 'valid'))
 
     def test_prefer_exact_name(self):
         self.lineage(HOST)
         self.lineage(HOST + '-0001')
-        self.assertEqual(self.select(), HOST)
+        self.assertEqual(self.state(), (HOST, 'valid'))
 
     def test_skip_empty_base_directory(self):
-        (self.live / HOST).mkdir()
+        (self.le / 'live' / HOST).mkdir()
         self.lineage(HOST + '-0001')
-        self.assertEqual(self.select(), HOST + '-0001')
+        self.assertEqual(self.state(), (HOST + '-0001', 'valid'))
 
     def test_skip_wrong_host_and_incomplete_lineages(self):
         self.lineage(HOST + '-0001', 'other')
         incomplete = self.lineage(HOST + '-0002')
         (incomplete / 'privkey.pem').unlink()
         self.lineage(HOST + '-0003')
-        self.assertEqual(self.select(), HOST + '-0003')
+        self.assertEqual(self.state(), (HOST + '-0003', 'valid'))
+
+    def test_skip_lineage_certbot_does_not_manage(self):
+        # e.g. a dummy certificate left in live/ by older versions of init.sh
+        self.lineage(HOST, renewal=False)
+        self.assertEqual(self.state(), (HOST, 'missing'))
 
     def test_skip_non_numbered_suffix(self):
         self.lineage(HOST + '-backup')
-        self.assertEqual(self.select(), HOST)
+        self.lineage(HOST + '-dry-run')
+        self.assertEqual(self.state(), (HOST, 'missing'))
 
     def test_new_install_uses_host(self):
-        self.assertEqual(self.select(), HOST)
+        self.assertEqual(self.state(), (HOST, 'missing'))
 
     def test_key_strength_accounts_for_algorithm(self):
-        for fixture, expected in [('ec', 1), ('rsa', 1), ('weak', 0)]:
+        for fixture, expected in [('ec', 'valid'), ('rsa', 'valid'), ('weak', 'weak-key')]:
             with self.subTest(fixture=fixture):
-                result = self.shell('certificateNeedsRenewal "$CERT"',
-                                    CERT=str(self.fixture_dir / fixture / 'fullchain.pem'))
-                self.assertEqual(result.returncode, expected, result.stderr)
+                shutil.rmtree(self.le / 'live')
+                (self.le / 'live').mkdir()
+                self.lineage(HOST, fixture)
+                self.assertEqual(self.state(), (HOST, expected))
 
-    def setup_script(self):
-        return '''
-data_path="$TEST_ROOT"
-nginx_server_file="$TEST_ROOT/nginx.conf"
-CATALYST_URL="https://$HOST"
-REGENERATE=0
-'''
+    def test_staging_certificate_is_replaced(self):
+        self.lineage(HOST, 'staging')
+        self.assertEqual(self.state(), (HOST, 'staging'))
 
-    def test_existing_ec_lineage_is_reused_without_issuance(self):
-        self.lineage(HOST + '-0001')
-        result = self.shell(self.setup_script() + '''
-leCertEmit () { echo 'Unexpected issuance' >&2; exit 99; }
-''' + HTTPS_SETUP)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        config = self.config.read_text()
-        self.assertIn(f'server_name {HOST};', config)
-        self.assertIn(f'/live/{HOST}-0001/fullchain.pem;', config)
-        self.assertIn(f'/live/{HOST}-0001/privkey.pem;', config)
-        self.assertNotIn('$certificate_path', config)
+    def test_certificate_close_to_expiry(self):
+        self.lineage(HOST, 'expiring')
+        self.assertEqual(self.state(), (HOST, 'expiring'))
 
-    def test_localhost_still_uses_http(self):
-        result = self.shell(self.setup_script() + '\nCATALYST_URL=http://localhost\n' + HTTPS_SETUP)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertNotIn('ssl_certificate', self.config.read_text())
+    def test_recently_issued_certificate(self):
+        self.lineage(HOST, recent=True)
+        self.assertEqual(self.state(), (HOST, 'recent'))
 
-    def test_wrong_host_certificate_is_not_reused(self):
-        self.lineage(HOST, 'other')
-        result = self.shell(self.setup_script() + '''
-leCertEmit () { echo 'Issuance required'; }
-''' + HTTPS_SETUP)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Issuance required', result.stdout)
+    def test_render_https_config_uses_selected_lineage(self):
+        config = self.root / 'nginx.conf'
+        result = self.shell(
+            'renderHttpsConfig "$DOMAIN" "/etc/letsencrypt/live/$DOMAIN-0001" '
+            '"$nginx_server_template_https" "$CONFIG"', CONFIG=str(config))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        text = config.read_text()
+        self.assertIn(f'server_name {HOST};', text)
+        self.assertIn(f'/live/{HOST}-0001/fullchain.pem;', text)
+        self.assertIn(f'/live/{HOST}-0001/privkey.pem;', text)
+        self.assertNotIn('$certificate_path', text)
 
-    def issue(self, name, fail=False):
+    def issue(self, fail_on=''):
         # Exercise the real issuance function, substituting only external commands.
-        return self.shell(self.setup_script() + '''
-nginx_url="$HOST"
-certificate_name="$CERT_NAME"
-CATALYST_OWNER_CHANNEL=stable
+        return self.shell('''
+nginx_url="$DOMAIN"
 EMAIL=ops@example.org
-downloadTlsFile () { touch "$2"; }
-curl () { printf 200; }
-sleep () { :; }
-docker-compose () {
-  printf '%s\\n' "$*" >> "$TEST_ROOT/docker-calls"
-  case "$*" in
-    *'openssl req'*)
-      mkdir -p "$TEST_ROOT/conf/bootstrap/$HOST"
-      cp "$FIXTURE/"*.pem "$TEST_ROOT/conf/bootstrap/$HOST/" ;;
-    *'certbot certonly'*)
-      [ "$FAIL_ISSUANCE" = 1 ] && return 1
-      mkdir -p "$TEST_ROOT/conf/live/$certificate_name"
-      cp "$FIXTURE/"*.pem "$TEST_ROOT/conf/live/$certificate_name/" ;;
-    *'rm -Rf'*) echo 'Must not delete certificate lineages' >&2; return 99 ;;
-    *'nginx -t'*)
-      test -f "$TEST_ROOT/conf/live/$certificate_name/fullchain.pem" || return 1 ;;
-  esac
+cert_failure_file="$TEST_ROOT/failed"
+waitForAcmeChallenge () { :; }
+waitForCertbotService () { :; }
+certbotRun () {
+  printf '%s\\n' "$*" >> "$TEST_ROOT/certbot-calls"
+  case "$*" in *"$FAIL_ON"*) [ -n "$FAIL_ON" ] && return 1 ;; esac
   return 0
 }
-leCertEmit
-''', CERT_NAME=name, FAIL_ISSUANCE='1' if fail else '0')
+issueCert "$DOMAIN-0001"
+''', FAIL_ON=fail_on)
 
-    def test_issuance_uses_explicit_name_and_preserves_existing_lineage(self):
-        name = HOST + '-0001'
-        self.lineage(name)
-        renewal = self.root / f'conf/renewal/{name}.conf'
-        renewal.parent.mkdir()
-        renewal.write_text('existing renewal settings')
-        result = self.issue(name)
+    def calls(self):
+        path = self.root / 'certbot-calls'
+        return path.read_text().splitlines() if path.exists() else []
+
+    def test_issuance_renews_the_selected_lineage_in_place(self):
+        result = self.issue()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        calls = (self.root / 'docker-calls').read_text()
-        self.assertEqual(calls.count(f"--cert-name '{name}'"), 2)
-        self.assertNotIn('rm -Rf', calls)
-        self.assertEqual(renewal.read_text(), 'existing renewal settings')
-        self.assertIn(f'/live/{name}/fullchain.pem;', self.config.read_text())
-        self.assertNotIn('/bootstrap/', self.config.read_text())
+        dry_run, real = self.calls()
+        self.assertIn(f'--cert-name {HOST}-0001-dry-run --dry-run', dry_run)
+        self.assertIn(f'--cert-name {HOST}-0001 --force-renewal', real)
+        self.assertNotIn('--dry-run', real)
+        self.assertFalse((self.root / 'failed').exists())
 
-    def test_first_issuance_uses_requested_name(self):
-        result = self.issue(HOST)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertTrue((self.live / HOST / 'fullchain.pem').is_file())
-        self.assertIn(f'/live/{HOST}/fullchain.pem;', self.config.read_text())
-
-    def test_failed_issuance_preserves_previous_certificate(self):
-        name = HOST + '-0001'
-        directory = self.lineage(name, 'rsa')
-        before = (directory / 'fullchain.pem').read_bytes()
-        result = self.issue(name, fail=True)
+    def test_failed_dry_run_skips_the_real_request(self):
+        result = self.issue(fail_on='--dry-run')
         self.assertNotEqual(result.returncode, 0)
-        self.assertEqual((directory / 'fullchain.pem').read_bytes(), before)
-        self.assertNotIn('restart nginx', (self.root / 'docker-calls').read_text())
-        self.assertIn(f'/bootstrap/{HOST}/fullchain.pem;', self.config.read_text())
+        self.assertEqual(len(self.calls()), 1)
+        self.assertTrue((self.root / 'failed').exists())
+
+    def test_failed_issuance_backs_off(self):
+        result = self.issue(fail_on='--force-renewal')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(len(self.calls()), 2)
+        result = self.issue()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('not trying again yet', result.stdout)
+        self.assertEqual(len(self.calls()), 2)
 
 
 if __name__ == '__main__':
