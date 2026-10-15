@@ -8,13 +8,19 @@ Below you can find the **frequently asked questions** about Catalyst Servers.
 
 We are using [Let's Encrypt](https://letsencrypt.org/) for certificates. We automatically generate the certificates the first time you start your server. We will also handle the renewal of the server for you!
 
-## When issuing a certificate, if fails the first time, the script won't try to issue a new one.
+The `certbot` container renews the certificate when it gets close to expiring. On top of that, every `./init.sh` run checks the current certificate and only requests a new one when it is missing, was not issued by Let's Encrypt (for example the temporary self-signed one), comes from the Let's Encrypt staging environment, has an RSA key under 2048 bits, or expires in less than 30 days.
 
-One of the steps in issuing a certificate is the creation of auto signed certs. The script checks if there are any certs already created. If they exist, then no new certificates are created.
+## What happens if issuing a certificate fails?
 
-To force a certificate regeneration you will need to change the `REGENERATE` entry on the `.env` file to `1` and then execute the script again.
+The previous certificate files are put back, so nginx keeps running, and the next `./init.sh` run tries again. To protect your domain from the Let's Encrypt rate limits, the script waits 60 minutes after a failed request before trying again. Delete the `.cert-request-failed` file to retry right away.
 
-**IT'S IMPORTANT** to roll back this value to `0`. If you don't, a new certificate will be issued on each run and you will hit the Let's Encrypt ratio limit. It this happens, your domain will be banned.
+Before every request the script runs a dry run against the Let's Encrypt staging environment, so a misconfigured DNS or firewall fails there without counting against the production limits.
+
+## How can I force a new certificate?
+
+Set `REGENERATE=1` in the `.env-advanced` file and execute `./init.sh` again. The new certificate is requested while the current one keeps being served, and the current one is kept if the request fails.
+
+Set the value back to `0` afterwards. While it is on, the script skips regeneration if the certificate is less than a day old, but it would still request a new one every day.
 
 ## How many certs I can issue?
 
