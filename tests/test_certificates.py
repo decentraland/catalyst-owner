@@ -57,11 +57,16 @@ class CertificateTests(unittest.TestCase):
                               env=env, text=True, capture_output=True)
 
     def lineage(self, name, fixture='ec', renewal=True, recent=False):
+        # Laid out like certbot: live/ holds relative symlinks into archive/.
+        archive = self.le / 'archive' / name
+        archive.mkdir(parents=True)
         directory = self.le / 'live' / name
-        shutil.copytree(self.fixture_dir / fixture, directory)
-        if not recent:
-            for pem in directory.iterdir():
-                os.utime(pem, (TWO_DAYS_AGO, TWO_DAYS_AGO))
+        directory.mkdir()
+        for kind in ('fullchain', 'privkey'):
+            shutil.copy(self.fixture_dir / fixture / f'{kind}.pem', archive / f'{kind}1.pem')
+            if not recent:
+                os.utime(archive / f'{kind}1.pem', (TWO_DAYS_AGO, TWO_DAYS_AGO))
+            (directory / f'{kind}.pem').symlink_to(f'../../archive/{name}/{kind}1.pem')
         if renewal:
             (self.le / 'renewal' / f'{name}.conf').write_text('renewal settings')
         return directory
@@ -93,6 +98,21 @@ class CertificateTests(unittest.TestCase):
         self.lineage(HOST + '-0003')
         self.assertEqual(self.state(), (HOST + '-0003', 'valid'))
 
+    def test_prefer_valid_numbered_lineage_over_unusable_exact_name(self):
+        for fixture in ('staging', 'expiring', 'weak'):
+            with self.subTest(fixture=fixture):
+                for directory in ('live', 'archive'):
+                    shutil.rmtree(self.le / directory, ignore_errors=True)
+                (self.le / 'live').mkdir()
+                self.lineage(HOST, fixture)
+                self.lineage(HOST + '-0001')
+                self.assertEqual(self.state(), (HOST + '-0001', 'valid'))
+
+    def test_renew_first_lineage_when_none_is_valid(self):
+        self.lineage(HOST, 'expiring')
+        self.lineage(HOST + '-0001', 'staging')
+        self.assertEqual(self.state(), (HOST, 'expiring'))
+
     def test_skip_lineage_certbot_does_not_manage(self):
         # e.g. a dummy certificate left in live/ by older versions of init.sh
         self.lineage(HOST, renewal=False)
@@ -109,7 +129,8 @@ class CertificateTests(unittest.TestCase):
     def test_key_strength_accounts_for_algorithm(self):
         for fixture, expected in [('ec', 'valid'), ('rsa', 'valid'), ('weak', 'weak-key')]:
             with self.subTest(fixture=fixture):
-                shutil.rmtree(self.le / 'live')
+                for directory in ('live', 'archive'):
+                    shutil.rmtree(self.le / directory, ignore_errors=True)
                 (self.le / 'live').mkdir()
                 self.lineage(HOST, fixture)
                 self.assertEqual(self.state(), (HOST, expected))

@@ -12,6 +12,8 @@ The `certbot` container renews the certificate when it gets close to expiring. O
 
 Until the first certificate is issued, nginx runs with a temporary self-signed certificate kept in `local/certbot/conf/bootstrap`, outside the directories certbot manages. Certbot may name the certificate after the host with a numeric suffix (for example `catalyst.example.com-0001`); the script detects it and points nginx at it.
 
+Only certificates certbot manages (with a configuration under `local/certbot/conf/renewal`) are used. A certificate placed in `live/` by hand, or left there by older versions of this script, is moved to `local/certbot/conf/stale`, and nginx uses the temporary certificate until certbot issues one.
+
 ## What happens if issuing a certificate fails?
 
 Existing certificates are renewed in place, and certbot only replaces their files once the new certificate was issued, so a failure leaves the current one in use. Without a certificate yet, nginx keeps running with the temporary one. Either way, the next `./init.sh` run tries again. To protect your domain from the Let's Encrypt rate limits, the script waits 60 minutes after a failed request before trying again. Delete the `.cert-request-failed` file to retry right away.
@@ -22,7 +24,7 @@ Before every request the script runs a dry run against the Let's Encrypt staging
 
 Set `REGENERATE=1` in the `.env-advanced` file and execute `./init.sh` again. The new certificate is requested while the current one keeps being served, and the current one is kept if the request fails.
 
-Set the value back to `0` afterwards. While it is on, the script skips regeneration if the certificate is less than a day old, but it would still request a new one every day.
+Set the value back to `0` afterwards. While it is on, the script skips regeneration if the certificate is less than a day old, but it would still request a new one on every run more than a day apart, and Let's Encrypt allows only 5 certificates per week for the same host.
 
 ## How many certs I can issue?
 

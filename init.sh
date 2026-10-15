@@ -395,7 +395,13 @@ fi
 # The cron job and bootstrap.sh can both start this script; never let two runs
 # touch the containers or the certificates at the same time.
 if command -v flock > /dev/null; then
-  exec 9> "$lock_file"
+  # A lock file left by a run as another user (e.g. `sudo ./init.sh`) must not
+  # pass for a run in progress.
+  if ! { exec 9> "$lock_file"; } 2> /dev/null; then
+    echo -n "Cannot write ${lock_file}; remove it or fix its owner"
+    printMessage failed
+    exit 1
+  fi
   if ! flock -n 9; then
     echo -n "Another init.sh run is in progress"
     printMessage failed
@@ -599,7 +605,9 @@ for entry in $config_services; do
   fi
   new_checksums="${new_checksums}${service} ${sum}"$'\n'
 done
-printf '%s' "$new_checksums" > "$config_checksums_file"
+if ! { printf '%s' "$new_checksums" > "$config_checksums_file"; } 2> /dev/null; then
+  printWarning "Cannot write ${config_checksums_file}, so the next run will restart ${config_services// /, } again; remove it or fix its owner"
+fi
 
 # Test the new nginx.conf in a one-off container first: restarting nginx with a
 # broken one would take it down, while failing here keeps it serving.
@@ -627,10 +635,15 @@ if test ${use_https} -eq 1; then
         # Point nginx at the lineage certbot actually wrote; the bootstrap
         # configuration stays in place if there is none.
         read -r cert_name cert_state <<< "$(certState)"
-        if [ "$cert_state" != "missing" ]; then
-          renderHttpsConfig "$nginx_url" "/etc/letsencrypt/live/${cert_name}" \
-            "$nginx_server_template_https" "$nginx_server_file" && cert_failed=0
-        fi
+        case "$cert_state" in
+          staging|weak-key|expiring|recent|valid)
+            renderHttpsConfig "$nginx_url" "/etc/letsencrypt/live/${cert_name}" \
+              "$nginx_server_template_https" "$nginx_server_file" && cert_failed=0
+            ;;
+          *)
+            printWarning "Could not find the issued certificate (got \"${cert_name} ${cert_state}\"), keeping the bootstrap one"
+            ;;
+        esac
       fi
       ;;
     staging|weak-key)
