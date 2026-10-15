@@ -6,7 +6,8 @@ volumes:
 services:
   postgres:
     # Updated from postgres:12 (EOL Nov 2024) to postgres:16 for security patches and performance improvements
-    image: postgres:16
+    # Same reference as docker-compose.yml: both run against the same data directory
+    image: postgres:16.15@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
@@ -27,7 +28,8 @@ services:
       options: { tag: postgres }
 
   content-server:
-    image: quay.io/decentraland/catalyst-content:${DOCKER_TAG:-latest}
+    # The catalyst image ships the maintenance entrypoint too; catalyst-content is no longer published
+    image: quay.io/decentraland/catalyst:${DOCKER_TAG:-latest}
     working_dir: /app
     command: [ "/usr/local/bin/node", "--max-old-space-size=8192", "content/entrypoints/run-maintenance.js" ]
     restart: "no"
