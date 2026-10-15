@@ -28,11 +28,10 @@ export cert_failure_file=".cert-request-failed"
 
 # Services that read configuration from bind-mounted files, as "service:path".
 # Compose only recreates a container when its definition or image changes, so
-# these are restarted when the files under their path change. nginx is reloaded
-# gracefully on every run, which covers its directory mounts, but nginx.conf is
-# mounted as a single file: `git pull` replaces it with a new file the running
-# container never sees, so a change to it needs a restart.
-export config_services="postgres:local/postgres postgres-exporter:local/postgres-exporter nginx:local/nginx/nginx.conf"
+# these are restarted when the files under their path change. nginx is not
+# listed: it is reloaded gracefully on every run, and restarted only when its
+# nginx.conf goes stale (see nginxConfStale).
+export config_services="postgres:local/postgres postgres-exporter:local/postgres-exporter"
 export config_checksums_file=".config-checksums"
 export lock_file=".init.lock"
 export lock_dir=".init.lock.d"
@@ -79,9 +78,12 @@ certbotShell () {
 restore_cert_script='
   backup="/etc/letsencrypt/init-backup/$DOMAIN"
   if [ -d "$backup" ]; then
+    # Only paths with a backed up copy are touched: a run killed halfway
+    # through backupCert leaves the rest where they are.
     for p in "live/$DOMAIN" "archive/$DOMAIN" "renewal/$DOMAIN.conf"; do
-      rm -rf "/etc/letsencrypt/$p"
-      if [ -e "$backup/$p" ]; then mv "$backup/$p" "/etc/letsencrypt/$p" || exit 1; fi
+      if [ -e "$backup/$p" ]; then
+        rm -rf "/etc/letsencrypt/$p" && mv "$backup/$p" "/etc/letsencrypt/$p" || exit 1
+      fi
     done
     rm -rf "$backup"
   fi
@@ -294,6 +296,28 @@ ensureTlsConfig () {
   echo "$certbot_ref" > "$stamp"
 }
 
+# Runs `nginx -t` with the nginx command given in "$@": an exec into the running
+# container, or a one-off container. The upstreams are resolved by host name
+# when the config loads, so the test fails while a backend container is still
+# starting or restarting; give them a moment before treating it as a broken
+# config. Prints nginx's output if it keeps failing.
+nginxConfigTest () {
+  local attempt output
+  for attempt in 1 2 3 4 5 6; do
+    output="$("$@" -t 2>&1)" && return 0
+    test ${attempt} -lt 6 && sleep 5
+  done
+  echo "$output"
+  return 1
+}
+
+# nginx.conf is bind-mounted as a single file. `git pull` replaces it with a new
+# file the running container never sees, and a reload re-reads the stale copy,
+# so it is stale whenever the container's copy differs from the repository's.
+nginxConfStale () {
+  [ "$(compose exec -T nginx cat /etc/nginx/nginx.conf 2> /dev/null | checksum)" != "$(checksum < local/nginx/nginx.conf)" ]
+}
+
 checksum () {
   if command -v sha256sum > /dev/null; then sha256sum; else shasum -a 256; fi | cut -d' ' -f1
 }
@@ -424,9 +448,12 @@ if command -v flock > /dev/null; then
   fi
 else
   # No flock (e.g. macOS): mkdir is atomic too. A lock left behind by a killed
-  # run is taken over once its process is gone.
+  # run is taken over once its process is gone. One without a pid yet was taken
+  # a moment ago by a run that has not written it.
   if ! mkdir "$lock_dir" 2> /dev/null; then
-    if kill -0 "$(cat "$lock_dir/pid" 2> /dev/null)" 2> /dev/null; then
+    lock_pid="$(cat "$lock_dir/pid" 2> /dev/null)"
+    if { [ -n "$lock_pid" ] && kill -0 "$lock_pid" 2> /dev/null; } ||
+       { [ -z "$lock_pid" ] && [ -n "$(find "$lock_dir" -maxdepth 0 -mmin -1)" ]; }; then
       echo -n "Another init.sh run is in progress"
       printMessage failed
       exit 1
@@ -615,6 +642,22 @@ for entry in $config_services; do
 done
 printf '%s' "$new_checksums" > "$config_checksums_file"
 
+# Test the new nginx.conf in a one-off container first: restarting nginx with a
+# broken one would take it down, while failing here keeps it serving.
+if nginxConfStale; then
+  echo "## nginx.conf changed, validating it before restarting nginx..."
+  if ! nginxConfigTest compose run --rm --no-deps -T --entrypoint nginx nginx; then
+    echo -n "The new nginx.conf is invalid, nginx keeps running with the previous one "
+    printMessage failed
+    exit 1
+  fi
+  if ! compose restart nginx; then
+    echo -n "Failed to restart nginx"
+    printMessage failed
+    exit 1
+  fi
+fi
+
 cert_failed=0
 if test ${use_https} -eq 1; then
   case "$cert_state" in
@@ -649,19 +692,12 @@ if test ${use_https} -eq 1; then
 fi
 
 # Picks up configuration and certificate changes without dropping connections.
-# The upstreams are resolved by host name when the config loads, so the test
-# fails while a backend container is still starting or restarting; give them a
-# moment before treating it as a broken config.
 echo -n "## Reloading nginx... "
-for attempt in 1 2 3 4 5 6; do
-  nginx_test="$(compose exec -T nginx nginx -t 2>&1)" && break
-  if test ${attempt} -eq 6; then
-    printMessage failed
-    echo "$nginx_test"
-    exit 1
-  fi
-  sleep 5
-done
+if ! nginx_test="$(nginxConfigTest compose exec -T nginx nginx)"; then
+  printMessage failed
+  echo "$nginx_test"
+  exit 1
+fi
 if ! compose exec -T nginx nginx -s reload > /dev/null 2>&1; then
   printMessage failed
   exit 1
