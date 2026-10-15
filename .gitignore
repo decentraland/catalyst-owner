@@ -12,3 +12,6 @@ storage
 
 database
 contents
+.config-checksums
+.cert-request-failed
+.init.lock
