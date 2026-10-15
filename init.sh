@@ -259,54 +259,6 @@ nginxConfStale () {
   [ "$(compose exec -T nginx cat /etc/nginx/nginx.conf 2> /dev/null | checksum)" != "$(checksum < local/nginx/nginx.conf)" ]
 }
 
-# docker-compose v1 (1.29.x) crashes with KeyError: 'ContainerConfig' when it
-# recreates a container whose image lacks that field, as images do on recent
-# Docker Engines, and leaves the old container stopped and renamed. Creating
-# containers works, so remove the ones `up` would recreate beforehand: those
-# whose config-hash label differs from the hash of the current definition,
-# which covers image changes too.
-removeOutdatedContainers () {
-  local hashes images service hash container image outdated=""
-  hashes="$(compose config --hash='*')" || return 1
-  while read -r service hash; do
-    for container in $(compose ps -q "$service"); do
-      if [ "$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.config-hash" }}' "$container")" != "$hash" ]; then
-        outdated="$outdated $service"
-        break
-      fi
-    done
-  done <<< "$hashes"
-  [ -n "$outdated" ] || return 0
-
-  # Plain `up` pulls before touching a container, so a missing image leaves the
-  # old one running. Keep that: remove nothing unless every image is here.
-  images="$(serviceImages)" || return 1
-  for service in $outdated; do
-    image="$(awk -v s="$service" '$1 == s { print $2 }' <<< "$images")"
-    if [ -z "$image" ] || ! docker image inspect "$image" > /dev/null 2>&1; then
-      echo "The image for ${service} (${image}) is not available locally"
-      return 1
-    fi
-  done
-
-  echo "## Removing the containers to update (docker-compose v1 cannot recreate them):${outdated}"
-  compose rm -s -f $outdated
-}
-
-# Prints "service image" for every service, read from the normalized
-# configuration (docker-compose v1 has no `config --images`).
-serviceImages () {
-  compose config | awk '
-    /^[^ ]/ { in_services = ($0 == "services:"); next }
-    in_services && /^  [^ ]/ { service = substr($1, 1, length($1) - 1); next }
-    in_services && /^    image: / {
-      image = $0
-      sub(/^    image: /, "", image)
-      gsub(/["\047]/, "", image)
-      print service, image
-    }'
-}
-
 checksum () {
   if command -v sha256sum > /dev/null; then sha256sum; else shasum -a 256; fi | cut -d' ' -f1
 }
@@ -629,12 +581,6 @@ done
 
 # Unless forced, only the services whose image or definition changed are
 # recreated; the rest keep running untouched.
-if [[ "$(docker-compose version --short 2> /dev/null)" == 1.* ]] && ! removeOutdatedContainers; then
-  echo -n "Failed to work out which containers to update. Is every image available? "
-  printMessage failed
-  exit 1
-fi
-
 echo "## Starting containers... "
 if ! compose up -d --remove-orphans; then
   echo -n "Failed to start catalyst node"
