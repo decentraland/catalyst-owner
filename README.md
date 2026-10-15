@@ -45,7 +45,7 @@ There is also some advanced configuration in the [.env-advanced](.env-advanced) 
 | Name             | Description                                                                                                                                                                                                                                                                                                   | Default | Required |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|:--------:|
 | ETH_NETWORK      | Which Ethereum network you want to use. Usually is `goerli` for testing or `mainnet` for production                                                                                                                                                                                                           | mainnet |   yes    |
-| REGENERATE       | This will instruct the script to regenerate the certs. `0` will keep the certificates, `1` will ask for certificate renewal. If there are no certificates, the initialization script will generate them automatically, regardless of this value. For more information, look at FAQ questions (2), (3) and (4) |    0    |    no    |
+| REGENERATE       | Forces the script to issue a new certificate. Normally not needed: missing, broken, staging or expiring certificates are detected and replaced automatically. It is skipped while the current certificate is less than a day old, but set it back to `0` afterwards: left on, it requests a new certificate on every run more than a day apart, and Let's Encrypt allows only 5 per week for the same host. For more information, look at the FAQ |    0    |    no    |
 | MAINTENANCE_MODE | This will instruct to run maintenance tasks in the Catalyst and then stop. `0` will run the Catalyst normally , `1` will run the maintenance mode.                                                                                                                                                            |    0    |    no    |
 
 ## Running your Catalyst
@@ -76,6 +76,14 @@ To update your Catalyst to a newer version, you can do the same as above:
 
 ```
 ./init.sh
+```
+
+Only the containers whose image or configuration changed are recreated; the rest keep running. nginx picks up certificate changes and changes under `local/nginx/conf.d`, `include` and `auth` with a graceful reload, and is restarted when `local/nginx/nginx.conf` changes.
+
+To bring every container down and up again instead, run:
+
+```
+./init.sh --force
 ```
 
 ## Stopping your Catalyst node

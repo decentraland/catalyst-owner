@@ -8,13 +8,23 @@ Below you can find the **frequently asked questions** about Catalyst Servers.
 
 We are using [Let's Encrypt](https://letsencrypt.org/) for certificates. We automatically generate the certificates the first time you start your server. We will also handle the renewal of the server for you!
 
-## When issuing a certificate, if fails the first time, the script won't try to issue a new one.
+The `certbot` container renews the certificate when it gets close to expiring. On top of that, every `./init.sh` run checks the current certificate and only requests a new one when there is no usable certificate for the host, or the current one comes from the Let's Encrypt staging environment, has an RSA key under 2048 bits, or expires in less than 30 days.
 
-One of the steps in issuing a certificate is the creation of auto signed certs. The script checks if there are any certs already created. If they exist, then no new certificates are created.
+Until the first certificate is issued, nginx runs with a temporary self-signed certificate kept in `local/certbot/conf/bootstrap`, outside the directories certbot manages. Certbot may name the certificate after the host with a numeric suffix (for example `catalyst.example.com-0001`); the script detects it and points nginx at it.
 
-To force a certificate regeneration you will need to change the `REGENERATE` entry on the `.env` file to `1` and then execute the script again.
+Only certificates certbot manages (with a configuration under `local/certbot/conf/renewal`) are used. A certificate placed in `live/` by hand, or left there by older versions of this script, is moved to `local/certbot/conf/stale`, and nginx uses the temporary certificate until certbot issues one.
 
-**IT'S IMPORTANT** to roll back this value to `0`. If you don't, a new certificate will be issued on each run and you will hit the Let's Encrypt ratio limit. It this happens, your domain will be banned.
+## What happens if issuing a certificate fails?
+
+Existing certificates are renewed in place, and certbot only replaces their files once the new certificate was issued, so a failure leaves the current one in use. Without a certificate yet, nginx keeps running with the temporary one. Either way, the next `./init.sh` run tries again. To protect your domain from the Let's Encrypt rate limits, the script waits 60 minutes after a failed request before trying again. Delete the `.cert-request-failed` file to retry right away.
+
+Before every request the script runs a dry run against the Let's Encrypt staging environment, so a misconfigured DNS or firewall fails there without counting against the production limits.
+
+## How can I force a new certificate?
+
+Set `REGENERATE=1` in the `.env-advanced` file and execute `./init.sh` again. The new certificate is requested while the current one keeps being served, and the current one is kept if the request fails.
+
+Set the value back to `0` afterwards. While it is on, the script skips regeneration if the certificate is less than a day old, but it would still request a new one on every run more than a day apart, and Let's Encrypt allows only 5 certificates per week for the same host.
 
 ## How many certs I can issue?
 
