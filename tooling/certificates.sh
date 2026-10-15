@@ -34,7 +34,8 @@ cert_state_script='
       case "${candidate#"$DOMAIN"-}" in ""|*[!0-9]*) continue ;; esac
     fi
     [ -f "$dir/fullchain.pem" ] && [ -f "$dir/privkey.pem" ] && [ -f "$le/renewal/$candidate.conf" ] || continue
-    openssl x509 -in "$dir/fullchain.pem" -noout -checkhost "$DOMAIN" > /dev/null 2>&1 || continue
+    # Match on the message: older OpenSSL releases (e.g. 3.0) exit 0 on a mismatch too.
+    openssl x509 -in "$dir/fullchain.pem" -noout -checkhost "$DOMAIN" 2> /dev/null | grep -q " does match " || continue
     name="$candidate"
     break
   done
