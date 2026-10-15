@@ -4,7 +4,7 @@ export data_path="local/certbot"
 # Certbot release whose TLS config we download. Pinned (not "main") so a given
 # repo revision always fetches identical files; keep in sync with the certbot
 # container image tag in docker-compose.yml.
-export certbot_ref="v5.7.0"
+export certbot_ref="v5.8.0"
 export nginx_server_file="local/nginx/conf.d/00-katalyst.conf"
 export nginx_server_template_http="local/nginx/conf.d/katalyst-http.conf.template"
 export nginx_server_template_https="local/nginx/conf.d/katalyst-https.conf.template"
