@@ -28,11 +28,14 @@ export cert_failure_file=".cert-request-failed"
 
 # Services that read configuration from bind-mounted files, as "service:path".
 # Compose only recreates a container when its definition or image changes, so
-# these are restarted when the files under their path change. nginx is not
-# listed: it is reloaded gracefully on every run instead.
-export config_services="postgres:local/postgres postgres-exporter:local/postgres-exporter"
+# these are restarted when the files under their path change. nginx is reloaded
+# gracefully on every run, which covers its directory mounts, but nginx.conf is
+# mounted as a single file: `git pull` replaces it with a new file the running
+# container never sees, so a change to it needs a restart.
+export config_services="postgres:local/postgres postgres-exporter:local/postgres-exporter nginx:local/nginx/nginx.conf"
 export config_checksums_file=".config-checksums"
 export lock_file=".init.lock"
+export lock_dir=".init.lock.d"
 
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
@@ -73,7 +76,6 @@ certbotShell () {
 }
 
 # Shell snippet that puts back the certificate files moved aside by backupCert.
-# Shared with certState, which runs it first to recover from an interrupted run.
 restore_cert_script='
   backup="/etc/letsencrypt/init-backup/$DOMAIN"
   if [ -d "$backup" ]; then
@@ -82,6 +84,23 @@ restore_cert_script='
       if [ -e "$backup/$p" ]; then mv "$backup/$p" "/etc/letsencrypt/$p" || exit 1; fi
     done
     rm -rf "$backup"
+  fi
+'
+
+# Shell snippet that recovers from a run interrupted while issuing a
+# certificate. certbot only writes a lineage once issuance succeeded, so if a
+# complete one is in place the backup is stale and dropped; otherwise the
+# backup is put back.
+recover_cert_script='
+  backup="/etc/letsencrypt/init-backup/$DOMAIN"
+  if [ -d "$backup" ]; then
+    if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] &&
+       [ -f "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ] &&
+       [ -f "/etc/letsencrypt/renewal/$DOMAIN.conf" ]; then
+      rm -rf "$backup"
+    else
+      '"$restore_cert_script"'
+    fi
   fi
 '
 
@@ -95,7 +114,7 @@ restore_cert_script='
 #   recent     valid and issued less than a day ago
 #   valid      valid
 certState () {
-  certbotShell "$restore_cert_script"'
+  certbotShell "$recover_cert_script"'
     cert="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
     if [ ! -f "$cert" ]; then echo missing; exit 0; fi
     if [ ! -f "/etc/letsencrypt/renewal/$DOMAIN.conf" ]; then echo unmanaged; exit 0; fi
@@ -202,7 +221,9 @@ issueCert () {
   if certbotRun "${args[@]}" --dry-run; then
     echo "## Requesting Let's Encrypt certificate for $nginx_url..."
     if certbotRun "${args[@]}"; then
-      dropCertBackup
+      # A leftover backup is dropped by the next run's certState, so this is
+      # not worth failing over.
+      dropCertBackup || printWarning "Could not remove the previous certificate backup"
       rm -f "$cert_failure_file"
       return 0
     fi
@@ -401,6 +422,19 @@ if command -v flock > /dev/null; then
     printMessage failed
     exit 1
   fi
+else
+  # No flock (e.g. macOS): mkdir is atomic too. A lock left behind by a killed
+  # run is taken over once its process is gone.
+  if ! mkdir "$lock_dir" 2> /dev/null; then
+    if kill -0 "$(cat "$lock_dir/pid" 2> /dev/null)" 2> /dev/null; then
+      echo -n "Another init.sh run is in progress"
+      printMessage failed
+      exit 1
+    fi
+    mkdir -p "$lock_dir"
+  fi
+  echo $$ > "$lock_dir/pid"
+  trap 'rm -rf "$lock_dir"' EXIT
 fi
 
 if ! [ -f ".env-database-admin" ]; then
@@ -469,6 +503,14 @@ fi
 # Setup the nginx conf file with plain http
 # else, make sure there is a certificate nginx can start with
 export nginx_url="${CATALYST_URL##*/}"
+# It names nginx's server and the certificate files moved around as root, so
+# never let a malformed CATALYST_URL (e.g. a trailing slash) turn it into an
+# empty or path-like value.
+if ! [[ "$nginx_url" =~ ^[A-Za-z0-9.-]+$ ]] || [[ "$nginx_url" == *..* ]]; then
+  echo -n "CATALYST_URL must be a scheme and a host name, like https://catalyst.example.com (got \"${CATALYST_URL}\") "
+  printMessage failed
+  exit 1
+fi
 use_https=0
 if [ "${CATALYST_URL}" != "http://localhost" ]; then
     use_https=1
@@ -521,11 +563,11 @@ if ! grep -q "${nginx_url}" "${nginx_server_file}"; then
   exit 1
 fi
 
+# A registry being down should not keep the node from starting with the images
+# it already has. Any image that is missing locally makes `up` fail below.
 echo "## Pulling images..."
 if ! compose pull --quiet; then
-  echo -n "Failed to pull the images"
-  printMessage failed
-  exit 1
+  printWarning "Failed to pull some images, continuing with the ones available locally"
 fi
 
 if test ${FORCE} -eq 1; then
@@ -607,12 +649,19 @@ if test ${use_https} -eq 1; then
 fi
 
 # Picks up configuration and certificate changes without dropping connections.
+# The upstreams are resolved by host name when the config loads, so the test
+# fails while a backend container is still starting or restarting; give them a
+# moment before treating it as a broken config.
 echo -n "## Reloading nginx... "
-if ! nginx_test="$(compose exec -T nginx nginx -t 2>&1)"; then
-  printMessage failed
-  echo "$nginx_test"
-  exit 1
-fi
+for attempt in 1 2 3 4 5 6; do
+  nginx_test="$(compose exec -T nginx nginx -t 2>&1)" && break
+  if test ${attempt} -eq 6; then
+    printMessage failed
+    echo "$nginx_test"
+    exit 1
+  fi
+  sleep 5
+done
 if ! compose exec -T nginx nginx -s reload > /dev/null 2>&1; then
   printMessage failed
   exit 1

@@ -71,7 +71,7 @@ To update your Catalyst to a newer version, you can do the same as above:
 ./init.sh
 ```
 
-Only the containers whose image or configuration changed are recreated; the rest keep running. nginx picks up configuration and certificate changes with a graceful reload.
+Only the containers whose image or configuration changed are recreated; the rest keep running. nginx picks up certificate changes and changes under `local/nginx/conf.d`, `include` and `auth` with a graceful reload, and is restarted when `local/nginx/nginx.conf` changes.
 
 To bring every container down and up again instead, run:
 
