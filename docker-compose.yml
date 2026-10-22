@@ -10,7 +10,7 @@ services:
     # Updated from postgres:12 (EOL Nov 2024) to postgres:16 for security patches and performance improvements
     # Pinned by digest to 16.15 (fixes CVE-2026-14676 in pg_stat_statements, among others) for reproducible
     # deploys. Keep docker-compose-maintenance.yml on the same reference: both run against the same data.
-    image: postgres:16.15@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+    image: postgres:16.15@sha256:9e2cf6287f25c3151f4c9421ccce2b17f3e60061c111a29165e0d2cdd9ff0a97
     container_name: ${POSTGRES_HOST:-postgres}
     env_file:
       - .env-database-admin
@@ -153,7 +153,7 @@ services:
     # Pinned by digest to guarantee the patched binary
     # (>= 1.31.1 fixes CVE-2026-9256, a heap overflow in ngx_http_rewrite_module;
     #  1.31.7 fixes CVE-2026-93479 and CVE-2026-15176, among others)
-    image: nginx:1.31.7-alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+    image: nginx:1.31.8-alpine@sha256:e2d97c2b8c016f12c2f1a27d095685063b2f281c4edf2babfde6001cf4fb77a8
     ports:
       - "80:80"
       - "443:443"
