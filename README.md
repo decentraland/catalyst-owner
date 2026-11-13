@@ -17,7 +17,7 @@ We actively mix canary and stable configurations in several catalysts for Goerli
 ### Requirements
 
 - You will need to have [docker](https://docs.docker.com/install/) installed.
-- You will need to have [Docker Compose v2](https://docs.docker.com/compose/install/) (`docker compose`) installed.
+- You will need to have [Docker Compose](https://docs.docker.com/compose/install/) installed. The scripts use the v2 plugin (`docker compose`) and fall back to the legacy `docker-compose` binary if that is all there is.
 - The initialization script runs on Bash. It has not been tested on Windows.
 
 In order to run a public server, you will also need to:
