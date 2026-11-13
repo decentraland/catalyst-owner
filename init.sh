@@ -39,6 +39,9 @@ export lock_dir=".init.lock.d"
 # ensure we have wide path options to run in different environments
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 
+# shellcheck source=compose.sh
+source "$(dirname "$0")/compose.sh"
+
 ####
 # Functions
 #####
@@ -57,7 +60,7 @@ printWarning () {
 }
 
 compose () {
-  docker-compose -f docker-compose.yml -f "platform.$(uname -s).yml" "$@"
+  $COMPOSE_CMD -f docker-compose.yml -f "platform.$(uname -s).yml" "$@"
 }
 
 # Runs certbot in a one-off container.
@@ -431,8 +434,8 @@ echo ""
 echo "Starting in ${SLEEP_TIME} seconds... " && sleep "$SLEEP_TIME"
 
 # Check if docker compose is installed
-if ! [ -x "$(command -v docker-compose)" ]; then
-  echo -n "Error: docker-compose is not installed..." >&2
+if [ -z "$COMPOSE_CMD" ]; then
+  echo -n "Error: docker compose is not installed..." >&2
   printMessage failed
   exit 1
 fi
@@ -522,7 +525,7 @@ fi
 if test ${MAINTENANCE_MODE} -eq 1; then
   echo "## Running maintenance..."
   compose down --remove-orphans
-  docker-compose -f docker-compose-maintenance.yml up -d
+  $COMPOSE_CMD -f docker-compose-maintenance.yml up -d
   exit $?
 fi
 

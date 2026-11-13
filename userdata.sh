@@ -36,10 +36,9 @@ usermod -a -G docker ubuntu
 # auto-start docker
 systemctl enable --now docker
 
-# install docker-compose
-until docker-compose version; do
-  curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
+# install the docker compose plugin
+until docker compose version; do
+  apt-get -qq install docker-compose-plugin -y
   sleep 10
 done
 
