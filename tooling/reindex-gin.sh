@@ -8,16 +8,21 @@
 # until rebuilt. Run once per node after it is on 16.16. Defaults to
 # deployments_entity_pointers_index. Safe to re-run.
 #
-# Needs free disk roughly equal to each index's size while it runs.
+# Needs free disk roughly equal to each index's size while it runs. On a large
+# table it can take a while: run it inside tmux or screen so a dropped SSH
+# session doesn't interrupt it.
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 # shellcheck source=/dev/null
+source .env-database-admin
+# shellcheck source=/dev/null
 source .env-database-content
 
 container="${POSTGRES_HOST:-postgres}"
+admin_user="${POSTGRES_USER:-postgres}"
 min_version_num=160016
 
 if [ $# -gt 0 ]; then
@@ -27,7 +32,7 @@ else
 fi
 
 psqlQuery () {
-  docker exec "$container" psql -U postgres -d "$POSTGRES_CONTENT_DB" -v ON_ERROR_STOP=1 -tAc "$1"
+  docker exec "$container" psql -U "$admin_user" -d "$POSTGRES_CONTENT_DB" -v ON_ERROR_STOP=1 -tAc "$1"
 }
 
 version_num=$(psqlQuery "SHOW server_version_num;")
@@ -47,8 +52,9 @@ for index in "${indexes[@]}"; do
     continue
   fi
 
-  # An interrupted REINDEX CONCURRENTLY leaves an invalid <index>_ccnew behind.
-  leftovers=$(psqlQuery "SELECT c.relname FROM pg_class c JOIN pg_index i ON i.indexrelid = c.oid WHERE c.relname ~ '^${index}_ccnew[0-9]*$' AND NOT i.indisvalid;")
+  # An interrupted REINDEX CONCURRENTLY leaves an invalid <index>_ccnew (before
+  # the swap) or <index>_ccold (after it) behind.
+  leftovers=$(psqlQuery "SELECT c.relname FROM pg_class c JOIN pg_index i ON i.indexrelid = c.oid WHERE c.relname ~ '^${index}_cc(new|old)[0-9]*$' AND NOT i.indisvalid;")
   for leftover in $leftovers; do
     echo "Dropping invalid leftover index ${leftover}..."
     psqlQuery "DROP INDEX CONCURRENTLY public.${leftover};" > /dev/null
