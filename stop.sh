@@ -2,6 +2,7 @@
 
 # shellcheck source=compose.sh
 source "$(dirname "$0")/compose.sh"
+[ -n "$COMPOSE_CMD" ] || { echo "Error: docker compose is not installed" >&2; exit 1; }
 
 VARIABLE_SUM=$#
 CONTAINER_NAMES=$@
