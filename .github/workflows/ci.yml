@@ -49,10 +49,8 @@ jobs:
           sed "s/options: {.*}//g" docker-compose.yml.bak > docker-compose.yml
           git diff docker-compose.yml
 
-      - name: Install docker-compose dependency
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+      - name: check docker compose
+        run: docker compose version
 
       - name: run init.sh
         run: ./init.sh
@@ -68,11 +66,11 @@ jobs:
         timeout-minutes: 5
         run: |
           docker container ls
-          docker-compose logs
+          docker compose logs
 
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }} 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs nginx
+            docker compose logs nginx
             sleep 10
           done
 
@@ -81,7 +79,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/content/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs content-server
+            docker compose logs content-server
             sleep 10
           done
 
@@ -90,7 +88,7 @@ jobs:
         run: |
           until ./.github/workflows/check-http-status-code.sh ${{ matrix.catalyst_url }}/lambdas/status 200; do
             echo "Retrying in 10 seconds..."
-            docker-compose logs lamb2
+            docker compose logs lamb2
             sleep 10
           done
 
@@ -163,5 +161,5 @@ jobs:
         if: ${{ always() }}
         run: |
           docker container ls
-          docker-compose logs
+          docker compose logs
           tail -n 5000 /var/log/syslog
