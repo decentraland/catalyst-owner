@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# shellcheck source=compose.sh
+source "$(dirname "$0")/compose.sh"
+
 VARIABLE_SUM=$#
 CONTAINER_NAMES=$@
 CONTAINER_VALID_LIST="nginx lamb2 content-server"
@@ -14,7 +18,7 @@ printMessage () {
 
 if test ${VARIABLE_SUM} -eq 0; then
   echo "## Stopping catalyst node..."
-  docker-compose stop
+  $COMPOSE_CMD stop
   if test $? -ne 0; then
     echo -n "Failed to stop catalyst node "
     printMessage failed
@@ -28,7 +32,7 @@ else
     #Check if the service exists
     echo ${CONTAINER_VALID_LIST} | grep --quiet ${i}
     if  test $? -eq 0; then
-      docker-compose stop ${i}
+      $COMPOSE_CMD stop ${i}
       if  test $? -eq 0; then
           echo "`printMessage ok`. Container ${i} was stopped"
         else
