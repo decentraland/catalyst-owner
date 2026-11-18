@@ -231,8 +231,10 @@ services:
     container_name: nginx
     # Pinned by digest to guarantee the patched binary
     # (>= 1.31.1 fixes CVE-2026-9256, a heap overflow in ngx_http_rewrite_module;
-    #  1.31.7 fixes CVE-2026-93479 and CVE-2026-15176, among others)
-    image: nginx:1.31.8-alpine@sha256:e2d97c2b8c016f12c2f1a27d095685063b2f281c4edf2babfde6001cf4fb77a8
+    #  1.31.7 fixes CVE-2026-93479 and CVE-2026-15176, among others;
+    #  1.31.9 fixes CVE-2026-123633 and CVE-2026-123007, the unauthenticated HTTP/2 RCE flaws
+    #  — we enable http2 and act as a reverse proxy, so both are exploitable)
+    image: nginx:1.31.9-alpine@sha256:0713660ff64e819a478be0d69ae314e52d21623c93672edd9f381a6e66fd95ff
     ports:
       - "80:80"
       - "443:443"
